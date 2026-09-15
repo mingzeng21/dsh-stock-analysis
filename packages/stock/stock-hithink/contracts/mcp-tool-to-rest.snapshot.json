@@ -1,0 +1,317 @@
+{
+  "_comment": "MCP tool -> REST endpoint mapping, parsed from https://fuyao.aicubes.cn/docs/mcp/overview/",
+  "tools": {
+    "get_a_share_auction_short_term_benchmark": {
+      "method": "GET",
+      "path": "/api/a-share/auction/short-term-benchmark"
+    },
+    "get_a_share_auction_snapshot": {
+      "method": "GET",
+      "path": "/api/a-share/auction/snapshot"
+    },
+    "get_a_share_calendar_trading_days": {
+      "method": "GET",
+      "path": "/api/a-share/calendar/trading-days"
+    },
+    "get_a_share_corporate_actions_adjustment_factors": {
+      "method": "GET",
+      "path": "/api/a-share/corporate-actions/adjustment-factors"
+    },
+    "get_a_share_financials_balance_sheets": {
+      "method": "GET",
+      "path": "/api/a-share/financials/balance-sheets"
+    },
+    "get_a_share_financials_cash_flow_statements": {
+      "method": "GET",
+      "path": "/api/a-share/financials/cash-flow-statements"
+    },
+    "get_a_share_financials_income_statements": {
+      "method": "GET",
+      "path": "/api/a-share/financials/income-statements"
+    },
+    "get_a_share_financials_indicators": {
+      "method": "GET",
+      "path": "/api/a-share/financials/indicators"
+    },
+    "get_a_share_index_catalog_ths_index_list": {
+      "method": "GET",
+      "path": "/api/a-share-index/catalog/ths-index-list"
+    },
+    "get_a_share_index_constituents_ths_stock_list": {
+      "method": "GET",
+      "path": "/api/a-share-index/constituents/ths-stock-list"
+    },
+    "get_a_share_index_prices_historical": {
+      "method": "GET",
+      "path": "/api/a-share-index/prices/historical"
+    },
+    "get_a_share_index_prices_snapshot": {
+      "method": "GET",
+      "path": "/api/a-share-index/prices/snapshot"
+    },
+    "get_a_share_prices_historical": {
+      "method": "GET",
+      "path": "/api/a-share/prices/historical"
+    },
+    "get_a_share_prices_snapshot": {
+      "method": "GET",
+      "path": "/api/a-share/prices/snapshot"
+    },
+    "get_a_share_special_data_anomaly_analysis_stock": {
+      "method": "GET",
+      "path": "/api/a-share/special-data/anomaly-analysis-stock"
+    },
+    "get_a_share_special_data_dragon_tiger_list": {
+      "method": "GET",
+      "path": "/api/a-share/special-data/dragon-tiger-list"
+    },
+    "get_a_share_special_data_hot_stock_list": {
+      "method": "GET",
+      "path": "/api/a-share/special-data/hot-stock-list"
+    },
+    "get_a_share_special_data_hot_stock_list_history": {
+      "method": "GET",
+      "path": "/api/a-share/special-data/hot-stock-list-history"
+    },
+    "get_a_share_special_data_hot_stock_rank_trend": {
+      "method": "GET",
+      "path": "/api/a-share/special-data/hot-stock-rank-trend"
+    },
+    "get_a_share_special_data_limit_break_pool": {
+      "method": "GET",
+      "path": "/api/a-share/special-data/limit-break-pool"
+    },
+    "get_a_share_special_data_limit_down_pool": {
+      "method": "GET",
+      "path": "/api/a-share/special-data/limit-down-pool"
+    },
+    "get_a_share_special_data_limit_up_ladder": {
+      "method": "GET",
+      "path": "/api/a-share/special-data/limit-up-ladder"
+    },
+    "get_a_share_special_data_limit_up_pool": {
+      "method": "GET",
+      "path": "/api/a-share/special-data/limit-up-pool"
+    },
+    "get_a_share_special_data_skyrocket_list": {
+      "method": "GET",
+      "path": "/api/a-share/special-data/skyrocket-list"
+    },
+    "get_a_share_valuations_snapshot": {
+      "method": "GET",
+      "path": "/api/a-share/valuations/snapshot"
+    },
+    "get_fund_backtest_indicators": {
+      "method": "GET",
+      "path": "/api/fund/backtest/indicators"
+    },
+    "get_fund_backtest_result": {
+      "method": "GET",
+      "path": "/api/fund/backtest/result"
+    },
+    "get_fund_companies_detail": {
+      "method": "GET",
+      "path": "/api/fund/companies/detail"
+    },
+    "get_fund_corporate_actions_dividends": {
+      "method": "GET",
+      "path": "/api/fund/corporate-actions/dividends"
+    },
+    "get_fund_diagnostics_detail": {
+      "method": "GET",
+      "path": "/api/fund/diagnostics/detail"
+    },
+    "get_fund_financials_balance_sheets": {
+      "method": "GET",
+      "path": "/api/fund/financials/balance-sheets"
+    },
+    "get_fund_financials_income_statements": {
+      "method": "GET",
+      "path": "/api/fund/financials/income-statements"
+    },
+    "get_fund_financials_indicators": {
+      "method": "GET",
+      "path": "/api/fund/financials/indicators"
+    },
+    "get_fund_holders_detail": {
+      "method": "GET",
+      "path": "/api/fund/holders/detail"
+    },
+    "get_fund_holders_top": {
+      "method": "GET",
+      "path": "/api/fund/holders/top"
+    },
+    "get_fund_indicators_line": {
+      "method": "GET",
+      "path": "/api/fund/indicators/line"
+    },
+    "get_fund_indicators_table": {
+      "method": "GET",
+      "path": "/api/fund/indicators/table"
+    },
+    "get_fund_managers_detail": {
+      "method": "GET",
+      "path": "/api/fund/managers/detail"
+    },
+    "get_fund_managers_experience": {
+      "method": "GET",
+      "path": "/api/fund/managers/experience"
+    },
+    "get_fund_managers_investment_style": {
+      "method": "GET",
+      "path": "/api/fund/managers/investment-style"
+    },
+    "get_fund_managers_performance": {
+      "method": "GET",
+      "path": "/api/fund/managers/performance"
+    },
+    "get_fund_market_historical": {
+      "method": "GET",
+      "path": "/api/fund/market/historical"
+    },
+    "get_fund_market_snapshot": {
+      "method": "GET",
+      "path": "/api/fund/market/snapshot"
+    },
+    "get_fund_news_article_list": {
+      "method": "GET",
+      "path": "/api/fund/news/article-list"
+    },
+    "get_fund_offerings_list": {
+      "method": "GET",
+      "path": "/api/fund/offerings/list"
+    },
+    "get_fund_performance_drawdowns": {
+      "method": "GET",
+      "path": "/api/fund/performance/drawdowns"
+    },
+    "get_fund_performance_indicators_historical": {
+      "method": "GET",
+      "path": "/api/fund/performance/indicators-historical"
+    },
+    "get_fund_performance_nav": {
+      "method": "GET",
+      "path": "/api/fund/performance/nav"
+    },
+    "get_fund_performance_returns": {
+      "method": "GET",
+      "path": "/api/fund/performance/returns"
+    },
+    "get_fund_portfolio_asset_allocation": {
+      "method": "GET",
+      "path": "/api/fund/portfolio/asset-allocation"
+    },
+    "get_fund_portfolio_bond_history": {
+      "method": "GET",
+      "path": "/api/fund/portfolio/bond-history"
+    },
+    "get_fund_portfolio_bond_report_dates": {
+      "method": "GET",
+      "path": "/api/fund/portfolio/bond-report-dates"
+    },
+    "get_fund_portfolio_holdings": {
+      "method": "GET",
+      "path": "/api/fund/portfolio/holdings"
+    },
+    "get_fund_portfolio_industry_allocation": {
+      "method": "GET",
+      "path": "/api/fund/portfolio/industry-allocation"
+    },
+    "get_fund_portfolio_stock_history": {
+      "method": "GET",
+      "path": "/api/fund/portfolio/stock-history"
+    },
+    "get_fund_portfolio_stock_report_dates": {
+      "method": "GET",
+      "path": "/api/fund/portfolio/stock-report-dates"
+    },
+    "get_fund_profile_detail": {
+      "method": "GET",
+      "path": "/api/fund/profile/detail"
+    },
+    "get_fund_quota_list": {
+      "method": "GET",
+      "path": "/api/fund/quota/list"
+    },
+    "get_fund_quota_summary": {
+      "method": "GET",
+      "path": "/api/fund/quota/summary"
+    },
+    "get_futures_basis_historical": {
+      "method": "GET",
+      "path": "/api/futures/basis/historical"
+    },
+    "get_futures_basis_main_continuous_latest": {
+      "method": "GET",
+      "path": "/api/futures/basis/main-continuous-latest"
+    },
+    "get_futures_calendar_trading_schedule": {
+      "method": "GET",
+      "path": "/api/futures/calendar/trading-schedule"
+    },
+    "get_futures_contracts_detail": {
+      "method": "GET",
+      "path": "/api/futures/contracts/detail"
+    },
+    "get_futures_positions_company_list": {
+      "method": "GET",
+      "path": "/api/futures/positions/company-list"
+    },
+    "get_futures_positions_company_variety_daily": {
+      "method": "GET",
+      "path": "/api/futures/positions/company-variety-daily"
+    },
+    "get_futures_positions_contract_daily": {
+      "method": "GET",
+      "path": "/api/futures/positions/contract-daily"
+    },
+    "get_futures_positions_contract_historical": {
+      "method": "GET",
+      "path": "/api/futures/positions/contract-historical"
+    },
+    "get_futures_positions_variety_daily": {
+      "method": "GET",
+      "path": "/api/futures/positions/variety-daily"
+    },
+    "get_futures_prices_daily": {
+      "method": "GET",
+      "path": "/api/futures/prices/daily"
+    },
+    "get_futures_prices_intraday": {
+      "method": "GET",
+      "path": "/api/futures/prices/intraday"
+    },
+    "get_futures_varieties_list": {
+      "method": "GET",
+      "path": "/api/futures/varieties/list"
+    },
+    "get_futures_warehouse_receipts_historical": {
+      "method": "GET",
+      "path": "/api/futures/warehouse-receipts/historical"
+    },
+    "get_meta_tickers_list": {
+      "method": "GET",
+      "path": "/api/meta/tickers/list"
+    },
+    "get_meta_tickers_search": {
+      "method": "GET",
+      "path": "/api/meta/tickers/search"
+    },
+    "get_options_contracts_detail": {
+      "method": "GET",
+      "path": "/api/options/contracts/detail"
+    },
+    "get_options_prices_daily": {
+      "method": "GET",
+      "path": "/api/options/prices/daily"
+    },
+    "get_options_prices_intraday": {
+      "method": "GET",
+      "path": "/api/options/prices/intraday"
+    },
+    "get_options_varieties_list": {
+      "method": "GET",
+      "path": "/api/options/varieties/list"
+    }
+  }
+}

@@ -611,6 +611,15 @@ const SERVICE_ROLES: ServiceRole[] = [
     note: 'Search and fetch providers register into one ctx.web seam; tool-web owns the stable model-facing names.',
   },
   {
+    key: 'stock',
+    pkg: 'stock',
+    title: 'Stock market data provider registry',
+    mode: 'seam',
+    implementations: ['stock-hithink'],
+    consumers: ['tool-stock'],
+    note: 'One ctx.stock seam serves every asset class the vendor publishes; tool-stock turns each registry capability into a native tool and is mounted only by the stock-analysis preset.',
+  },
+  {
     key: 'spillStore',
     pkg: 'spill',
     title: 'Spill storage seam',

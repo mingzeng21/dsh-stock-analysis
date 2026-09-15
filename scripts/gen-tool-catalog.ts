@@ -65,6 +65,11 @@ import * as ToolTodo from '@deepseek-ai/dsh-tool-todo'
 import * as ToolSubagent from '@deepseek-ai/dsh-tool-subagent'
 import { registerListSubagentModels } from '../packages/subagent/tool-subagent/src/list-models.ts'
 import * as ToolWeb from '@deepseek-ai/dsh-tool-web'
+import StockRuntime from '@deepseek-ai/dsh-stock'
+import type { StockProvider } from '@deepseek-ai/dsh-stock'
+import { STOCK_ENDPOINTS } from '@deepseek-ai/dsh-stock-hithink'
+import { IWENCAI_ENDPOINTS } from '@deepseek-ai/dsh-stock-iwencai'
+import * as ToolStock from '@deepseek-ai/dsh-tool-stock'
 import VmWorkflowEngine from '@deepseek-ai/dsh-workflow-worker-thread'
 import * as ToolRalph from '@deepseek-ai/dsh-tool-ralph'
 import * as ToolWorkflow from '@deepseek-ai/dsh-tool-workflow'
@@ -92,6 +97,30 @@ class CatalogAttachmentStore extends AttachmentStore {
   override readImage(_ref: ImageAttachmentRef): Promise<StoredImageAttachment> {
     return Promise.reject(new Error('gen-tool-catalog: attachment reads are unreachable during schema harvest'))
   }
+}
+
+/**
+ * Serves the real stock endpoint registry with no transport, so the catalog can
+ * harvest `tool-stock` schemas without a credential or a network call. Tool
+ * schemas derive from the registry alone; execution is unreachable here.
+ */
+const CatalogStockProvider: StockProvider = {
+  id: 'catalog',
+  endpoints: STOCK_ENDPOINTS,
+  available: () => true,
+  execute: () => Promise.reject(new Error('gen-tool-catalog: stock execution is unreachable during schema harvest')),
+}
+
+/**
+ * Second catalog provider: the 问财 gateway's capabilities. Tool schemas depend
+ * only on the registry records, and the seam routes by capability id, so a
+ * transport-free provider is enough to harvest both vendors at once.
+ */
+const CatalogIwencaiProvider: StockProvider = {
+  id: 'catalog-iwencai',
+  endpoints: IWENCAI_ENDPOINTS,
+  available: () => true,
+  execute: () => Promise.reject(new Error('gen-tool-catalog: stock execution is unreachable during schema harvest')),
 }
 
 const root = resolve(import.meta.dirname, '..')
@@ -602,6 +631,24 @@ const TOOL_PACKAGES: ToolPackage[] = [
     },
     note:
       'web_search and web_fetch keep provider selection behind ctx.web so model-visible schemas stay stable across backend swaps.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-stock',
+    dir: 'tool-stock',
+    source: 'packages/stock/tool-stock/src/index.ts',
+    requires: ['ctx.tools', 'ctx.stock'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      // The schemas derive from the endpoint registry, not from a vendor
+      // connection, so a provider that serves the real registry and never
+      // performs I/O is enough to harvest them.
+      await ctx.plugin(StockRuntime)
+      ctx.stock.register(CatalogStockProvider)
+      ctx.stock.register(CatalogIwencaiProvider)
+      await ctx.plugin(ToolStock)
+    },
+    note:
+      'Every registered stock capability is one native tool. The `stock-analysis` preset is the only shipped composition that mounts this package, so the schema cost stays out of `standard` and `ptc`.',
   },
 ]
 

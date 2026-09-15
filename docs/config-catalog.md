@@ -2268,6 +2268,76 @@ export interface Config {
 
 Source: [`packages/spill/spill-policy/src/index.ts:61`](../packages/spill/spill-policy/src/index.ts)
 
+<a id="deepseek-aidsh-stock"></a>
+
+## `@deepseek-ai/dsh-stock`
+
+```ts config-catalog
+/** Config for the stock seam. */
+export interface StockRuntimeConfig {
+  /** Restrict the seam to this provider id. Omitted = every registered usable provider takes part. */
+  readonly provider?: string
+  /** Upper bound on rows one call returns before the result is marked truncated. */
+  readonly maxRows?: number
+  /** Lifetime of a cached symbol lookup, in milliseconds. */
+  readonly symbolCacheTtlMs?: number
+}
+```
+
+Source: [`packages/stock/stock/src/index.ts:92`](../packages/stock/stock/src/index.ts)
+
+<a id="deepseek-aidsh-stock-hithink"></a>
+
+## `@deepseek-ai/dsh-stock-hithink`
+
+Requires: `stock`
+
+```ts config-catalog
+/** Plugin config. */
+export interface Config {
+  /** Literal API key; prefer {@link Config.apiKeyEnv} so no secret enters configuration files. */
+  apiKey?: string
+  /** Credential reference resolved for each call; defaults to `HITHINK_FINANCE_API_KEY`. */
+  apiKeyEnv?: string
+  /** Vendor origin; defaults to `https://fuyao.aicubes.cn`. */
+  baseUrl?: string
+  /** Per-attempt deadline in milliseconds. Defaults to 30000. */
+  timeoutMs?: number
+  /** Total attempts for one call, including the first. Defaults to 3. */
+  maxAttempts?: number
+  /** Maximum in-flight requests. Defaults to 4. */
+  maxConcurrency?: number
+}
+```
+
+Source: [`packages/stock/stock-hithink/src/index.ts:50`](../packages/stock/stock-hithink/src/index.ts)
+
+<a id="deepseek-aidsh-stock-iwencai"></a>
+
+## `@deepseek-ai/dsh-stock-iwencai`
+
+Requires: `stock`
+
+```ts config-catalog
+/** Plugin config. */
+export interface Config {
+  /** Literal API key; prefer {@link Config.apiKeyEnv} so no secret enters configuration files. */
+  apiKey?: string
+  /** Credential reference resolved for each call; defaults to `IWENCAI_API_KEY`. */
+  apiKeyEnv?: string
+  /** Gateway origin; defaults to `https://openapi.iwencai.com`. */
+  baseUrl?: string
+  /** Per-attempt deadline in milliseconds. Defaults to 30000. */
+  timeoutMs?: number
+  /** Total attempts for one call, including the first. Defaults to 3. */
+  maxAttempts?: number
+  /** Cap on in-flight requests. Defaults to 4. */
+  maxConcurrency?: number
+}
+```
+
+Source: [`packages/stock/stock-iwencai/src/index.ts:59`](../packages/stock/stock-iwencai/src/index.ts)
+
 <a id="deepseek-aidsh-storage-domain"></a>
 
 ## `@deepseek-ai/dsh-storage-domain`
@@ -2980,6 +3050,24 @@ export interface Config {
 ```
 
 Source: [`packages/skill/tool-skill/src/index.ts:61`](../packages/skill/tool-skill/src/index.ts)
+
+<a id="deepseek-aidsh-tool-stock"></a>
+
+## `@deepseek-ai/dsh-tool-stock`
+
+Requires: `tools` · `stock`
+
+```ts config-catalog
+/** Deployment config for the stock tool suite. */
+export interface Config {
+  /** Character budget for one rendered result; the batch-fact header is always kept. */
+  renderMaxChars?: number
+  /** Cooperative timeout budget attached to every tool, in milliseconds. */
+  timeoutMs?: number
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts:31`](../packages/stock/tool-stock/src/index.ts)
 
 <a id="deepseek-aidsh-tool-str-replace-editor"></a>
 

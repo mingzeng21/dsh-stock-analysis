@@ -2215,6 +2215,37 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'stock',
+    summary: 'The stock data service, registered as `ctx.stock`.',
+    description: 'The stock data service, registered as `ctx.stock`.\n\nCapabilities from every registered usable provider form one catalog, and a call routes to the provider that registered the capability id. A configured `provider` restricts the seam to that one provider. Capability ids are unique across providers, which registration enforces, so routing never depends on registration order.',
+    methods: [
+      {
+        signature: 'register(provider: StockProvider): () => void',
+        description: 'Register a provider.\n\nThrows StockError `STOCK_DUPLICATE_PROVIDER` when its id is taken, and `STOCK_DUPLICATE_ENDPOINT` when any capability id it serves is already registered by another provider: a capability id is the handle callers and feature code write down, so two owners would make it ambiguous. The registration unwinds with the calling fiber.',
+        parameters: [{ name: 'provider', description: 'the provider; its `id` is the registry key.' }],
+        returns: 'the disposer that unregisters it.',
+      },
+      {
+        signature: 'catalog(query: StockCatalogQuery = {}): readonly StockEndpoint[]',
+        description: 'List registry records matching a query, across every usable provider.',
+        parameters: [{ name: 'query', description: 'optional text and universe filters.' }],
+        returns: 'matching endpoints, ordered by provider registration then registry order.',
+      },
+      {
+        signature: 'async call(endpointId: string, params: Readonly<Record<string, unknown>> = {}, signal?: AbortSignal): Promise<StockResult>',
+        description: 'Execute one capability. Arguments are validated against the registry record before any request is issued, and the row count is bounded before the result reaches a caller.\n\nThe capability\'s owning provider is found by registry record, not by provider selection: several vendors answer different capabilities through the same seam, and an id belongs to exactly one of them.',
+        parameters: [{ name: 'endpointId', description: 'capability id from {@link StockRuntime.catalog}.' }, { name: 'params', description: 'untrusted arguments, normally model-authored.' }, { name: 'signal', description: 'optional cancellation forwarded to the provider.' }],
+        returns: 'normalized rows plus batch facts.',
+      },
+      {
+        signature: 'async resolveSymbols(query: string, options: SymbolQueryOptions = {}): Promise<readonly SymbolMatch[]>',
+        description: 'Resolve a company name, bare code, or thscode fragment to complete instruments. Results are cached per query for `symbolCacheTtlMs`, because disambiguation is a prerequisite for nearly every other call.',
+        parameters: [{ name: 'query', description: 'user-facing text, e.g. `中际旭创` or `300308`.' }, { name: 'options', description: 'asset-type filter and result bound.' }],
+        returns: 'matches in vendor order, capped to `options.limit`.',
+      },
+    ],
+  },
+  {
     key: 'storage',
     summary: 'The storage hub service.',
     description: 'The storage hub service. Backends register under `backend`; data forms mount under their `StorageForms` key and are reached as `ctx.storage.<form>`.',
@@ -5695,6 +5726,70 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type SpillSource = {\n    kind: \'tool\';\n    toolName: string;\n    callId: ToolCallId;\n    label: string;\n} | {\n    kind: \'session-reference\';\n    sessionId: SessionId;\n    label: string;\n};',
   },
   {
+    name: 'StockAvailability',
+    declaration: 'export type StockAvailability = \'open\' | \'unavailable\';',
+  },
+  {
+    name: 'StockCatalogQuery',
+    declaration: 'export interface StockCatalogQuery {\n    readonly text?: string;\n    readonly universe?: StockEndpoint[\'universe\'];\n}',
+  },
+  {
+    name: 'StockDateEncoding',
+    declaration: 'export type StockDateEncoding = \'ms-epoch\' | \'iso-date\' | \'compact-date\' | \'report-period\';',
+  },
+  {
+    name: 'StockEndpoint',
+    declaration: 'export interface StockEndpoint {\n    readonly id: string;\n    readonly universe: StockUniverse;\n    readonly tool: string;\n    readonly method: \'GET\' | \'POST\';\n    readonly path: string;\n    readonly title: string;\n    readonly summary: string;\n    readonly params: readonly StockParam[];\n    readonly availability: StockAvailability;\n    readonly paging: StockPaging;\n    readonly window: StockWindow;\n    readonly dateEncoding: StockDateEncoding | \'none\';\n    readonly mcpTool?: string;\n    readonly source: \'mcp\' | \'manual\';\n}',
+  },
+  {
+    name: 'StockMeta',
+    declaration: 'export interface StockMeta {\n    readonly asOf?: number;\n    readonly total?: number;\n    readonly truncated: boolean;\n    readonly next?: StockParams;\n}',
+  },
+  {
+    name: 'StockPaging',
+    declaration: 'export type StockPaging = \'none\' | \'offset\' | \'page\' | \'cursor\';',
+  },
+  {
+    name: 'StockParam',
+    declaration: 'export interface StockParam {\n    readonly name: string;\n    readonly type: StockParamType;\n    readonly required: boolean;\n    readonly description: string;\n    readonly default?: string | number | boolean;\n    readonly enum?: readonly string[];\n}',
+  },
+  {
+    name: 'StockParams',
+    declaration: 'export type StockParams = Readonly<Record<string, StockParamValue>>;',
+  },
+  {
+    name: 'StockParamType',
+    declaration: 'export type StockParamType = \'string\' | \'integer\' | \'number\' | \'boolean\' | \'object\' | \'array\';',
+  },
+  {
+    name: 'StockParamValue',
+    declaration: 'export type StockParamValue = string | number | boolean;',
+  },
+  {
+    name: 'StockProvider',
+    declaration: 'export interface StockProvider {\n    readonly id: string;\n    readonly endpoints: readonly StockEndpoint[];\n    readonly available: () => boolean;\n    readonly execute: (request: StockProviderRequest) => Promise<StockResult>;\n}',
+  },
+  {
+    name: 'StockProviderRequest',
+    declaration: 'export interface StockProviderRequest {\n    readonly endpoint: StockEndpoint;\n    readonly params: StockParams;\n    readonly signal: AbortSignal;\n}',
+  },
+  {
+    name: 'StockResult',
+    declaration: 'export interface StockResult {\n    readonly endpointId: string;\n    readonly rows: readonly StockRow[];\n    readonly meta: StockMeta;\n}',
+  },
+  {
+    name: 'StockRow',
+    declaration: 'export type StockRow = Readonly<Record<string, unknown>>;',
+  },
+  {
+    name: 'StockUniverse',
+    declaration: 'export type StockUniverse = \'a-share\' | \'a-share-index\' | \'fund\' | \'futures\' | \'options\' | \'meta\' | \'iwencai\';',
+  },
+  {
+    name: 'StockWindow',
+    declaration: 'export type StockWindow = \'none\' | \'today-only\' | \'one-year\' | \'five-years\' | \'ten-years\';',
+  },
+  {
     name: 'StorageBackend',
     declaration: 'export interface StorageBackend {\n    readonly kv?: KvFacet;\n    close(): Promise<void>;\n}',
   },
@@ -5865,6 +5960,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'SurfaceOp',
     declaration: 'export type SurfaceOp = \'append\' | {\n    op: \'replace\';\n    startSeq: SessionSeq;\n    endSeq: SessionSeq;\n};',
+  },
+  {
+    name: 'SymbolMatch',
+    declaration: 'export interface SymbolMatch {\n    readonly thscode: string;\n    readonly ticker: string;\n    readonly name: string;\n    readonly assetType?: string;\n    readonly exchange?: string;\n}',
+  },
+  {
+    name: 'SymbolQueryOptions',
+    declaration: 'export interface SymbolQueryOptions {\n    readonly assetType?: string;\n    readonly limit?: number;\n}',
   },
   {
     name: 'SystemMessage',

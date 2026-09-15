@@ -41,6 +41,7 @@ This table connects model-visible tool names to the plugin package and service s
 | `@deepseek-ai/dsh-tool-todo` | `todo_write` | `ctx.tools`, `owning Agent session` | `tool/call`, `todo/write`, `tool/result` | - | todo_write is session-owned state; UIs render the latest todo/write event as a checklist. `allowParallelInProgress` is required with no default, so the catalog states its choice: `true`, whose description invites several `in_progress` items. A deployment choosing `false` receives the same tool with a description asking for exactly one active task. |
 | `@deepseek-ai/dsh-tool-workflow` | `workflow` | `ctx.tools`, `ctx.workflowEngine`, `ctx.systemPrompt`, `a calling Agent (exec.agent parents the script children)` | `tool/call`, `tool/result` | - | - |
 | `@deepseek-ai/dsh-tool-web` | `web_fetch`, `web_search` | `ctx.tools`, `ctx.web`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | web_search and web_fetch keep provider selection behind ctx.web so model-visible schemas stay stable across backend swaps. |
+| `@deepseek-ai/dsh-tool-stock` | `fund_backtest_indicators`, `fund_backtest_result`, `fund_companies_detail`, `fund_corporate_actions_dividends`, `fund_diagnostics_detail`, `fund_financials_balance_sheets`, `fund_financials_income_statements`, `fund_financials_indicators`, `fund_holders_detail`, `fund_holders_top`, `fund_indicators_line`, `fund_indicators_table`, `fund_managers_detail`, `fund_managers_experience`, `fund_managers_investment_style`, `fund_managers_performance`, `fund_market_historical`, `fund_market_snapshot`, `fund_news_article_list`, `fund_offerings_list`, `fund_performance_drawdowns`, `fund_performance_indicators_historical`, `fund_performance_nav`, `fund_performance_returns`, `fund_portfolio_asset_allocation`, `fund_portfolio_bond_history`, `fund_portfolio_bond_report_dates`, `fund_portfolio_holdings`, `fund_portfolio_industry_allocation`, `fund_portfolio_stock_history`, `fund_portfolio_stock_report_dates`, `fund_profile_detail`, `fund_quota_list`, `fund_quota_summary`, `futures_basis_historical`, `futures_basis_main_continuous_latest`, `futures_calendar_trading_schedule`, `futures_contracts_detail`, `futures_positions_company_list`, `futures_positions_company_variety_daily`, `futures_positions_contract_daily`, `futures_positions_contract_historical`, `futures_positions_variety_daily`, `futures_prices_daily`, `futures_prices_intraday`, `futures_varieties_list`, `futures_warehouse_receipts_historical`, `iwencai_announcement_search`, `iwencai_astock_selector`, `iwencai_basicinfo_query`, `iwencai_business_query`, `iwencai_event_query`, `iwencai_fund_selector`, `iwencai_hkstock_selector`, `iwencai_industry_query`, `iwencai_insresearch_query`, `iwencai_macro_query`, `iwencai_management_query`, `iwencai_news_search`, `iwencai_report_search`, `iwencai_sector_selector`, `iwencai_usstock_selector`, `options_contracts_detail`, `options_prices_daily`, `options_prices_intraday`, `options_varieties_list`, `stock_adjustment_factors`, `stock_anomaly_analysis`, `stock_anomaly_analysis_list`, `stock_auction_benchmark`, `stock_auction_snapshot`, `stock_dragon_tiger_list`, `stock_financials_balance`, `stock_financials_cashflow`, `stock_financials_income`, `stock_financials_indicators`, `stock_hot_list`, `stock_hot_list_history`, `stock_hot_rank_trend`, `stock_index_catalog`, `stock_index_constituents`, `stock_index_kline`, `stock_index_quote`, `stock_kline`, `stock_limit_break_pool`, `stock_limit_down_pool`, `stock_limit_up_ladder`, `stock_limit_up_pool`, `stock_quote`, `stock_skyrocket_list`, `stock_symbol_list`, `stock_symbol_search`, `stock_trading_calendar`, `stock_valuation` | `ctx.tools`, `ctx.stock` | `tool/call`, `tool/result` | - | Every registered stock capability is one native tool. The `stock-analysis` preset is the only shipped composition that mounts this package, so the schema cost stays out of `standard` and `ptc`. |
 
 <a id="deepseek-aidsh-tool-ask-user"></a>
 
@@ -2267,3 +2268,2651 @@ Search the web for current information. Provide 1–4 queries in the required qu
 Source: [`packages/web/tool-web/src/index.ts`](../packages/web/tool-web/src/index.ts)
 
 web_search and web_fetch keep provider selection behind ctx.web so model-visible schemas stay stable across backend swaps.
+
+<a id="deepseek-aidsh-tool-stock"></a>
+
+## `@deepseek-ai/dsh-tool-stock`
+
+### `fund_backtest_indicators`
+
+基金回测可用指标。查询在线回测支持的指标、操作符与规则，无业务参数。
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_backtest_result`
+
+基金在线回测。按买入卖出条件执行基金在线回测，返回交易明细与净值曲线。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "含市场后缀的完整基金代码，例如 000001.OF。"
+    },
+    "buy_conditions": {
+      "type": "string",
+      "description": "买入条件 JSON 字符串，必须是对象或数组。"
+    },
+    "sell_conditions": {
+      "type": "string",
+      "description": "卖出条件 JSON 字符串，必须是对象或数组。"
+    },
+    "buy_frequency_type": {
+      "type": "string",
+      "description": "买入频率，具体值由上游判定，例如 WEEKLY。"
+    },
+    "max_buy_times": {
+      "type": "number",
+      "description": "最大买入次数。"
+    },
+    "per_buy_amount": {
+      "type": "number",
+      "description": "每次买入金额。"
+    }
+  },
+  "required": [
+    "thscode",
+    "buy_conditions",
+    "sell_conditions",
+    "buy_frequency_type",
+    "max_buy_times",
+    "per_buy_amount"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_companies_detail`
+
+查询基金公司详情；timestamp 为接口响应时间戳。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "company_id": {
+      "type": "string",
+      "description": "基金公司 ID"
+    }
+  },
+  "required": [
+    "company_id"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_corporate_actions_dividends`
+
+查询基金分红记录；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_diagnostics_detail`
+
+查询基金诊断详情；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_financials_balance_sheets`
+
+查询基金资产负债表；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_financials_income_statements`
+
+查询基金利润表；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_financials_indicators`
+
+查询基金财务指标；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_holders_detail`
+
+查询基金持有人结构，支持合并份额、独立份额或全部披露口径，返回实际命中口径、机构占比、持有人户数、户均持有份额、个人占比和管理人员工持有比例。上游按报告期披露。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "merge_scope": {
+      "type": "string",
+      "description": "持有人披露口径：all=全部口径（默认，分别返回合并/独立份额的最新记录） / merged=A类、C类等份额合并披露 / separate=当前份额独立披露",
+      "default": "all",
+      "enum": [
+        "all",
+        "merged",
+        "separate"
+      ]
+    },
+    "thscode": {
+      "type": "string",
+      "description": "完整基金 thscode，必须保留市场后缀",
+      "default": "161725.SZ"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_holders_top`
+
+查询基金前十大持有人；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "description": "返回条数，最大 10"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_indicators_line`
+
+基金画线指标。查询基金指标时间序列；时间轴使用 Unix 毫秒整数。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "indexes": {
+      "type": "string",
+      "description": "指标分组 JSON 数组，每组含 thscodes 与 index_info。"
+    },
+    "time_range": {
+      "type": "string",
+      "description": "时间范围 JSON 对象，含 time_type、start、end（Unix 毫秒）。"
+    }
+  },
+  "required": [
+    "indexes",
+    "time_range"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_indicators_table`
+
+基金表格指标。查询基金表格式指标结果，支持分页与排序；省略参数时不注入业务默认值。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "code_selectors": {
+      "type": "string",
+      "description": "代码选择器 JSON 对象。"
+    },
+    "indexes": {
+      "type": "string",
+      "description": "指标 JSON 数组，index_id 必填。"
+    },
+    "page_info": {
+      "type": "string",
+      "description": "分页 JSON 对象，起点为 0。"
+    },
+    "sort": {
+      "type": "string",
+      "description": "排序 JSON 数组，每项含 idx 与 type。"
+    }
+  }
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_managers_detail`
+
+查询基金经理详情；timestamp 为接口响应时间戳。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "manager_id": {
+      "type": "string",
+      "description": "基金经理 ID"
+    }
+  },
+  "required": [
+    "manager_id"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_managers_experience`
+
+查询基金经理从业经历；timestamp 为接口响应时间戳。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "manager_id": {
+      "type": "string",
+      "description": "基金经理 ID"
+    }
+  },
+  "required": [
+    "manager_id"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_managers_investment_style`
+
+查询基金经理投资风格。关联基金解析失败时对应字段为空，不影响主能力；timestamp 为接口响应时间戳。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "manager_id": {
+      "type": "string",
+      "description": "基金经理 ID"
+    }
+  },
+  "required": [
+    "manager_id"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_managers_performance`
+
+查询基金经理业绩；timestamp 为接口响应时间戳。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "manager_id": {
+      "type": "string",
+      "description": "基金经理 ID"
+    },
+    "range": {
+      "type": "string",
+      "description": "统计区间",
+      "enum": [
+        "month",
+        "tmonth",
+        "year",
+        "nowyear",
+        "now"
+      ]
+    }
+  },
+  "required": [
+    "manager_id",
+    "range"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_market_historical`
+
+查询单只 ETF 的历史日线行情。仅支持 interval=1d，窗口最长 5 个自然年；LOF、场外基金和 REITs 返回 code=3004。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "end": {
+      "type": "integer",
+      "description": "结束时间，毫秒 Unix 时间戳；必须不早于 start，且窗口最长 5 个自然年"
+    },
+    "interval": {
+      "type": "string",
+      "description": "K 线周期，当前仅支持 1d(日线)",
+      "default": "1d",
+      "enum": [
+        "1d"
+      ]
+    },
+    "start": {
+      "type": "integer",
+      "description": "起始时间，毫秒 Unix 时间戳"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只 ETF thscode，如 510300.SH。不接受逗号多值",
+      "default": "510300.SH"
+    }
+  },
+  "required": [
+    "end",
+    "start",
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_market_snapshot`
+
+查询 ETF 行情快照。基金使用完整 thscode 唯一定位；LOF、场外基金和 REITs 返回 code=3004。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "单只 ETF thscode，如 510300.SH。不接受逗号多值",
+      "default": "510300.SH"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_news_article_list`
+
+查询基金资讯列表；使用 offset/has_more 游标分页，上游未提供总记录数，因此 data 不返回 total；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "description": "返回条数"
+    },
+    "offset": {
+      "type": "string",
+      "description": "翻页游标"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_offerings_list`
+
+查询基金募集列表；timestamp 为接口响应时间戳。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "subscribe": {
+      "type": "string",
+      "description": "募集状态",
+      "enum": [
+        "active",
+        "upcoming"
+      ]
+    }
+  },
+  "required": [
+    "subscribe"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_performance_drawdowns`
+
+查询基金回撤指标；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_performance_indicators_historical`
+
+查询基金历史业绩指标；周期固定为 DAY_1，data 仅使用 timestamp/item，不返回顶层 thscode/interval；timestamp 保留明确的上游数据时间。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "end": {
+      "type": "integer",
+      "description": "结束时间，毫秒 Unix 时间戳"
+    },
+    "start": {
+      "type": "integer",
+      "description": "起始时间，毫秒 Unix 时间戳"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "end",
+    "start",
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_performance_nav`
+
+查询基金单位净值和复权净值。不传 range 时只返回最新一个净值日期；传 range 时返回区间序列。nav_type 控制返回单位净值、复权净值或二者。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "nav_type": {
+      "type": "string",
+      "description": "净值字段：unit(单位净值) / adj(复权净值) / unit,adj(同时返回二者)",
+      "default": "unit,adj",
+      "enum": [
+        "unit",
+        "adj",
+        "unit,adj"
+      ]
+    },
+    "range": {
+      "type": "string",
+      "description": "净值区间：week(近一周) / month(近一月) / tmonth(近三月) / hyear(近半年) / year(近一年) / twoyear(近两年) / tyear(近三年) / fyear(近五年)。省略时只返回最新值",
+      "enum": [
+        "week",
+        "month",
+        "tmonth",
+        "hyear",
+        "year",
+        "twoyear",
+        "tyear",
+        "fyear"
+      ]
+    },
+    "thscode": {
+      "type": "string",
+      "description": "完整基金 thscode，必须保留市场后缀",
+      "default": "025480.OF"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_performance_returns`
+
+查询基金近一月、近三月、近半年、近一年、近三年、近五年、今年以来和成立以来收益率。收益率为百分数原值，如 8.88 表示 8.88%。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "完整基金 thscode，必须保留市场后缀",
+      "default": "510300.SH"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_portfolio_asset_allocation`
+
+查询基金资产配置；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_portfolio_bond_history`
+
+查询基金历史债券持仓；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "end_date": {
+      "type": "string",
+      "description": "报告截止日期"
+    },
+    "report_type": {
+      "type": "string",
+      "description": "报告类型"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "end_date",
+    "report_type",
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_portfolio_bond_report_dates`
+
+查询基金债券持仓报告日期；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "report_type": {
+      "type": "string",
+      "description": "报告类型"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_portfolio_holdings`
+
+查询单只基金定期披露的重仓股，返回股票 thscode、ticker、名称和占基金净值比例。重仓股为定期披露数据，不代表实时持仓。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "完整基金 thscode，必须保留市场后缀",
+      "default": "025480.OF"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_portfolio_industry_allocation`
+
+查询基金行业配置；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_portfolio_stock_history`
+
+查询基金历史股票持仓；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "end_date": {
+      "type": "string",
+      "description": "报告截止日期"
+    },
+    "report_type": {
+      "type": "string",
+      "description": "报告类型"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "end_date",
+    "report_type",
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_portfolio_stock_report_dates`
+
+查询基金股票持仓报告日期；timestamp 为接口响应时间戳。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "report_type": {
+      "type": "string",
+      "description": "报告类型"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只基金 thscode"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_profile_detail`
+
+查询单只基金的基础资料，返回 thscode、ticker、基金名称、成立日期、管理人和基金经理。基金使用完整 thscode 唯一定位。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "完整基金 thscode，必须保留市场后缀，如 025480.OF / 510300.SH / 161725.SZ",
+      "default": "025480.OF"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_quota_list`
+
+QDII额度列表。按分类查询 QDII 额度下的基金列表；额度与收益数值以字符串原样返回。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tab": {
+      "type": "string",
+      "description": "分类数组 JSON 字符串，例如 [\"remen\"]。"
+    },
+    "buy": {
+      "type": "boolean",
+      "description": "可购状态过滤；省略时不向上游注入默认值。"
+    }
+  },
+  "required": [
+    "tab"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `fund_quota_summary`
+
+QDII额度汇总。按分类查询 QDII 额度汇总；数值以字符串原样返回，不作单位换算。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tab": {
+      "type": "string",
+      "description": "分类数组 JSON 字符串，例如 [\"nazhi100\"]。"
+    }
+  },
+  "required": [
+    "tab"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `futures_basis_historical`
+
+期货历史基差。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "spot_indicator_id": {
+      "type": "string",
+      "description": "可选现货指标ID"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "期货合约同花顺代码"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `futures_basis_main_continuous_latest`
+
+期货主连最新基差。
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `futures_calendar_trading_schedule`
+
+期货交易日日程。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "end_date": {
+      "type": "string",
+      "description": "结束日期"
+    },
+    "start_date": {
+      "type": "string",
+      "description": "开始日期"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "期货合约同花顺代码"
+    }
+  },
+  "required": [
+    "end_date",
+    "start_date",
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `futures_contracts_detail`
+
+期货合约详情。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "期货合约同花顺代码"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `futures_positions_company_list`
+
+期货公司列表。
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `futures_positions_company_variety_daily`
+
+公司品种日持仓。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "description": "交易日期"
+    },
+    "varieties": {
+      "type": "string",
+      "description": "1至5个逗号分隔的期货品种代码"
+    }
+  },
+  "required": [
+    "date",
+    "varieties"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `futures_positions_contract_daily`
+
+期货合约日持仓。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "description": "交易日期"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "期货合约同花顺代码"
+    },
+    "variety": {
+      "type": "string",
+      "description": "大写期货品种代码"
+    }
+  },
+  "required": [
+    "date",
+    "thscode",
+    "variety"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `futures_positions_contract_historical`
+
+期货合约历史持仓。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "company": {
+      "type": "string",
+      "description": "期货公司名称"
+    },
+    "start_date": {
+      "type": "string",
+      "description": "开始日期"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "期货合约同花顺代码"
+    },
+    "variety": {
+      "type": "string",
+      "description": "大写期货品种代码"
+    }
+  },
+  "required": [
+    "company",
+    "start_date",
+    "thscode",
+    "variety"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `futures_positions_variety_daily`
+
+期货品种日持仓。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "description": "交易日期"
+    }
+  },
+  "required": [
+    "date"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `futures_prices_daily`
+
+固定1d期货日K。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "end": {
+      "type": "integer",
+      "description": "与start成对提供的正毫秒时间戳"
+    },
+    "start": {
+      "type": "integer",
+      "description": "与end成对提供的正毫秒时间戳"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "期货合约同花顺代码"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `futures_prices_intraday`
+
+期货当前交易会话分时。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "session": {
+      "type": "string",
+      "description": "可选交易会话",
+      "enum": [
+        "pre_market",
+        "intraday",
+        "post_market"
+      ]
+    },
+    "thscode": {
+      "type": "string",
+      "description": "期货合约同花顺代码"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `futures_varieties_list`
+
+期货品种资料，返回统一响应信封。
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `futures_warehouse_receipts_historical`
+
+期货历史仓单。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "end_date": {
+      "type": "string",
+      "description": "结束日期"
+    },
+    "start_date": {
+      "type": "string",
+      "description": "开始日期"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "期货合约同花顺代码"
+    }
+  },
+  "required": [
+    "end_date",
+    "start_date",
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_announcement_search`
+
+公告搜索。按语义检索 A股、港股、基金、ETF 的公司公告原文，覆盖定期报告、分红派息、回购增持、资产重组等类型，返回标题、摘要与公告 PDF 链接。查研报用 iwencai_report_search，查新闻用 iwencai_news_search。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言检索问句，例如「贵州茅台 分红公告」。"
+    },
+    "size": {
+      "type": "integer",
+      "description": "期望返回的条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_astock_selector`
+
+问财选A股。用自然语言按条件筛选 A股列表（涨幅、涨停、成交量、财务条件、行业概念等组合），返回符合条件的股票及其命中指标。用于「选出哪些股票」，不是查询某只已知股票的既有数据。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言问句，例如「今日涨幅居前的A股」。"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始。",
+      "default": 1
+    },
+    "limit": {
+      "type": "integer",
+      "description": "单页条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_basicinfo_query`
+
+基本资料查询。用自然语言查询证券的基本资料：公司简介、上市日期、所属行业与板块、费率等静态档案信息。查经营数据用 iwencai_business_query，查股东股本用 iwencai_management_query。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言问句，例如「今日涨幅居前的A股」。"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始。",
+      "default": 1
+    },
+    "limit": {
+      "type": "integer",
+      "description": "单页条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_business_query`
+
+公司经营数据查询。用自然语言查询公司经营面数据：主营业务构成、主要客户、主要供应商、参控股公司、重大合同。查股权股本用 iwencai_management_query，查基础资料用 iwencai_basicinfo_query。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言问句，例如「今日涨幅居前的A股」。"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始。",
+      "default": 1
+    },
+    "limit": {
+      "type": "integer",
+      "description": "单页条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_event_query`
+
+事件数据查询。用自然语言查询上市公司事件数据：业绩预告、增发配股、限售解禁、股权质押、机构调研、监管函等。查公司经营面（主营业务、客户、供应商、重大合同）用 iwencai_business_query。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言问句，例如「今日涨幅居前的A股」。"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始。",
+      "default": 1
+    },
+    "limit": {
+      "type": "integer",
+      "description": "单页条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_fund_selector`
+
+问财选基金。用自然语言按条件筛选公募基金（收益率、规模、类型、持仓特征等），返回符合条件的基金及其命中指标。筛选场内 ETF 也可用本能力。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言问句，例如「今日涨幅居前的A股」。"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始。",
+      "default": 1
+    },
+    "limit": {
+      "type": "integer",
+      "description": "单页条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_hkstock_selector`
+
+问财选港股。用自然语言按条件筛选港股标的，返回符合条件的港股及其命中指标。筛选 A股用 iwencai_astock_selector，筛选美股用 iwencai_usstock_selector。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言问句，例如「今日涨幅居前的A股」。"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始。",
+      "default": 1
+    },
+    "limit": {
+      "type": "integer",
+      "description": "单页条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_industry_query`
+
+行业数据查询。用自然语言查询行业与产业链数据：行业景气、产销、价格、上下游与竞争格局。筛选板块本身用 iwencai_sector_selector；查宏观经济用 iwencai_macro_query。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言问句，例如「今日涨幅居前的A股」。"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始。",
+      "default": 1
+    },
+    "limit": {
+      "type": "integer",
+      "description": "单页条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_insresearch_query`
+
+机构研究与评级查询。用自然语言查询机构研究与评级数据：券商评级、目标价、盈利预测、ESG、券商金股、一致预期。查研报原文用 iwencai_report_search。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言问句，例如「今日涨幅居前的A股」。"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始。",
+      "default": 1
+    },
+    "limit": {
+      "type": "integer",
+      "description": "单页条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_macro_query`
+
+宏观数据查询。用自然语言查询宏观经济指标：GDP、CPI、PPI、利率、汇率、社融、M2、PMI、工业增加值、消费、投资、进出口。查行业面用 iwencai_industry_query。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言问句，例如「今日涨幅居前的A股」。"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始。",
+      "default": 1
+    },
+    "limit": {
+      "type": "integer",
+      "description": "单页条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_management_query`
+
+公司股东股本查询。用自然语言查询股权与股本信息：股本结构、股东户数、前十大股东/流通股东、主要持有人、实际控制人、股权质押。查经营面用 iwencai_business_query。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言问句，例如「今日涨幅居前的A股」。"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始。",
+      "default": 1
+    },
+    "limit": {
+      "type": "integer",
+      "description": "单页条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_news_search`
+
+新闻搜索。按语义检索财经资讯，来源含官媒、主流财经媒体、垂直行业网站与公司官网，用于了解最新财经事件、政策动态与行业进展。查公告用 iwencai_announcement_search。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言检索问句，例如「贵州茅台 分红公告」。"
+    },
+    "size": {
+      "type": "integer",
+      "description": "期望返回的条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_report_search`
+
+研报搜索。按语义检索主流投研机构发布的研究报告，返回标题、摘要与原文链接，用于获取分析逻辑、投资评级与目标价。查公告用 iwencai_announcement_search。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言检索问句，例如「贵州茅台 分红公告」。"
+    },
+    "size": {
+      "type": "integer",
+      "description": "期望返回的条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_sector_selector`
+
+问财选板块。用自然语言按条件筛选市场板块（行业估值、资金流向、涨跌幅、板块类型等组合），返回符合条件的板块及其命中指标。注意它返回的是板块本身，不是板块成分股。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言问句，例如「今日涨幅居前的A股」。"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始。",
+      "default": 1
+    },
+    "limit": {
+      "type": "integer",
+      "description": "单页条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `iwencai_usstock_selector`
+
+问财选美股。用自然语言按条件筛选美股标的（行情、财务、行业概念、业绩预测、研报评级等组合），返回符合条件的美股及其命中指标。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "自然语言问句，例如「今日涨幅居前的A股」。"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始。",
+      "default": 1
+    },
+    "limit": {
+      "type": "integer",
+      "description": "单页条数。",
+      "default": 10
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `options_contracts_detail`
+
+期权合约详情。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "期权合约同花顺代码"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `options_prices_daily`
+
+固定1d期权日K。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "end": {
+      "type": "integer",
+      "description": "与start成对提供的正毫秒时间戳"
+    },
+    "start": {
+      "type": "integer",
+      "description": "与end成对提供的正毫秒时间戳"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "期权合约同花顺代码"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `options_prices_intraday`
+
+期权当前交易会话分时。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "session": {
+      "type": "string",
+      "description": "可选交易会话",
+      "enum": [
+        "pre_market",
+        "intraday",
+        "post_market"
+      ]
+    },
+    "thscode": {
+      "type": "string",
+      "description": "期权合约同花顺代码"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `options_varieties_list`
+
+期权品种资料，返回统一响应信封。
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_adjustment_factors`
+
+单只标的的复权因子事件流（现金分红/送股/配股），调用方可据此自行推导前/后复权因子。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "from": {
+      "type": "string",
+      "description": "事件起始日，格式 YYYY-MM-DD；不传则不设起始边界"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只标的 thscode，不接受逗号",
+      "default": "600519.SH"
+    },
+    "to": {
+      "type": "string",
+      "description": "事件截止日，格式 YYYY-MM-DD；不传则不设截止边界"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_anomaly_analysis`
+
+按同花顺代码批量查询当日个股异动原因。thscodes 必填，逗号分隔，大小写不敏感，去重后返回；数量不超过服务端配置上限（默认 50）。 thscodes 是逗号分隔的完整代码（如 600519.SH,000001.SZ）；不确定时先用 stock_symbol_search 解析。 口径：按 thscodes 批量查这些标的当日各自的异动原因。要按异动标签列出全市场触发个股，用 stock_anomaly_analysis_list。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscodes": {
+      "type": "string",
+      "description": "逗号分隔的同花顺代码列表，格式为 6 位数字 + .SH/.SZ/.BJ，如 300033.SZ,600519.SH",
+      "default": "300033.SZ,600519.SH"
+    }
+  },
+  "required": [
+    "thscodes"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_anomaly_analysis_list`
+
+个股异动原因列表。查询当日个股异动原因，可选按异动标签过滤；不传 tag_codes 时返回全部当日记录。 口径：按异动标签（tag_codes）列出触发该标签的全市场个股，不针对具体标的；查某几只股票各自的异动原因用 stock_anomaly_analysis。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tag_codes": {
+      "type": "string",
+      "description": "异动标签，逗号分隔，多个值为 OR 关系；合法值 LIMIT_UP/LIMIT_DOWN/SHARP_RISE/SHARP_FALL/RAPID_RALLY/RAPID_DECLINE。",
+      "enum": [
+        "LIMIT_UP",
+        "LIMIT_DOWN",
+        "SHARP_RISE",
+        "SHARP_FALL",
+        "RAPID_RALLY",
+        "RAPID_DECLINE"
+      ]
+    }
+  }
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_auction_benchmark`
+
+查询短线风向标集合竞价基准数据；date/date_ms 为最终查询日期，timestamp 为接口响应时间戳。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "description": "查询日期，格式 yyyy-MM-dd；不传时默认取 Asia/Shanghai 当日"
+    }
+  }
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_auction_snapshot`
+
+查询一个或多个 A 股标的的集合竞价快照；timestamp 为接口响应组装时间戳。 thscodes 是逗号分隔的完整代码（如 600519.SH,000001.SZ）；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "stage": {
+      "type": "string",
+      "description": "集合竞价阶段，live 为实时、final 为终态",
+      "default": "final",
+      "enum": [
+        "live",
+        "final"
+      ]
+    },
+    "thscodes": {
+      "type": "string",
+      "description": "A 股 thscode，多个代码使用英文逗号分隔"
+    }
+  },
+  "required": [
+    "thscodes"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_dragon_tiger_list`
+
+查询 A 股龙虎榜。board_type 缺省 all；all 为全部榜，org 为机构榜，hot_money 为游资榜。date 可选，格式 YYYY-MM-DD；缺省由服务端取最近一个早于当前自然日的 A 股交易日。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "board_type": {
+      "type": "string",
+      "description": "榜单类型：all(全部) / org(机构榜) / hot_money(游资榜)，缺省 all",
+      "default": "all",
+      "enum": [
+        "all",
+        "org",
+        "hot_money"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "description": "目标交易日，格式 YYYY-MM-DD；缺省由服务端取最近一个早于当前自然日的 A 股交易日"
+    }
+  }
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_financials_balance`
+
+A股整体合并资产负债表多期序列。两种取数模式（互斥）：不传start/end返回最近N期；同时传start+end返回时间区间内全部报告期。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "end": {
+      "type": "integer",
+      "description": "时间区间模式：结束毫秒戳，end >= start"
+    },
+    "limit": {
+      "type": "integer",
+      "description": "最近N期模式：默认4，范围[1,20]。与start/end互斥",
+      "default": 4
+    },
+    "period": {
+      "type": "string",
+      "description": "报告期类型：annual(仅Q4报告期)、quarterly(每个季度末)",
+      "default": "annual",
+      "enum": [
+        "annual",
+        "quarterly"
+      ]
+    },
+    "start": {
+      "type": "integer",
+      "description": "时间区间模式：起始毫秒戳，需与end同传。窗口不超10年"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只标的 thscode，不接受逗号。含交易所后缀（如 600519.SH）",
+      "default": "600519.SH"
+    }
+  },
+  "required": [
+    "period",
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_financials_cashflow`
+
+A股整体合并现金流量表多期序列。两种取数模式（互斥）：不传start/end返回最近N期；同时传start+end返回时间区间内全部报告期。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "end": {
+      "type": "integer",
+      "description": "时间区间模式：结束毫秒戳，end >= start"
+    },
+    "limit": {
+      "type": "integer",
+      "description": "最近N期模式：默认4，范围[1,20]。与start/end互斥",
+      "default": 4
+    },
+    "period": {
+      "type": "string",
+      "description": "报告期类型：annual(仅Q4报告期)、quarterly(每个季度末)",
+      "default": "annual",
+      "enum": [
+        "annual",
+        "quarterly"
+      ]
+    },
+    "start": {
+      "type": "integer",
+      "description": "时间区间模式：起始毫秒戳，需与end同传。窗口不超10年"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只标的 thscode，不接受逗号。含交易所后缀（如 600519.SH）",
+      "default": "600519.SH"
+    }
+  },
+  "required": [
+    "period",
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_financials_income`
+
+A股整体合并利润表多期序列。两种取数模式（互斥）：不传start/end返回最近N期；同时传start+end返回时间区间内全部报告期。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "end": {
+      "type": "integer",
+      "description": "时间区间模式：结束毫秒戳，end >= start"
+    },
+    "limit": {
+      "type": "integer",
+      "description": "最近N期模式：默认4，范围[1,20]。与start/end互斥",
+      "default": 4
+    },
+    "period": {
+      "type": "string",
+      "description": "报告期类型：annual(仅Q4报告期)、quarterly(每个季度末)",
+      "default": "annual",
+      "enum": [
+        "annual",
+        "quarterly"
+      ]
+    },
+    "start": {
+      "type": "integer",
+      "description": "时间区间模式：起始毫秒戳，需与end同传。窗口不超10年"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只标的 thscode，不接受逗号。含交易所后缀（如 600519.SH）",
+      "default": "600519.SH"
+    }
+  },
+  "required": [
+    "period",
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_financials_indicators`
+
+单只 A 股指定报告期的财务指标数据。一次返回成长、盈利、偿债、营运、现金流五类能力下的指标 ID 与本期值，调用方无需拆分为多个请求。不返回行业、评分、排名、行业均值或点评。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "report": {
+      "type": "string",
+      "description": "必填，报告期，格式 {yyyy}-{1|2|3|4}；1 一季报，2 中报，3 三季报，4 年报"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只标的 thscode，含交易所后缀（如 300033.SZ）",
+      "default": "300033.SZ"
+    }
+  },
+  "required": [
+    "report",
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_hot_list`
+
+返回 A 股热股榜。period 缺省为 day；day 表示 24 小时榜，hour 表示小时榜。响应包含排名、热度、排名变化、涨跌停分析和标签信息。 口径：当前时点的热股榜。历史某一天的热股榜见 stock_hot_list_history；单只股票在区间内的排名走势见 stock_hot_rank_trend。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "period": {
+      "type": "string",
+      "description": "榜单周期：day(24小时榜) / hour(小时榜)，缺省 day",
+      "default": "day",
+      "enum": [
+        "day",
+        "hour"
+      ]
+    }
+  }
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_hot_list_history`
+
+查询指定自然日的 A 股历史热股榜排名。date 必填，格式 YYYY-MM-DD；返回股票代码、名称、历史排名和对应日期。 口径：按自然日返回那一天的热股榜。当前时点的榜单见 stock_hot_list；单只股票在区间内的排名走势见 stock_hot_rank_trend。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "description": "必填，目标日期，格式 YYYY-MM-DD；需在最近一年内"
+    }
+  },
+  "required": [
+    "date"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_hot_rank_trend`
+
+查询单只 A 股在指定日期区间内的热股榜排名走势。thscode 必填且仅支持单只；start_date/end_date 使用 YYYY-MM-DD，日期需在最近一年内且区间不超过一年。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。 口径：单只股票在日期区间内的热榜排名走势，不是榜单本身；榜单见 stock_hot_list 与 stock_hot_list_history。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "end_date": {
+      "type": "string",
+      "description": "必填，结束日期，格式 YYYY-MM-DD；需在最近一年内，且不早于 start_date"
+    },
+    "start_date": {
+      "type": "string",
+      "description": "必填，起始日期，格式 YYYY-MM-DD；需在最近一年内"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只 A 股 thscode，不接受逗号",
+      "default": "300033.SZ"
+    }
+  },
+  "required": [
+    "end_date",
+    "start_date",
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_index_catalog`
+
+按 tag（cn_concept / region / tszs / industry）列出 THS 指数/板块清单。单 tag 全量返回，无分页。典型用法是先用本接口拿到目标指数 thscode，再调 stock_index_constituents 取成分。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "tag": {
+      "type": "string",
+      "description": "标签：cn_concept(A股概念) / region(区域指数) / tszs(特色指数) / industry(行业指数)。大小写不敏感；缺省 cn_concept",
+      "default": "cn_concept",
+      "enum": [
+        "cn_concept",
+        "region",
+        "tszs",
+        "industry"
+      ]
+    }
+  }
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_index_constituents`
+
+按单个指数/板块 thscode 返回其当前成分股（股票）清单。支持 THS 板块（如 886042.TI）与标准指数（如沪深300 000300.SH）。单次仅支持一个指数；不接受逗号分隔。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscode": {
+      "type": "string",
+      "description": "指数/板块 thscode，形如 {ticker}.{suffix}。支持 THS 板块（如 886042.TI）与标准指数（如 000300.SH / 399300.SZ）。入参会被 trim().toUpperCase() 标准化；不接受逗号，单次仅支持一个指数",
+      "default": "886042.TI"
+    }
+  },
+  "required": [
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_index_kline`
+
+单只指数的历史 K 线，仅支持 start/end 时间区间模式，窗口最长 10 年；指数无复权概念，响应 data.adjust 恒为 null。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "end": {
+      "type": "integer",
+      "description": "结束时间，毫秒 Unix 时间戳；end - start ≤ 10 年",
+      "default": 1747641600000
+    },
+    "interval": {
+      "type": "string",
+      "description": "K 线周期：1d / 1w / 1mo",
+      "default": "1d",
+      "enum": [
+        "1d",
+        "1w",
+        "1mo"
+      ]
+    },
+    "start": {
+      "type": "integer",
+      "description": "起始时间，毫秒 Unix 时间戳",
+      "default": 1716105600000
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只指数 thscode，不接受逗号；支持 .SH / .SZ / .TI",
+      "default": "000001.SH"
+    }
+  },
+  "required": [
+    "end",
+    "interval",
+    "start",
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_index_quote`
+
+按 thscode 批量取指数最新行情。必传 thscodes（与 A 股版的差别，不支持全集枚举），覆盖上证/深证交易所指数（.SH/.SZ）与同花顺指数/板块/行业（.TI）。 thscodes 是逗号分隔的完整代码（如 600519.SH,000001.SZ）；不确定时先用 stock_symbol_search 解析。 指数池不含北证50（899050.BJ）与中证2000（932000.CSI），传入会报 Unknown thscode；中证系列已收录的写 .SH 形式（沪深300=000300.SH、中证500=000905.SH、中证1000=000852.SH）。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "description": "与 A 股签名对齐，对本接口无效（不支持空 thscodes 全集枚举）"
+    },
+    "offset": {
+      "type": "integer",
+      "description": "同上，对本接口无效"
+    },
+    "thscodes": {
+      "type": "string",
+      "description": "逗号分隔的指数 thscode 列表（如 000001.SH,399001.SZ,886042.TI,881101.TI）",
+      "default": "000001.SH,000300.SH,886042.TI"
+    }
+  },
+  "required": [
+    "thscodes"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_kline`
+
+单只标的历史K线数据，窗口最长10年。支持前复权/后复权/不复权。 thscode 必须写完整代码（如 600519.SH），不接受裸代码；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "adjust": {
+      "type": "string",
+      "description": "复权方式：none(不复权)、forward(前复权)、backward(后复权)",
+      "default": "forward",
+      "enum": [
+        "none",
+        "forward",
+        "backward"
+      ]
+    },
+    "end": {
+      "type": "integer",
+      "description": "必填，结束时间，毫秒 Unix 时间戳。end - start 不超过10年"
+    },
+    "interval": {
+      "type": "string",
+      "description": "K线周期：1d(日线)、1w(周线)、1mo(月线)",
+      "default": "1d",
+      "enum": [
+        "1d",
+        "1w",
+        "1mo"
+      ]
+    },
+    "offset": {
+      "type": "integer",
+      "description": "分页偏移",
+      "default": 0
+    },
+    "start": {
+      "type": "integer",
+      "description": "必填，起始时间，毫秒 Unix 时间戳"
+    },
+    "thscode": {
+      "type": "string",
+      "description": "单只标的 thscode，不接受逗号。多标的请分多次请求",
+      "default": "600519.SH"
+    }
+  },
+  "required": [
+    "end",
+    "interval",
+    "start",
+    "thscode"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_limit_break_pool`
+
+按交易日返回 A 股涨停炸板股票池，支持分页及按涨跌幅、开板次数、最新价、换手率或成交额排序。 口径：当日盘中曾涨停、收盘未封住（炸板）的股票池，与收盘涨停池 stock_limit_up_pool 互斥。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "date_ms": {
+      "type": "integer",
+      "description": "交易日上海时区零点毫秒时间戳；省略时查询当前自然日"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始",
+      "default": 1
+    },
+    "size": {
+      "type": "integer",
+      "description": "单页条数，范围 1..200",
+      "default": 50
+    },
+    "sort_dir": {
+      "type": "string",
+      "description": "排序方向",
+      "default": "desc",
+      "enum": [
+        "asc",
+        "desc"
+      ]
+    },
+    "sort_field": {
+      "type": "string",
+      "description": "排序字段",
+      "default": "price_change_ratio_pct",
+      "enum": [
+        "price_change_ratio_pct",
+        "open_times",
+        "last_price",
+        "turnover_ratio_pct",
+        "turnover"
+      ]
+    }
+  }
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_limit_down_pool`
+
+按交易日返回 A 股跌停股票池，支持分页及按跌停时间、最新价、涨跌幅或换手率排序。首次和最后跌停时间以上海时区 HH:mm 返回。 口径：当日收盘跌停（封板成功）的股票池，与 stock_limit_up_pool 的涨停方向相反，不与炸板池 stock_limit_break_pool 混用。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "date_ms": {
+      "type": "integer",
+      "description": "交易日上海时区零点毫秒时间戳；省略时查询当前自然日"
+    },
+    "page": {
+      "type": "integer",
+      "description": "页码，从 1 开始",
+      "default": 1
+    },
+    "size": {
+      "type": "integer",
+      "description": "单页条数，范围 1..200",
+      "default": 50
+    },
+    "sort_dir": {
+      "type": "string",
+      "description": "排序方向",
+      "default": "desc",
+      "enum": [
+        "asc",
+        "desc"
+      ]
+    },
+    "sort_field": {
+      "type": "string",
+      "description": "排序字段",
+      "default": "last_limit_time",
+      "enum": [
+        "last_limit_time",
+        "first_limit_time",
+        "last_price",
+        "price_change_ratio_pct",
+        "turnover_ratio_pct"
+      ]
+    }
+  }
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_limit_up_ladder`
+
+返回近 30 个交易日 × 6 档板数（2/3/4/5/6/7+ 连板）的矩阵，用于观察连板梯队结构与次日晋级。无入参。 口径：近 30 个交易日的连板梯队矩阵（按连板高度分组），不是单日股票池；单日涨停池见 stock_limit_up_pool，单日炸板池见 stock_limit_break_pool。
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_limit_up_pool`
+
+按交易日返回全市场涨停股清单，覆盖沪深主板、创业板、科创板和北交所。支持按日期查询、分页，以及按最新价、连板数、封单金额或涨停时间排序。 口径：当日收盘涨停（封板成功）的股票池。盘中曾涨停而收盘未封住者不在此列，见 stock_limit_break_pool；跌停方向见 stock_limit_down_pool；按连板高度分组的矩阵见 stock_limit_up_ladder。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "date_ms": {
+      "type": "integer",
+      "description": "目标交易日的 Asia/Shanghai 00:00 毫秒戳；缺省取今日。非交易日返回空集（不报错）"
+    },
+    "page": {
+      "type": "integer",
+      "description": "1-based 页码",
+      "default": 1
+    },
+    "size": {
+      "type": "integer",
+      "description": "单页条数，默认 50，最大 200",
+      "default": 50
+    },
+    "sort_dir": {
+      "type": "string",
+      "description": "排序方向",
+      "default": "desc",
+      "enum": [
+        "asc",
+        "desc"
+      ]
+    },
+    "sort_field": {
+      "type": "string",
+      "description": "排序字段白名单",
+      "default": "last_price",
+      "enum": [
+        "last_price",
+        "continue_day_cnt",
+        "seal_money",
+        "limit_up_time"
+      ]
+    }
+  }
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_quote`
+
+A股市场行情快照。指定 thscodes 时按入参顺序批量返回；省略时遍历全量 A 股代码表并按 limit/offset 分页。 thscodes 是逗号分隔的完整代码（如 600519.SH,000001.SZ）；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "description": "thscodes 省略时生效，单页条数",
+      "default": 100
+    },
+    "offset": {
+      "type": "integer",
+      "description": "thscodes 省略时生效，分页偏移",
+      "default": 0
+    },
+    "thscodes": {
+      "type": "string",
+      "description": "逗号分隔的 thscode 列表，如 600519.SH,000001.SZ。给定时忽略分页参数",
+      "default": "600519.SH,000001.SZ"
+    }
+  }
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_skyrocket_list`
+
+返回 A 股飙升热榜。period 缺省为 day；day 表示日榜，hour 表示小时榜。响应按热榜排名正序返回，包含排名、热度、排名变化、涨跌停分析和标签信息。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "period": {
+      "type": "string",
+      "description": "榜单周期：day(日榜) / hour(小时榜)，缺省 day",
+      "default": "day",
+      "enum": [
+        "day",
+        "hour"
+      ]
+    }
+  }
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_symbol_list`
+
+批量获取代码表，支持按资产类别过滤。循环递增 offset 直到 item.size() < limit 即可取尽。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "asset_type": {
+      "type": "string",
+      "description": "资产类别：a-share(A股股票)、a-share-index(A股指数/同花顺指数/板块)、forex(外汇)、fund-otc(场外公募基金)、fund-etf(ETF基金)、fund-lof(LOF基金)、fund-reits(公募REITs)。支持逗号分隔多值",
+      "default": "a-share",
+      "enum": [
+        "a-share",
+        "a-share-index",
+        "forex",
+        "fund-otc",
+        "fund-etf",
+        "fund-lof",
+        "fund-reits"
+      ]
+    },
+    "limit": {
+      "type": "integer",
+      "description": "单页条数，默认1000，最大10000",
+      "default": 1000
+    },
+    "offset": {
+      "type": "integer",
+      "description": "分页偏移，默认0",
+      "default": 0
+    }
+  }
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_symbol_search`
+
+按关键词（thscode / ticker / 名称）跨市场标的检索与消歧，支持子串匹配。其余业务 tool 的前置步骤，先解析出 thscode 再取数。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "asset_type": {
+      "type": "string",
+      "description": "资产类别过滤：a-share(A股股票)、a-share-index(A股指数/同花顺指数/板块)、forex(外汇)、fund-otc(场外公募基金)、fund-etf(ETF基金)、fund-lof(LOF基金)、fund-reits(公募REITs)。支持逗号分隔多值",
+      "enum": [
+        "a-share",
+        "a-share-index",
+        "forex",
+        "fund-otc",
+        "fund-etf",
+        "fund-lof",
+        "fund-reits"
+      ]
+    },
+    "exchange": {
+      "type": "string",
+      "description": "交易所过滤：SH(沪市)、SZ(深市)、BJ(北交所)",
+      "enum": [
+        "SH",
+        "SZ",
+        "BJ"
+      ]
+    },
+    "limit": {
+      "type": "integer",
+      "description": "返回上限，默认10，最大50",
+      "default": 10
+    },
+    "q": {
+      "type": "string",
+      "description": "搜索关键词：完整 thscode、ticker 代码或中文/英文名称（支持子串匹配）",
+      "default": "平安"
+    }
+  },
+  "required": [
+    "q"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_trading_calendar`
+
+A股近一年交易日序列，固定窗口为[今日-1年, 今日]（Asia/Shanghai自然日），无任何请求参数。
+
+```json
+{
+  "type": "object",
+  "properties": {}
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+### `stock_valuation`
+
+批量查询 A 股最新估值快照。按请求顺序返回股票代码、名称及市盈率、市净率、市销率和市现率等五项估值指标。 thscodes 是逗号分隔的完整代码（如 600519.SH,000001.SZ）；不确定时先用 stock_symbol_search 解析。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "thscodes": {
+      "type": "string",
+      "description": "同花顺代码，英文逗号分隔，默认最多100支",
+      "default": "600519.SH,000001.SZ"
+    }
+  },
+  "required": [
+    "thscodes"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
+
+Every registered stock capability is one native tool. The `stock-analysis` preset is the only shipped composition that mounts this package, so the schema cost stays out of `standard` and `ptc`.

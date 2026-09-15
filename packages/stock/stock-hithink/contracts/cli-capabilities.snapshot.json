@@ -1,0 +1,1073 @@
+{
+  "_comment": "Snapshot of @hithink-tech/hithink-finance-cli@0.1.10 schemas/capabilities.json (see contracts/README.md).",
+  "capabilities": [
+    {
+      "command": [
+        "data",
+        "clean"
+      ],
+      "description": "Local capability data.clean",
+      "id": "data.clean",
+      "source": "local"
+    },
+    {
+      "command": [
+        "data",
+        "init"
+      ],
+      "description": "Local capability data.init",
+      "id": "data.init",
+      "source": "local"
+    },
+    {
+      "command": [
+        "data",
+        "migrate"
+      ],
+      "description": "Local capability data.migrate",
+      "id": "data.migrate",
+      "source": "local"
+    },
+    {
+      "command": [
+        "data",
+        "remove"
+      ],
+      "description": "Local capability data.remove",
+      "id": "data.remove",
+      "source": "local"
+    },
+    {
+      "command": [
+        "data",
+        "repair"
+      ],
+      "description": "Local capability data.repair",
+      "id": "data.repair",
+      "source": "local"
+    },
+    {
+      "command": [
+        "data",
+        "status"
+      ],
+      "description": "Local capability data.status",
+      "id": "data.status",
+      "source": "local"
+    },
+    {
+      "command": [
+        "data",
+        "sync"
+      ],
+      "description": "Local capability data.sync",
+      "id": "data.sync",
+      "source": "local"
+    },
+    {
+      "command": [
+        "data",
+        "validate"
+      ],
+      "description": "Local capability data.validate",
+      "id": "data.validate",
+      "source": "local"
+    },
+    {
+      "command": [
+        "db",
+        "describe"
+      ],
+      "description": "Local capability db.describe",
+      "id": "db.describe",
+      "source": "local"
+    },
+    {
+      "command": [
+        "db",
+        "export"
+      ],
+      "description": "Local capability db.export",
+      "id": "db.export",
+      "source": "local"
+    },
+    {
+      "command": [
+        "db",
+        "query"
+      ],
+      "description": "Local capability db.query",
+      "id": "db.query",
+      "source": "local"
+    },
+    {
+      "command": [
+        "financials",
+        "balance-sheet"
+      ],
+      "endpoint": "/api/a-share/financials/balance-sheets",
+      "id": "financials.balance-sheet",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "ten-years"
+    },
+    {
+      "command": [
+        "financials",
+        "cash-flow"
+      ],
+      "endpoint": "/api/a-share/financials/cash-flow-statements",
+      "id": "financials.cash-flow",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "ten-years"
+    },
+    {
+      "command": [
+        "financials",
+        "income"
+      ],
+      "endpoint": "/api/a-share/financials/income-statements",
+      "id": "financials.income",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "ten-years"
+    },
+    {
+      "command": [
+        "financials",
+        "indicators"
+      ],
+      "endpoint": "/api/a-share/financials/indicators",
+      "id": "financials.indicators",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "asset-allocation"
+      ],
+      "endpoint": "/api/fund/portfolio/asset-allocation",
+      "id": "fund.asset-allocation",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "backtest-indicators"
+      ],
+      "endpoint": "/api/fund/backtest/indicators",
+      "id": "fund.backtest-indicators",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "backtest-result"
+      ],
+      "endpoint": "/api/fund/backtest/result",
+      "id": "fund.backtest-result",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "balance-sheets"
+      ],
+      "endpoint": "/api/fund/financials/balance-sheets",
+      "id": "fund.balance-sheets",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "bond-history"
+      ],
+      "endpoint": "/api/fund/portfolio/bond-history",
+      "id": "fund.bond-history",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "bond-report-dates"
+      ],
+      "endpoint": "/api/fund/portfolio/bond-report-dates",
+      "id": "fund.bond-report-dates",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "company-detail"
+      ],
+      "endpoint": "/api/fund/companies/detail",
+      "id": "fund.company-detail",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "diagnostics"
+      ],
+      "endpoint": "/api/fund/diagnostics/detail",
+      "id": "fund.diagnostics",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "dividends"
+      ],
+      "endpoint": "/api/fund/corporate-actions/dividends",
+      "id": "fund.dividends",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "drawdowns"
+      ],
+      "endpoint": "/api/fund/performance/drawdowns",
+      "id": "fund.drawdowns",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "financial-indicators"
+      ],
+      "endpoint": "/api/fund/financials/indicators",
+      "id": "fund.financial-indicators",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "history"
+      ],
+      "endpoint": "/api/fund/market/historical",
+      "id": "fund.history",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "five-years"
+    },
+    {
+      "command": [
+        "fund",
+        "holders"
+      ],
+      "endpoint": "/api/fund/holders/detail",
+      "id": "fund.holders",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "holdings"
+      ],
+      "endpoint": "/api/fund/portfolio/holdings",
+      "id": "fund.holdings",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "income-statements"
+      ],
+      "endpoint": "/api/fund/financials/income-statements",
+      "id": "fund.income-statements",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "indicators-history"
+      ],
+      "endpoint": "/api/fund/performance/indicators-historical",
+      "id": "fund.indicators-history",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "five-years"
+    },
+    {
+      "command": [
+        "fund",
+        "indicators-line"
+      ],
+      "endpoint": "/api/fund/indicators/line",
+      "id": "fund.indicators-line",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "indicators-table"
+      ],
+      "endpoint": "/api/fund/indicators/table",
+      "id": "fund.indicators-table",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "industry-allocation"
+      ],
+      "endpoint": "/api/fund/portfolio/industry-allocation",
+      "id": "fund.industry-allocation",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "manager-detail"
+      ],
+      "endpoint": "/api/fund/managers/detail",
+      "id": "fund.manager-detail",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "manager-experience"
+      ],
+      "endpoint": "/api/fund/managers/experience",
+      "id": "fund.manager-experience",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "manager-performance"
+      ],
+      "endpoint": "/api/fund/managers/performance",
+      "id": "fund.manager-performance",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "manager-style"
+      ],
+      "endpoint": "/api/fund/managers/investment-style",
+      "id": "fund.manager-style",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "nav"
+      ],
+      "endpoint": "/api/fund/performance/nav",
+      "id": "fund.nav",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "news"
+      ],
+      "endpoint": "/api/fund/news/article-list",
+      "id": "fund.news",
+      "method": "GET",
+      "paging": "offset",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "offerings"
+      ],
+      "endpoint": "/api/fund/offerings/list",
+      "id": "fund.offerings",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "profile"
+      ],
+      "endpoint": "/api/fund/profile/detail",
+      "id": "fund.profile",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "quota-list"
+      ],
+      "endpoint": "/api/fund/quota/list",
+      "id": "fund.quota-list",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "quota-summary"
+      ],
+      "endpoint": "/api/fund/quota/summary",
+      "id": "fund.quota-summary",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "returns"
+      ],
+      "endpoint": "/api/fund/performance/returns",
+      "id": "fund.returns",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "snapshot"
+      ],
+      "endpoint": "/api/fund/market/snapshot",
+      "id": "fund.snapshot",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "stock-history"
+      ],
+      "endpoint": "/api/fund/portfolio/stock-history",
+      "id": "fund.stock-history",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "stock-report-dates"
+      ],
+      "endpoint": "/api/fund/portfolio/stock-report-dates",
+      "id": "fund.stock-report-dates",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "fund",
+        "top-holders"
+      ],
+      "endpoint": "/api/fund/holders/top",
+      "id": "fund.top-holders",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "futures",
+        "basis-history"
+      ],
+      "endpoint": "/api/futures/basis/historical",
+      "id": "futures.basis-history",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "futures",
+        "company-variety-positions"
+      ],
+      "endpoint": "/api/futures/positions/company-variety-daily",
+      "id": "futures.company-variety-positions",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "futures",
+        "contract-detail"
+      ],
+      "endpoint": "/api/futures/contracts/detail",
+      "id": "futures.contract-detail",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "futures",
+        "contract-position-history"
+      ],
+      "endpoint": "/api/futures/positions/contract-historical",
+      "id": "futures.contract-position-history",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "one-year"
+    },
+    {
+      "command": [
+        "futures",
+        "contract-positions"
+      ],
+      "endpoint": "/api/futures/positions/contract-daily",
+      "id": "futures.contract-positions",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "futures",
+        "daily"
+      ],
+      "endpoint": "/api/futures/prices/daily",
+      "id": "futures.daily",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "futures",
+        "intraday"
+      ],
+      "endpoint": "/api/futures/prices/intraday",
+      "id": "futures.intraday",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "today-only"
+    },
+    {
+      "command": [
+        "futures",
+        "latest-basis"
+      ],
+      "endpoint": "/api/futures/basis/main-continuous-latest",
+      "id": "futures.latest-basis",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "futures",
+        "position-companies"
+      ],
+      "endpoint": "/api/futures/positions/company-list",
+      "id": "futures.position-companies",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "futures",
+        "trading-schedule"
+      ],
+      "endpoint": "/api/futures/calendar/trading-schedule",
+      "id": "futures.trading-schedule",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "futures",
+        "varieties"
+      ],
+      "endpoint": "/api/futures/varieties/list",
+      "id": "futures.varieties",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "futures",
+        "variety-positions"
+      ],
+      "endpoint": "/api/futures/positions/variety-daily",
+      "id": "futures.variety-positions",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "futures",
+        "warehouse-receipts"
+      ],
+      "endpoint": "/api/futures/warehouse-receipts/historical",
+      "id": "futures.warehouse-receipts",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "index",
+        "catalog"
+      ],
+      "endpoint": "/api/a-share-index/catalog/ths-index-list",
+      "id": "index.catalog",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "index",
+        "constituents"
+      ],
+      "endpoint": "/api/a-share-index/constituents/ths-stock-list",
+      "id": "index.constituents",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "index",
+        "history"
+      ],
+      "endpoint": "/api/a-share-index/prices/historical",
+      "id": "index.history",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "ten-years"
+    },
+    {
+      "command": [
+        "index",
+        "snapshot"
+      ],
+      "endpoint": "/api/a-share-index/prices/snapshot",
+      "id": "index.snapshot",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "market",
+        "adjustment-factors"
+      ],
+      "description": "Local capability market.adjustment-factors",
+      "id": "market.adjustment-factors",
+      "source": "local"
+    },
+    {
+      "command": [
+        "market",
+        "auction-benchmark"
+      ],
+      "endpoint": "/api/a-share/auction/short-term-benchmark",
+      "id": "market.auction-benchmark",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "market",
+        "auction-snapshot"
+      ],
+      "endpoint": "/api/a-share/auction/snapshot",
+      "id": "market.auction-snapshot",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "today-only"
+    },
+    {
+      "command": [
+        "market",
+        "calendar"
+      ],
+      "endpoint": "/api/a-share/calendar/trading-days",
+      "id": "market.calendar",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "one-year"
+    },
+    {
+      "command": [
+        "market",
+        "corporate-actions"
+      ],
+      "endpoint": "/api/a-share/corporate-actions/adjustment-factors",
+      "id": "market.corporate-actions",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "market",
+        "history"
+      ],
+      "endpoint": "/api/a-share/prices/historical",
+      "id": "market.history",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "ten-years"
+    },
+    {
+      "command": [
+        "market",
+        "panel"
+      ],
+      "description": "Local capability market.panel",
+      "id": "market.panel",
+      "source": "local"
+    },
+    {
+      "command": [
+        "market",
+        "snapshot"
+      ],
+      "endpoint": "/api/a-share/prices/snapshot",
+      "id": "market.snapshot",
+      "method": "GET",
+      "paging": "offset",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "options",
+        "contract-detail"
+      ],
+      "endpoint": "/api/options/contracts/detail",
+      "id": "options.contract-detail",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "options",
+        "daily"
+      ],
+      "endpoint": "/api/options/prices/daily",
+      "id": "options.daily",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "options",
+        "intraday"
+      ],
+      "endpoint": "/api/options/prices/intraday",
+      "id": "options.intraday",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "today-only"
+    },
+    {
+      "command": [
+        "options",
+        "varieties"
+      ],
+      "endpoint": "/api/options/varieties/list",
+      "id": "options.varieties",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "special",
+        "anomaly-list"
+      ],
+      "endpoint": "/api/a-share/special-data/anomaly-analysis-list",
+      "id": "special.anomaly-list",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "today-only"
+    },
+    {
+      "command": [
+        "special",
+        "anomaly-stock"
+      ],
+      "endpoint": "/api/a-share/special-data/anomaly-analysis-stock",
+      "id": "special.anomaly-stock",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "today-only"
+    },
+    {
+      "command": [
+        "special",
+        "dragon-tiger"
+      ],
+      "endpoint": "/api/a-share/special-data/dragon-tiger-list",
+      "id": "special.dragon-tiger",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "one-year"
+    },
+    {
+      "command": [
+        "special",
+        "hot-stock"
+      ],
+      "endpoint": "/api/a-share/special-data/hot-stock-list",
+      "id": "special.hot-stock",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "special",
+        "hot-stock-history"
+      ],
+      "endpoint": "/api/a-share/special-data/hot-stock-list-history",
+      "id": "special.hot-stock-history",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "one-year"
+    },
+    {
+      "command": [
+        "special",
+        "hot-stock-trend"
+      ],
+      "endpoint": "/api/a-share/special-data/hot-stock-rank-trend",
+      "id": "special.hot-stock-trend",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "one-year"
+    },
+    {
+      "command": [
+        "special",
+        "limit-break-pool"
+      ],
+      "endpoint": "/api/a-share/special-data/limit-break-pool",
+      "id": "special.limit-break-pool",
+      "method": "GET",
+      "paging": "page",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "special",
+        "limit-down-pool"
+      ],
+      "endpoint": "/api/a-share/special-data/limit-down-pool",
+      "id": "special.limit-down-pool",
+      "method": "GET",
+      "paging": "page",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "special",
+        "limit-up-ladder"
+      ],
+      "endpoint": "/api/a-share/special-data/limit-up-ladder",
+      "id": "special.limit-up-ladder",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "special",
+        "limit-up-pool"
+      ],
+      "endpoint": "/api/a-share/special-data/limit-up-pool",
+      "id": "special.limit-up-pool",
+      "method": "GET",
+      "paging": "page",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "special",
+        "skyrocket"
+      ],
+      "endpoint": "/api/a-share/special-data/skyrocket-list",
+      "id": "special.skyrocket",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "symbol",
+        "list"
+      ],
+      "endpoint": "/api/meta/tickers/list",
+      "id": "symbol.list",
+      "method": "GET",
+      "paging": "offset",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "symbol",
+        "search"
+      ],
+      "endpoint": "/api/meta/tickers/search",
+      "id": "symbol.search",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    },
+    {
+      "command": [
+        "valuation",
+        "snapshot"
+      ],
+      "endpoint": "/api/a-share/valuations/snapshot",
+      "id": "valuation.snapshot",
+      "method": "GET",
+      "paging": "none",
+      "source": "remote",
+      "window": "none"
+    }
+  ],
+  "schema_version": "1",
+  "sourcePackage": "@hithink-tech/hithink-finance-cli",
+  "sourceVersion": "0.1.10"
+}

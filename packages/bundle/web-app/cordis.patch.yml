@@ -482,3 +482,37 @@
       name: '@deepseek-ai/dsh-agent-presets'
       config:
         default: standard
+
+    # ── stock market data ───────────────────────────────────────────────────
+
+    # The seam and its vendor provider sit on the HOST plane: they register no
+    # tools, so they cost no tool-schema tokens, and any session or host plugin
+    # can read `ctx.stock` without the market-data toolset being mounted. The
+    # model-facing `tool-stock` row belongs to the `stock-analysis` preset
+    # instead, because the vendor exposes 82 capabilities and every native tool
+    # is a per-request cost that `standard` and `ptc` must not carry.
+    - id: stock
+      name: '@deepseek-ai/dsh-stock'
+
+    - id: stock-hithink
+      name: '@deepseek-ai/dsh-stock-hithink'
+      config:
+        apiKeyEnv: HITHINK_FINANCE_API_KEY
+        baseUrl: https://fuyao.aicubes.cn
+        maxConcurrency: 4
+        maxAttempts: 3
+        timeoutMs: 30000
+
+    # A second vendor on the same seam: the 问财 gateway answers document search
+    # and natural-language research queries, and it registers capabilities the
+    # 同花顺 market-data API does not have (announcements, research reports, news,
+    # macro, shareholder structure). Capability ids are unique across providers,
+    # so `tool-stock` registers both vendors' capabilities from one catalog.
+    - id: stock-iwencai
+      name: '@deepseek-ai/dsh-stock-iwencai'
+      config:
+        apiKeyEnv: IWENCAI_API_KEY
+        baseUrl: https://openapi.iwencai.com
+        maxConcurrency: 4
+        maxAttempts: 3
+        timeoutMs: 30000

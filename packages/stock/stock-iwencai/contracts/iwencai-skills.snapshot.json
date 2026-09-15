@@ -1,0 +1,111 @@
+{
+  "_comment": "Selected 问财 SkillHub skills. Source: GET http://ms.10jqka.com.cn/gateway/market/api/v1/skills/square (paginated, 162 records). Regenerate with scripts/gen-iwencai-catalog.ts --refresh.",
+  "skills": [
+    {
+      "cnName": "公告搜索",
+      "description": "支持A股、港股、基金、ETF等金融标的公告的查询，同时公告类型包括不限于定期财务报告、分红派息、回购增持、资产重组等等。",
+      "name": "announcement-search",
+      "updateTime": 1782722969305,
+      "version": "1.0.1"
+    },
+    {
+      "cnName": "研报搜索",
+      "description": "收录了主流投研机构发布的研究报告，帮你快速获取专业、深度的分析逻辑、投资评级、目标价等重要投研决策信息。",
+      "name": "report-search",
+      "updateTime": 1782722962213,
+      "version": "1.0.1"
+    },
+    {
+      "cnName": "新闻搜索",
+      "description": "财经领域为主的资讯搜索引擎，囊获了各类型媒体：官媒、主流财经媒体、垂直行业网站、知名上市公司/非上市公司官网等，可以帮助你了解最新财经事件、政策动态、行业革新、企业业务进展等等。",
+      "name": "news-search",
+      "updateTime": 1782722949612,
+      "version": "1.0.1"
+    },
+    {
+      "cnName": "问财选A股",
+      "description": "通过自然语言查询进行 A 股股票筛选，支持行情指标、技术形态、财务指标、行业概念等多条件组合筛选。返回符合条件的相关股票数据。当用户询问针对行情、财务数据、技术指标、行业概念等A股股票筛选相关问题时，必须使用此技能。",
+      "name": "hithink-astock-selector",
+      "updateTime": 1777293030668,
+      "version": "1.0.0"
+    },
+    {
+      "cnName": "问财选基金",
+      "description": "根据基金类型、业绩、基金经理、风险、持仓、资产配置等维度筛选公募基金。返回符合条件的相关基金数据。当用户询问基金筛选问题时，必须使用此技能。",
+      "name": "hithink-fund-selector",
+      "updateTime": 1777293371606,
+      "version": "1.0.0"
+    },
+    {
+      "cnName": "问财选港股",
+      "description": "通过自然语言查询进行港股筛选，支持行情指标、财务指标、行业概念、陆港通等多条件组合筛选。返回符合条件的相关港股数据。当用户询问港股筛选问题时，必须使用此技能。",
+      "name": "hithink-hkstock-selector",
+      "updateTime": 1777293425651,
+      "version": "1.0.0"
+    },
+    {
+      "cnName": "问财选美股",
+      "description": "通过自然语言查询进行美股筛选，支持行情指标、财务指标、行业概念、业绩预测、研报评级等多条件组合筛选。返回符合条件的相关美股数据。当用户询问美股筛选问题时，必须使用此技能。",
+      "name": "hithink-usstock-selector",
+      "updateTime": 1777294125144,
+      "version": "1.0.0"
+    },
+    {
+      "cnName": "问财选板块",
+      "description": "通过行业估值、资金流向、涨跌幅、板块类型等多条件组合筛选市场板块。返回符合条件的相关板块数据。当用户询问板块筛选问题时，必须使用此技能。",
+      "name": "hithink-sector-selector",
+      "updateTime": 1777294143338,
+      "version": "1.0.0"
+    },
+    {
+      "cnName": "事件数据查询",
+      "description": "查询个股业绩预告、增发、质押、解禁、调研、监管函等事件数据，支持自然语言问句输入，返回相关事件数据结果。当用户询问业绩预告、增发配股、股权质押、限售解禁、机构调研、监管函等事件数据查询问题时，必须使用此技能。",
+      "name": "hithink-event-query",
+      "updateTime": 1777293185350,
+      "version": "1.0.0"
+    },
+    {
+      "cnName": "公司经营数据查询",
+      "description": "查询主营业务构成、主要客户、供应商、参控股公司、股权投资、重大合同等经营相关数据，支持自然语言问句输入，返回相关经营数据结果。当用户询问主营业务构成、主要客户、供应商信息、参控股公司、股权投资、重大合同等经营数据查询问题时，必须使用此技能。",
+      "name": "hithink-business-query",
+      "updateTime": 1777293176523,
+      "version": "1.0.0"
+    },
+    {
+      "cnName": "公司股东股本查询",
+      "description": "查询股本结构、股权结构、股东户数、前十大股东/流通股东、主要持有人、实控人等股权信息，支持自然语言问句输入，返回相关股东股本数据结果。当用户询问股本结构、股东户数、前十大股东、股权质押、实控人、主要持有人等股东股本数据查询问题时，必须使用此技能。",
+      "name": "hithink-management-query",
+      "updateTime": 1777294137984,
+      "version": "1.0.0"
+    },
+    {
+      "cnName": "基本资料查询",
+      "description": "查询全品类标的（股票、指数、基金、期货、期权、转债、债券、理财、保险等）的基础信息、发行主体、机构资料、费率、上市地点、上市日期等静态信息，支持自然语言问句输入，返回相关基本资料数据结果。当用户询问股票基本信息、基金资料、期货合约信息、债券资料、费率信息、上市日期等基本资料查询问题时，必须使用此技能。",
+      "name": "hithink-basicinfo-query",
+      "updateTime": 1777293022272,
+      "version": "1.0.0"
+    },
+    {
+      "cnName": "宏观数据查询",
+      "description": "查询 GDP、CPI、PPI、利率、汇率、社融等宏观经济指标，支持自然语言问句输入，返回相关宏观经济数据结果。当用户询问宏观经济数据、GDP、CPI、PPI、利率、汇率、社融、M2、PMI、工业增加值、消费、投资、进出口等宏观经济指标查询问题时，必须使用此技能。",
+      "name": "hithink-macro-query",
+      "updateTime": 1777294131611,
+      "version": "1.0.0"
+    },
+    {
+      "cnName": "行业数据查询",
+      "description": "查询行业估值、财务、盈利、行情、板块排名等数据，支持自然语言问句输入，返回相关行业数据结果。当用户询问行业数据、行业估值、行业排名、行业财务、行业盈利、行业行情、板块排名等行业相关问题时，必须使用此技能。",
+      "name": "hithink-industry-query",
+      "updateTime": 1777293430872,
+      "version": "1.0.0"
+    },
+    {
+      "cnName": "机构研究与评级查询",
+      "description": "查询研报评级、业绩预测、ESG、信用评级、主体评级、基金评级、券商金股等机构观点数据，支持自然语言问句输入，返回相关机构研究数据结果。当用户询问研报评级、业绩预测、ESG评级、信用评级、主体评级、基金评级、券商金股等机构研究数据查询问题时，必须使用此技能。",
+      "name": "hithink-insresearch-query",
+      "updateTime": 1777293511470,
+      "version": "1.0.0"
+    }
+  ],
+  "store": "http://ms.10jqka.com.cn/gateway/market/api/v1/skills/square"
+}
