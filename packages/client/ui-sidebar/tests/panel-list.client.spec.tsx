@@ -261,6 +261,40 @@ describe('sidebar global panels', () => {
     expect(layout.selectPanel).toHaveBeenCalledExactlyOnceWith(ALPHA)
   })
 
+  it('highlights the reserved conversation row while no global panel is selected', async () => {
+    const { runtime, locale, view } = await bench()
+    // The bench already owns the `conversation` main entry; this contributes
+    // only the navigation row that addresses it.
+    const conversation = await runtime.mount({
+      inject: ['slots'],
+      apply(ctx: Context) {
+        ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
+          name: 'sidebar.panellist',
+          id: 'conversation',
+          label: 'Conversation',
+          order: 0,
+        }, ({ size }: PropsRuntime<'sidebar.panellist'>) => <span data-testid="conversation-icon">{size}</span>))
+      },
+    })
+    const { alpha } = await mountPanels(runtime, locale)
+    const navigation = await view.findByRole('navigation', { name: 'Global panels' })
+    const conversationRow = within(navigation).getByRole('button', { name: 'Conversation' })
+
+    // The layout records the Conversation as `null`, so the row for the
+    // reserved key is the selected one exactly while that holds.
+    expect(runtime.panelInfo.getSnapshot().activePanelId).toBeNull()
+    expect(conversationRow.getAttribute('aria-current')).toBe('page')
+    expect(within(navigation).getByRole('button', { name: 'Alpha panel' }).getAttribute('aria-current')).toBeNull()
+
+    // Selecting any other panel takes the highlight off the reserved row. The
+    // `selectPanel('conversation')` mapping back to `null` belongs to
+    // LayoutController and is covered in ui-layout's own suite.
+    fireEvent.click(within(navigation).getByRole('button', { name: 'Alpha panel' }))
+    await waitFor(() => { expect(conversationRow.getAttribute('aria-current')).toBeNull() })
+    expect(alpha).toBeDefined()
+    expect(conversation).toBeDefined()
+  })
+
   it('disposes the sidebar while retaining independently owned main panel bodies', async () => {
     const { runtime, locale, sidebar, view } = await bench()
     await mountPanels(runtime, locale)

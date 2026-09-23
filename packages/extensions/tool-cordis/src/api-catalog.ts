@@ -2246,6 +2246,37 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'stockController',
+    summary: 'Host Remote reads over the stock capability seam.',
+    description: 'Host Remote reads over the stock capability seam.',
+    methods: [
+      {
+        signature: '@Remote async searchSymbols(query: string, limit: number, signal: AbortSignal): Promise<readonly InstrumentMatch[]>',
+        description: 'Resolve a name, bare code, or thscode fragment to complete instruments.\n\nThe seam\'s symbol lookup is cached rather than transport-cancellable, so a superseded request is refused before it starts instead of being aborted mid-flight.',
+        parameters: [{ name: 'query', description: 'user-facing search text.' }, { name: 'limit', description: 'desired candidate count; capped by configuration.' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'candidates in vendor order, or every candidate the cap allows.',
+      },
+      {
+        signature: '@Remote async quotes(thscodes: string[], signal: AbortSignal): Promise<QuoteBatch>',
+        description: 'Read the latest quote for each named instrument in one batched call.',
+        parameters: [{ name: 'thscodes', description: 'complete thscodes; blanks and duplicates are dropped, and the batch is capped by configuration.' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'the quotes the vendor returned, in the seam\'s order, with the batch\'s data-readiness timestamp.',
+      },
+      {
+        signature: '@Remote async candles(request: CandleRequest, signal: AbortSignal): Promise<CandleSeries>',
+        description: 'Read one instrument\'s candle series for a window.',
+        parameters: [{ name: 'request', description: 'instrument, period, adjustment, and the window.' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'bars in the vendor\'s ascending order, with the seam\'s truncation fact.',
+      },
+      {
+        signature: '@Remote async documents(request: DocumentsRequest, signal: AbortSignal): Promise<readonly DocumentRow[]>',
+        description: 'Search one document channel for an instrument.',
+        parameters: [{ name: 'request', description: 'instrument display name, channel, and desired row count.' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'rows in the gateway\'s relevance order, each excerpt capped by configuration.',
+      },
+    ],
+  },
+  {
     key: 'storage',
     summary: 'The storage hub service.',
     description: 'The storage hub service. Backends register under `backend`; data forms mount under their `StorageForms` key and are reached as `ctx.storage.<form>`.',
@@ -2783,6 +2814,37 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         parameters: [{ name: 'request', description: 'Questions, owner agent, and abort signal.' }],
         returns: 'The answer chosen or typed by the human.',
         throws: ['{UserQuestionError} code `ASK_ABORTED` when the supplied signal is already or becomes aborted, `CALLER_NOT_LIVE` when a supplied agent is not the registry\'s exact live instance, or `DELEGATED_CALLER` when that live agent is owned by another agent.'],
+      },
+    ],
+  },
+  {
+    key: 'watchlistController',
+    summary: 'Host Remote reads and mutations over the durable watchlist domain.',
+    description: 'Host Remote reads and mutations over the durable watchlist domain.',
+    methods: [
+      {
+        signature: '@Remote list(signal: AbortSignal): Promise<readonly WatchlistEntry[]>',
+        description: 'Read the whole list in display order.',
+        parameters: [{ name: 'signal', description: 'caller cancellation; the read is synchronous, so a cancelled caller is refused rather than interrupted.' }],
+        returns: 'every entry, in order.',
+      },
+      {
+        signature: '@Remote async add(request: WatchlistAddRequest, signal: AbortSignal): Promise<readonly WatchlistEntry[]>',
+        description: 'Resolve an instrument and append it to the list.',
+        parameters: [{ name: 'request', description: 'the complete thscode to add.' }, { name: 'signal', description: 'caller cancellation; the symbol lookup is refused before it starts when the caller is gone.' }],
+        returns: 'the complete list after the addition.',
+      },
+      {
+        signature: '@Remote async remove(request: WatchlistRemoveRequest, signal: AbortSignal): Promise<readonly WatchlistEntry[]>',
+        description: 'Drop one entry.',
+        parameters: [{ name: 'request', description: 'the thscode to remove.' }, { name: 'signal', description: 'caller cancellation; the mutation is refused before it starts when the caller is gone.' }],
+        returns: 'the complete list after the removal.',
+      },
+      {
+        signature: '@Remote async reorder(request: WatchlistReorderRequest, signal: AbortSignal): Promise<readonly WatchlistEntry[]>',
+        description: 'Replace the list order.',
+        parameters: [{ name: 'request', description: 'every entry\'s thscode in the new order.' }, { name: 'signal', description: 'caller cancellation; the mutation is refused before it starts when the caller is gone.' }],
+        returns: 'the complete list in its new order.',
       },
     ],
   },
@@ -3842,6 +3904,26 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type BrandedNumber<B extends string> = number & {\n    readonly [BRAND]: B;\n};',
   },
   {
+    name: 'Candle',
+    declaration: 'export interface Candle {\n    readonly time: number;\n    readonly open: number;\n    readonly high: number;\n    readonly low: number;\n    readonly close: number;\n    readonly volume: number;\n}',
+  },
+  {
+    name: 'CandleAdjust',
+    declaration: 'export type CandleAdjust = \'none\' | \'forward\' | \'backward\';',
+  },
+  {
+    name: 'CandleInterval',
+    declaration: 'export type CandleInterval = \'1d\' | \'1w\' | \'1mo\';',
+  },
+  {
+    name: 'CandleRequest',
+    declaration: 'export interface CandleRequest {\n    readonly thscode: string;\n    readonly interval: CandleInterval;\n    readonly adjust?: CandleAdjust;\n    readonly start: number;\n    readonly end: number;\n}',
+  },
+  {
+    name: 'CandleSeries',
+    declaration: 'export interface CandleSeries {\n    readonly thscode: string;\n    readonly interval: CandleInterval;\n    readonly asOf?: number;\n    readonly truncated: boolean;\n    readonly candles: readonly Candle[];\n}',
+  },
+  {
     name: 'ClientArtifactBaseline',
     declaration: 'export interface ClientArtifactBaseline {\n    readonly path: string;\n    readonly mtimeMs: number;\n    readonly size: number;\n}',
   },
@@ -4146,6 +4228,18 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface DirectoryRegistrationHandle {\n    (): void;\n    replace(entries: readonly LlmConfigurableProvider[]): void;\n}',
   },
   {
+    name: 'DocumentKind',
+    declaration: 'export type DocumentKind = \'report\' | \'announcement\' | \'news\';',
+  },
+  {
+    name: 'DocumentRow',
+    declaration: 'export interface DocumentRow {\n    readonly kind: DocumentKind;\n    readonly title: string;\n    readonly source?: string;\n    readonly publishedAt: number;\n    readonly summary: string;\n    readonly summaryTruncated: boolean;\n    readonly url?: string;\n}',
+  },
+  {
+    name: 'DocumentsRequest',
+    declaration: 'export interface DocumentsRequest {\n    readonly name: string;\n    readonly kind: DocumentKind;\n    readonly size: number;\n}',
+  },
+  {
     name: 'Domain',
     declaration: 'export interface Domain<S extends DomainSpec> {\n    readonly name: string;\n    readonly global: DomainGlobalHandleOf<S>;\n    table<N extends keyof S[\'tables\'] & string>(name: N): KvTable<TableKeyOf<S, N>, TableValueOf<S, N>>;\n    close(): Promise<void>;\n}',
   },
@@ -4424,6 +4518,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'InspectorJsonValue',
     declaration: 'export type InspectorJsonValue = InspectorJsonPrimitive | readonly InspectorJsonValue[] | InspectorJsonObject;',
+  },
+  {
+    name: 'InstrumentMatch',
+    declaration: 'export interface InstrumentMatch {\n    readonly thscode: string;\n    readonly ticker: string;\n    readonly name: string;\n    readonly assetType?: string;\n    readonly exchange?: string;\n}',
   },
   {
     name: 'InvariantFailure',
@@ -4892,6 +4990,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'PtcDispatchLog',
     declaration: 'export interface PtcDispatchLog {\n    readonly exec: ToolExecution;\n    readonly agent?: Agent;\n    readonly subCallId: ToolCallId;\n    readonly name: string;\n    readonly isError: boolean;\n    readonly content: ContentBlock[];\n}',
+  },
+  {
+    name: 'Quote',
+    declaration: 'export interface Quote {\n    readonly thscode: string;\n    readonly last: number;\n    readonly change: number;\n    readonly changePct: number;\n    readonly open: number;\n    readonly high: number;\n    readonly low: number;\n    readonly prevClose: number;\n    readonly volume: number;\n    readonly turnover: number;\n}',
+  },
+  {
+    name: 'QuoteBatch',
+    declaration: 'export interface QuoteBatch {\n    readonly asOf?: number;\n    readonly quotes: readonly Quote[];\n}',
   },
   {
     name: 'ReadFileLine',
@@ -6356,6 +6462,22 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'VerifiedWebhookDelivery',
     declaration: 'export interface VerifiedWebhookDelivery<K extends string = string> {\n    readonly kind: K;\n    readonly source: WebhookSourceId;\n    readonly deliveryId: WebhookDeliveryId;\n    readonly event: WebhookEventOf<K>;\n    readonly receivedAt: number;\n}',
+  },
+  {
+    name: 'WatchlistAddRequest',
+    declaration: 'export interface WatchlistAddRequest {\n    readonly thscode: string;\n}',
+  },
+  {
+    name: 'WatchlistEntry',
+    declaration: 'export interface WatchlistEntry {\n    readonly thscode: string;\n    readonly name: string;\n    readonly addedAt: number;\n}',
+  },
+  {
+    name: 'WatchlistRemoveRequest',
+    declaration: 'export interface WatchlistRemoveRequest {\n    readonly thscode: string;\n}',
+  },
+  {
+    name: 'WatchlistReorderRequest',
+    declaration: 'export interface WatchlistReorderRequest {\n    readonly thscodes: readonly string[];\n}',
   },
   {
     name: 'WebBootBatch',

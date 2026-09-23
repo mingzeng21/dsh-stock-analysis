@@ -48,6 +48,10 @@ const SAFE_HOST_DEPENDENCY_EXPORTS = {
   '@deepseek-ai/dsh-deque': ['Deque'],
   '@deepseek-ai/dsh-llm': ['callConfigEquals'],
   '@deepseek-ai/dsh-session-format': ['sessionFormatLogFilename'],
+  // A pure spec factory: it validates a domain declaration and returns it. It
+  // holds no cross-instance state, so a second installed copy answers
+  // identically and a duplicate installation cannot diverge.
+  '@deepseek-ai/dsh-storage-domain': ['defineDomain'],
   '@deepseek-ai/dsh-timeout': ['MAX_TIMER_DELAY_MS'],
   '@deepseek-ai/schemastery': ['default'],
 } as const satisfies HostDependencyExports

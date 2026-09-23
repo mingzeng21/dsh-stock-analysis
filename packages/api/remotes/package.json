@@ -64,6 +64,8 @@
     "@deepseek-ai/dsh-agent-presets": "workspace:^",
     "@deepseek-ai/dsh-api-gateway": "workspace:^",
     "@deepseek-ai/dsh-api-settings-controller": "workspace:^",
+    "@deepseek-ai/dsh-api-stock-controller": "workspace:^",
+    "@deepseek-ai/dsh-api-watchlist-controller": "workspace:^",
     "@deepseek-ai/dsh-api-workspace-controller": "workspace:^",
     "@deepseek-ai/dsh-commands": "workspace:^",
     "@deepseek-ai/dsh-cordis-host-runner": "workspace:^",

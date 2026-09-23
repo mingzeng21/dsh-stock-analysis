@@ -15,6 +15,15 @@ import type { createLayoutStore } from './stores.ts'
 /** Identity shared by a sidebar panel entry and its main-slot occupant. */
 export type MainPanelId = Branded<'MainPanelId'>
 
+/**
+ * The reserved main key that shows the Conversation. The layout store records
+ * the Conversation as `activePanelId: null`, and this key is how a navigation
+ * row selects it, so the Conversation is addressable exactly like every other
+ * panel while `panelInfo`, the browser title, and the right column keep
+ * comparing against `null`.
+ */
+export const CONVERSATION_MAIN_KEY: MainPanelId = 'conversation' as MainPanelId
+
 /** Root-scoped navigation state exposed to panel-aware components. */
 export interface PanelInfo {
   /** Selected global panel; null displays the current Conversation. */
@@ -64,13 +73,18 @@ export class LayoutController implements ILayout {
     private readonly hasMainPanel: (id: MainPanelId) => boolean,
   ) {}
 
-  /** Select a global panel or return to the Conversation. */
+  /**
+   * Select a global panel or return to the Conversation. The reserved
+   * {@link CONVERSATION_MAIN_KEY} is the Conversation, so a navigation row for
+   * it resolves to the same `null` every other consumer already reads.
+   */
   selectPanel(panelId: MainPanelId | null): void {
-    if (panelId !== null && !this.hasMainPanel(panelId)) {
-      throw new Error(`layout.selectPanel: main panel "${panelId}" is not registered`)
+    const target = panelId === CONVERSATION_MAIN_KEY ? null : panelId
+    if (target !== null && !this.hasMainPanel(target)) {
+      throw new Error(`layout.selectPanel: main panel "${target}" is not registered`)
     }
     this.navigation.abort()
-    this.panels.selectPanel(panelId)
+    this.panels.selectPanel(target)
   }
 
   /** @returns the new pending navigation's cancellation signal. */

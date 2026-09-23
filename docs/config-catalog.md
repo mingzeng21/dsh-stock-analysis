@@ -229,6 +229,44 @@ export interface Config {
 
 Source: [`packages/api/settings-controller/src/index.ts:36`](../packages/api/settings-controller/src/index.ts)
 
+<a id="deepseek-aidsh-api-stock-controller"></a>
+
+## `@deepseek-ai/dsh-api-stock-controller`
+
+Requires: `stock`
+
+```ts config-catalog
+/** Reads this service exposes and the caps a deployment applies to them. */
+export interface Config {
+  /** Inclusive cap on instruments one quote batch may name. */
+  readonly maxQuotes: number
+  /** Inclusive cap on rows one document search may return. */
+  readonly maxDocuments: number
+  /** Inclusive character cap on one document excerpt. */
+  readonly maxSummaryChars: number
+  /** Inclusive cap on symbol-search candidates. */
+  readonly maxSymbolMatches: number
+}
+```
+
+Source: [`packages/api/stock-controller/src/index.ts:114`](../packages/api/stock-controller/src/index.ts)
+
+<a id="deepseek-aidsh-api-watchlist-controller"></a>
+
+## `@deepseek-ai/dsh-api-watchlist-controller`
+
+Requires: `storageDomain` · `stock`
+
+```ts config-catalog
+/** Reads and mutations this service exposes, and the bound a deployment applies. */
+export interface Config {
+  /** Inclusive cap on list entries; adding beyond it fails instead of growing the list. */
+  readonly maxEntries: number
+}
+```
+
+Source: [`packages/api/watchlist-controller/src/index.ts:45`](../packages/api/watchlist-controller/src/index.ts)
+
 <a id="deepseek-aidsh-api-workspace-files"></a>
 
 ## `@deepseek-ai/dsh-api-workspace-files`
@@ -3578,6 +3616,7 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-client-ui-tool` ([`packages/client/ui-tool/src/index.ts`](../packages/client/ui-tool/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-trajectory` ([`packages/client/ui-trajectory/src/index.ts`](../packages/client/ui-trajectory/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-user-questions` ([`packages/client/ui-user-questions/src/index.ts`](../packages/client/ui-user-questions/src/index.ts))
+- `@deepseek-ai/dsh-client-ui-watchlist` ([`packages/client/ui-watchlist/src/index.ts`](../packages/client/ui-watchlist/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-workflow-run` ([`packages/client/ui-workflow-run/src/index.ts`](../packages/client/ui-workflow-run/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-workspace` ([`packages/client/ui-workspace/src/index.ts`](../packages/client/ui-workspace/src/index.ts))
 - `@deepseek-ai/dsh-command-compact` — requires `commands` · `compaction` ([`packages/compaction/command-compact/src/index.ts`](../packages/compaction/command-compact/src/index.ts))

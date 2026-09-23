@@ -234,6 +234,47 @@ async closeAll(): Promise<void>
 
 Source: [`packages/storage/storage-domain/src/index.ts`](../../packages/storage/storage-domain/src/index.ts)
 
+<a id="ctxwatchlistcontroller--watchlistcontroller"></a>
+
+### `ctx.watchlistController` — `WatchlistController`
+
+Host Remote reads and mutations over the durable watchlist domain.
+
+```ts cordis-catalog
+/**
+ * Read the whole list in display order.
+ * @param signal - caller cancellation; the read is synchronous, so a cancelled caller is refused rather than interrupted.
+ * @returns every entry, in order.
+ */
+@Remote list(signal: AbortSignal): Promise<readonly WatchlistEntry[]>
+
+/**
+ * Resolve an instrument and append it to the list.
+ * @param request - the complete thscode to add.
+ * @param signal - caller cancellation; the symbol lookup is refused before it starts when the caller is gone.
+ * @returns the complete list after the addition.
+ */
+@Remote async add(request: WatchlistAddRequest, signal: AbortSignal): Promise<readonly WatchlistEntry[]>
+
+/**
+ * Drop one entry.
+ * @param request - the thscode to remove.
+ * @param signal - caller cancellation; the mutation is refused before it starts when the caller is gone.
+ * @returns the complete list after the removal.
+ */
+@Remote async remove(request: WatchlistRemoveRequest, signal: AbortSignal): Promise<readonly WatchlistEntry[]>
+
+/**
+ * Replace the list order.
+ * @param request - every entry's thscode in the new order.
+ * @param signal - caller cancellation; the mutation is refused before it starts when the caller is gone.
+ * @returns the complete list in its new order.
+ */
+@Remote async reorder(request: WatchlistReorderRequest, signal: AbortSignal): Promise<readonly WatchlistEntry[]>
+```
+
+Source: [`packages/api/watchlist-controller/src/index.ts`](../../packages/api/watchlist-controller/src/index.ts)
+
 <a id="domain-events"></a>
 
 ### `domain/*` events

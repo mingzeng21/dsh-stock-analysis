@@ -184,6 +184,23 @@ function contextDescriptor(): InvocationDescriptor {
   }
 }
 
+function removeDescriptor(): InvocationDescriptor {
+  return {
+    id: '@fixture/probe#probe/remove',
+    service: 'probe',
+    namespace: 'probe',
+    method: 'remove',
+    invocation: { kind: 'direct' },
+    parameters: [{
+      name: 'request',
+      wire: 'request',
+      source: 'json',
+      codec: { mode: 'strict', typeSymbol: '@fixture#RemoveRequest', schema: requestSchema },
+    }],
+    result: { mode: 'strict', typeSymbol: '@fixture#RenameResult', schema: renameResultSchema },
+  }
+}
+
 function maybeDescriptor(): InvocationDescriptor {
   const schema = z.union([z.string(), z.null(), z.undefined()])
   return {
@@ -882,7 +899,7 @@ describe('Client Typert API', () => {
     expect(ctx.typert.remotes.list()).toEqual([])
   })
 
-  it('rejects duplicate, live, scoped-service, and Context namespace collisions', async () => {
+  it('rejects duplicate, live, scoped, and Context collisions while allowing remove', async () => {
     const call = vi.fn<ConnectionHandle['rpc']['call']>()
       .mockResolvedValue({ ok: true, value: { renamed: true } })
     const ctx = await bench(call)
@@ -913,10 +930,22 @@ describe('Client Typert API', () => {
     await expect(ctx.remote.$mount({
       package: '@fixture/scoped-conflict', descriptors: [{ ...context, id: '@fixture/other#probe/rename' }],
     })).rejects.toThrow('scoped method probe/rename is already mounted')
-    await expect(ctx.remote.$mount({
-      package: '@fixture/service-method-conflict',
-      descriptors: [{ ...context, id: '@fixture/probe#probe/remove', method: 'remove' }],
-    })).rejects.toThrow('conflicts with its namespace service')
+    const disposeRemove = await ctx.remote.$mount({
+      package: '@fixture/service-method-name',
+      descriptors: [removeDescriptor()],
+    })
+    const probe = ctx.get('remote.probe') as unknown as {
+      remove(request: { readonly objective: string }): Promise<unknown>
+    }
+    await expect(probe.remove({ objective: 'remove' }))
+      .resolves.toEqual({ ok: true, value: { renamed: true } })
+    expect(call).toHaveBeenLastCalledWith(
+      '/api',
+      'probe/remove',
+      { args: { request: { objective: 'remove' } } },
+      expect.any(AbortSignal),
+    )
+    await disposeRemove()
     const scopedService = ctx.get('remote.probe') as unknown as object
     Object.defineProperty(scopedService, 'custom', { configurable: true, value: () => undefined })
     await expect(ctx.remote.$mount({

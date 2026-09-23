@@ -200,6 +200,20 @@ const SERVICE_ROLES: ServiceRole[] = [
     note: 'Serves stat, paged text, byte windows, directory listings, and the change feed for files inside a Session\'s workspace root, confined by lstat, containment, and a stat re-check.',
   },
   {
+    key: 'stockController',
+    pkg: 'api-stock-controller',
+    title: 'Browser-facing stock Remote controller',
+    mode: 'core',
+    note: 'Serves four reads over the stock seam — symbol search, a quote batch, a candle series, and research documents — and resolves the vendor\'s row fields, encodings, and search vocabulary once on the Host.',
+  },
+  {
+    key: 'watchlistController',
+    pkg: 'api-watchlist-controller',
+    title: 'Durable watchlist Remote controller',
+    mode: 'core',
+    note: 'Owns the ordered personal instrument list as one storage-domain value and serves its list, add, remove, and reorder operations.',
+  },
+  {
     key: 'workspaceController',
     pkg: 'api-workspace-controller',
     title: 'Host Workspace Remote controller',

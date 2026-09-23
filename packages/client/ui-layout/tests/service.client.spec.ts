@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { LayoutController } from '../src/client/service.ts'
+import { CONVERSATION_MAIN_KEY, LayoutController } from '../src/client/service.ts'
 import type { MainPanelId, PanelActions } from '../src/client/service.ts'
 
 function fakePanels(): PanelActions {
@@ -41,6 +41,24 @@ describe('LayoutController', () => {
 
     expect(panels.toggleSidebar).toHaveBeenCalledTimes(1)
     expect(panels.setSidebar).not.toHaveBeenCalled()
+  })
+
+  it('resolves the reserved Conversation key to the null selection every other consumer reads', () => {
+    const panels = fakePanels()
+    const service = new LayoutController(panels, () => true)
+
+    service.selectPanel(CONVERSATION_MAIN_KEY)
+
+    expect(panels.selectPanel).toHaveBeenCalledOnce()
+    expect(panels.selectPanel).toHaveBeenCalledWith(null)
+  })
+
+  it('validates a panel key after the reserved key has been resolved away', () => {
+    const panels = fakePanels()
+    const service = new LayoutController(panels, () => false)
+
+    expect(() => { service.selectPanel(CONVERSATION_MAIN_KEY) }).not.toThrow()
+    expect(() => { service.selectPanel('panel-a' as MainPanelId) }).toThrow('main panel "panel-a" is not registered')
   })
 
   it('forwards panel selection and returning to the Conversation without changing geometry', () => {

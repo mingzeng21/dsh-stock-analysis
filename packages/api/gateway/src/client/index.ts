@@ -90,6 +90,8 @@ interface LoaderReadiness {
   await(): Promise<unknown>
 }
 
+const WITHDRAW_METHOD = Symbol('withdrawMethod')
+
 /** One descriptor's mounted variants, for the group disposer to unwind. */
 interface InstalledMethod {
   readonly descriptor: InvocationDescriptor
@@ -336,8 +338,8 @@ class ClientRemoteService extends Service implements ClientRemote {
         if (!method.token.active) continue
         method.token.active = false
         method.token.abort.abort()
-        if (method.scoped) handle.service.remove('scoped', method.descriptor.method, method.token)
-        if (method.direct) handle.service.remove('direct', method.descriptor.method, method.token)
+        if (method.scoped) handle.service[WITHDRAW_METHOD]('scoped', method.descriptor.method, method.token)
+        if (method.direct) handle.service[WITHDRAW_METHOD]('direct', method.descriptor.method, method.token)
       }
       await this.disposeNamespace(name, handle)
     }
@@ -598,7 +600,7 @@ class RemoteNamespaceService extends Service {
     else record.scoped = value as ScopedMethod
   }
 
-  remove(kind: 'direct' | 'scoped', method: string, token: MountToken): void {
+  [WITHDRAW_METHOD](kind: 'direct' | 'scoped', method: string, token: MountToken): void {
     const record = this.methods.get(method)
     const current = record?.[kind]
     /* v8 ignore next -- duplicate live variants are rejected before installation, so no newer token can replace this one. */
@@ -646,8 +648,8 @@ function installMethods(
     for (const method of [...installed].reverse()) {
       method.token.active = false
       method.token.abort.abort()
-      if (method.scoped) service.remove('scoped', method.descriptor.method, method.token)
-      if (method.direct) service.remove('direct', method.descriptor.method, method.token)
+      if (method.scoped) service[WITHDRAW_METHOD]('scoped', method.descriptor.method, method.token)
+      if (method.direct) service[WITHDRAW_METHOD]('direct', method.descriptor.method, method.token)
     }
     throw error
   }

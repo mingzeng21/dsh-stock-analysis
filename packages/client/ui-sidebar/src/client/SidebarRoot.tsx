@@ -31,6 +31,14 @@ import css from './SidebarRoot.module.css'
 const COLLAPSE_SETTLE_MS = 150
 
 /**
+ * The reserved main key the layout renders while no global panel is selected.
+ * `ui-layout` owns the reservation; this shell names the same key because the
+ * navigation list is what draws that row and its selection state is `null`
+ * rather than the key every other row compares against.
+ */
+const CONVERSATION_PANEL_ID = 'conversation'
+
+/**
  * How long the column's scrollbars stay drawn after the pointer leaves it.
  * The bar is a pointer affordance here, and hiding it on the leave event
  * itself makes it blink out while the pointer is only crossing the column's
@@ -57,7 +65,8 @@ type PanelRowProps =
 
 /** Each panel row subscribes only to its own selection state. */
 function PanelRow({ id, label, wide, usePanelInfo, selectPanel, renderSlot }: PanelRowProps) {
-  const active = usePanelInfo(info => info.activePanelId === id)
+  const active = usePanelInfo(info =>
+    id === CONVERSATION_PANEL_ID ? info.activePanelId === null : info.activePanelId === id)
   return (
     <Tooltip label={label} delayMs={500} disabled={wide}>
       <button

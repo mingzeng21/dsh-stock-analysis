@@ -1,0 +1,556 @@
+/* The panel fills the center column: a fixed rail and a flexible analysis side. */
+.panel {
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-primary);
+  font-family: var(--dsw-font-family);
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.railHead {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 12px 8px;
+}
+
+.railTitle {
+  flex: 1;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  cursor: pointer;
+}
+
+.iconButton:hover,
+.iconButton:focus-visible {
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.iconButton:disabled {
+  color: var(--dsw-alias-label-dimmed);
+  cursor: default;
+}
+
+.add {
+  padding: 0 12px 8px;
+}
+
+.addRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.addInput {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  height: 28px;
+  padding: 0 8px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: 6px;
+  background: var(--dsw-specific-input-major);
+  color: var(--dsw-alias-label-primary);
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.addInput::placeholder {
+  color: var(--dsw-alias-label-dimmed);
+}
+
+.candidates {
+  margin: 6px 0 0;
+  padding: 0;
+  max-height: 220px;
+  overflow: auto;
+  list-style: none;
+}
+
+.candidate {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  width: 100%;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font-family: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.candidate:hover,
+.candidate:focus-visible {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.candidateName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.candidateCode {
+  flex: none;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+}
+
+.rows {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0 8px 8px;
+  overflow: auto;
+  list-style: none;
+  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
+  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+}
+
+.rowItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'name price'
+    'code change';
+  gap: 1px 8px;
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.row:hover,
+.row:focus-visible {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.rowActive {
+  background: var(--dsw-alias-interactive-bg-hover-solid);
+}
+
+.rowName {
+  grid-area: name;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.rowCode {
+  grid-area: code;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.rowPrice {
+  grid-area: price;
+  justify-self: end;
+  font-size: 13px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rowChange {
+  grid-area: change;
+  justify-self: end;
+  font-size: 11px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rowRemove {
+  position: absolute;
+  right: 2px;
+  opacity: 0;
+}
+
+.rowItem:hover .rowRemove,
+.rowRemove:focus-visible {
+  opacity: 1;
+}
+
+/* A-share convention colours a rise red and a fall green, which is the
+   opposite of the semantic names these two tokens carry. */
+.up {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.down {
+  color: var(--dsw-alias-state-success-primary);
+}
+
+.flat {
+  color: var(--dsw-alias-label-secondary);
+}
+
+.note {
+  margin: 0;
+  padding: 4px 12px 8px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.failure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 4px 12px 8px;
+  color: var(--dsw-alias-state-error-primary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.retry {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--dsw-alias-label-primary-bluish);
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.empty {
+  padding: 16px 12px;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.emptyHint {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-dimmed);
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 20px 24px;
+  overflow: hidden;
+}
+
+.detailEmpty {
+  margin: auto;
+  color: var(--dsw-alias-label-dimmed);
+  font-size: 13px;
+}
+
+.quote {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: auto;
+}
+
+.quoteHead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.quoteName {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+}
+
+.quoteCode {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 13px;
+}
+
+.quoteLast {
+  margin-left: auto;
+  font-size: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.quoteChange {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px 20px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metricLabel {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.metricValue {
+  font-size: 14px;
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+.asOf {
+  margin: 16px 0 0;
+  color: var(--dsw-alias-label-dimmed);
+  font-size: 11px;
+}
+
+.chartBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+.chartNote {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+}
+
+/* The chart needs a definite height: a canvas cannot size itself. */
+.chartArea {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  height: 280px;
+  margin-top: 12px;
+}
+
+.chartEmpty {
+  margin: auto;
+  color: var(--dsw-alias-label-dimmed);
+  font-size: 13px;
+}
+
+/* The lower half of the analysis side: the channel tabs and the rows under
+   them. It owns the leftover height so both halves stay on screen. */
+.documents {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.documentBar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+
+.documentRows {
+  flex: 1;
+  min-height: 0;
+  margin: 8px 0 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
+  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+}
+
+.documentRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.documentTitle {
+  color: var(--dsw-alias-label-primary);
+  font-size: 13px;
+  line-height: 18px;
+  text-decoration: none;
+}
+
+a.documentTitle:hover,
+a.documentTitle:focus-visible {
+  color: var(--dsw-alias-label-primary-bluish);
+  text-decoration: underline;
+}
+
+.documentMeta {
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+.documentSummary {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.documentNote {
+  color: var(--dsw-alias-label-dimmed);
+  font-size: 11px;
+  line-height: 16px;
+}
+
+/* The analysis pane closes the analysis side: a fixed block under the
+   documents, threaded with the panel's one analysis session. */
+.analysis {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  min-height: 200px;
+  max-height: 320px;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.analysisBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.analysisTitle {
+  flex: 1;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--dsw-alias-label-primary);
+}
+
+.start,
+.send {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: 6px;
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.send {
+  flex: none;
+}
+
+.start:disabled,
+.send:disabled {
+  color: var(--dsw-alias-label-dimmed);
+  cursor: default;
+}
+
+/* The transcript is the pane's only scroll container, so the composer stays
+   where the reader left it. */
+.turns {
+  flex: 1;
+  min-height: 0;
+  margin: 8px 0 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
+  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+}
+
+.turn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+}
+
+.turnPrompt {
+  margin: 0;
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.turnResponse {
+  margin: 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.composer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  margin-top: 8px;
+}

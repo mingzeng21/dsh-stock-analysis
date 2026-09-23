@@ -144,4 +144,51 @@ async resolveSymbols(query: string, options: SymbolQueryOptions = {}): Promise<r
 ```
 
 Source: [`packages/stock/stock/src/index.ts`](../../packages/stock/stock/src/index.ts)
+
+<a id="ctxstockcontroller--stockcontroller"></a>
+
+### `ctx.stockController` — `StockController`
+
+Host Remote reads over the stock capability seam.
+
+```ts cordis-catalog
+/**
+ * Resolve a name, bare code, or thscode fragment to complete instruments.
+ *
+ * The seam's symbol lookup is cached rather than transport-cancellable, so a
+ * superseded request is refused before it starts instead of being aborted
+ * mid-flight.
+ * @param query - user-facing search text.
+ * @param limit - desired candidate count; capped by configuration.
+ * @param signal - caller cancellation.
+ * @returns candidates in vendor order, or every candidate the cap allows.
+ */
+@Remote async searchSymbols(query: string, limit: number, signal: AbortSignal): Promise<readonly InstrumentMatch[]>
+
+/**
+ * Read the latest quote for each named instrument in one batched call.
+ * @param thscodes - complete thscodes; blanks and duplicates are dropped, and the batch is capped by configuration.
+ * @param signal - caller cancellation.
+ * @returns the quotes the vendor returned, in the seam's order, with the batch's data-readiness timestamp.
+ */
+@Remote async quotes(thscodes: string[], signal: AbortSignal): Promise<QuoteBatch>
+
+/**
+ * Read one instrument's candle series for a window.
+ * @param request - instrument, period, adjustment, and the window.
+ * @param signal - caller cancellation.
+ * @returns bars in the vendor's ascending order, with the seam's truncation fact.
+ */
+@Remote async candles(request: CandleRequest, signal: AbortSignal): Promise<CandleSeries>
+
+/**
+ * Search one document channel for an instrument.
+ * @param request - instrument display name, channel, and desired row count.
+ * @param signal - caller cancellation.
+ * @returns rows in the gateway's relevance order, each excerpt capped by configuration.
+ */
+@Remote async documents(request: DocumentsRequest, signal: AbortSignal): Promise<readonly DocumentRow[]>
+```
+
+Source: [`packages/api/stock-controller/src/index.ts`](../../packages/api/stock-controller/src/index.ts)
 <!-- END GENERATED cordis-surface -->

@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-09-21-remote-remove-method-collision.md
+2026-09-21-remote-remove-method-collision.md: afb5b6c47f05de628147bfa93b3c4586b3436ec8
+2026-09-21-remote-remove-method-collision.zh.md: 01f9594a7a9421ebd34ded24b124ef326b086115

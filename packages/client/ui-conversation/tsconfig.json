@@ -9,6 +9,9 @@
   ],
   "references": [
     {
+      "path": "../ui-sidebar"
+    },
+    {
       "path": "../../../vendor/schemastery"
     },
     {

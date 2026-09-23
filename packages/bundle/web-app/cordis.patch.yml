@@ -119,6 +119,18 @@
     - id: workspace-controller
       name: '@deepseek-ai/dsh-api-workspace-controller'
 
+    # Browser-facing market-data reads over the `stock` capability seam: the
+    # four narrow reads a view needs, with the vendor's row fields resolved
+    # once on this side. It adds no tools, so it costs no tool-schema tokens.
+    - id: stock-controller
+      name: '@deepseek-ai/dsh-api-stock-controller'
+
+    # The durable personal instrument list. User data rather than composition
+    # configuration, so it opens the `watchlist` storage domain; host-owned so
+    # a later model-facing tool can read the same list the panel shows.
+    - id: watchlist-controller
+      name: '@deepseek-ai/dsh-api-watchlist-controller'
+
     - id: cordis-host-runner
       name: '@deepseek-ai/dsh-cordis-host-runner'
 
@@ -282,6 +294,11 @@
 
     - id: ui-workspace
       name: '@deepseek-ai/dsh-client-ui-workspace'
+
+    # The watchlist global panel: a personal instrument list and the analysis
+    # surface for the selected instrument, over the stock and watchlist Remotes.
+    - id: ui-watchlist
+      name: '@deepseek-ai/dsh-client-ui-watchlist'
 
     # Input triggers: the '/' | '@' pipeline (ui-input-trigger), the command surface over
     # it (ui-commands), and the reference sources (ui-skill / ui-reference).

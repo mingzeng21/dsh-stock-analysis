@@ -4,6 +4,7 @@ import z from '@deepseek-ai/schemastery'
 import type { ISessions } from '@deepseek-ai/dsh-api-session-controller/client'
 import { IconPaperclipOutline16 } from '@deepseek-ai/dsh-client-ui-primitives'
 import { createSnapshotStore, type BoundActions } from '@deepseek-ai/dsh-client-store'
+import type { MainPanelId } from '@deepseek-ai/dsh-client-ui-layout/client'
 import { resolveSlotLabel } from '@deepseek-ai/dsh-client-ui-slots'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 // Type-only service and declaration merges used by this assembly.
@@ -28,6 +29,7 @@ import { ComposerSubmissionPolicy } from './input/submission-policy.ts'
 import { queueDockEntry } from './queue/QueueDock.tsx'
 import { EnterBehaviorRow } from './settings/EnterBehaviorRow.tsx'
 import type { EnterBehaviorRowInjected } from './settings/EnterBehaviorRow.tsx'
+import { ConversationPanelIcon } from './PanelIcon.tsx'
 import { ConversationRoot } from './skeleton/ConversationRoot.tsx'
 import { ConversationPanel } from './skeleton/ConversationPanel.tsx'
 import { ConversationSession, ConversationSessionHeader } from './skeleton/ConversationSession.tsx'
@@ -115,6 +117,14 @@ function scopedConversation(sessions: ISessions, id: SessionId): IConversation {
   return conversation
 }
 
+/**
+ * The reserved main key that renders the Conversation. `ui-layout` owns the
+ * reservation; this plugin spells the same key because it is the identity of
+ * this plugin's own `main` registration and a cross-plugin value import is
+ * unavailable to a feature package.
+ */
+const CONVERSATION_MAIN_KEY = 'conversation' as MainPanelId
+
 /** Resolve package-internal attachment operations from the public service. */
 function concreteConversation(ctx: Context): ConversationController {
   const conversation = ctx.get('conversation') as ConversationController | undefined
@@ -151,6 +161,17 @@ export function apply(ctx: Context, config: Config = Config({})): void {
       setBusyEnter: (behavior) => { submissionPolicy.setBusyEnter(behavior) },
     }),
   }, EnterBehaviorRow))
+
+  // The Conversation's navigation row. It occupies the reserved main key the
+  // layout renders while no global panel is selected, so clicking the row
+  // resolves to the same `null` selection `ctx.layout.selectPanel` gives that
+  // key. The row exists exactly while this plugin contributes the panel.
+  ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
+    name: 'sidebar.panellist',
+    id: CONVERSATION_MAIN_KEY,
+    order: 0,
+    label: () => t('panel.nav'),
+  }, ConversationPanelIcon))
 
   const viewTabs = (): ViewTab[] => {
     const tabs: ViewTab[] = []
@@ -411,7 +432,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
   slots.inject('main', function* () {
     yield slots.register({
       name: 'main',
-      key: 'conversation',
+      key: CONVERSATION_MAIN_KEY,
       children: { 'main.conversation': { kind: 'single', scope: 'session-maybe' } },
     }, ConversationPanel)
     yield registerConversationRoot()
