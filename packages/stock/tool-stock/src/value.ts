@@ -2,7 +2,7 @@
  * Canonical value of one stock tool call: the bounded row set plus the batch
  * facts a model needs to read it correctly (`asOf`, `truncated`, `total`, and
  * the continuation arguments for the next page). Rows keep the vendor's field
- * names — 82 capabilities return 82 row layouts, and the seam's provider owns
+ * names — the seam's 94 capabilities return 94 row layouts, and the seam's provider owns
  * their normalization — so this module re-publishes them as lossless JSON and
  * declares nothing about their interior.
  * @module @deepseek-ai/dsh-tool-stock/value

@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/stock/stock-hithink/README.md
-README.md: 70b362776f8b4b2e1a091b41a3c69be325fd765d
-README.zh.md: e7c4b332e78464fbe71274c569736befbe6b0bf5
+README.md: cee02008dd65c5cc3e3d771adb16ea0640bfc830
+README.zh.md: 40713c7e9ceab84f37039f5673eddfecc8e178ac

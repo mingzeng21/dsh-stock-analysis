@@ -30,7 +30,7 @@ The model-facing tool DSL constrains values only through `enum`, `const`, `defau
 
 ## Results
 
-One call returns `StockResult`: normalized rows plus batch facts. Rows keep the vendor's field names — 82 capabilities return 82 row shapes, and inventing a canonical type per shape without a consumer would fix the wrong model. What *is* normalized is everything a caller would otherwise re-derive: the data-readiness timestamp (`asOf`, milliseconds since the Unix epoch in `Asia/Shanghai`), the vendor's total count, whether the seam capped the rows (`truncated`), and the arguments for the next page (`next`).
+One call returns `StockResult`: normalized rows plus batch facts. Rows keep the vendor's field names — the seam's 94 capabilities return 94 row shapes, and inventing a canonical type per shape without a consumer would fix the wrong model. What *is* normalized is everything a caller would otherwise re-derive: the data-readiness timestamp (`asOf`, milliseconds since the Unix epoch in `Asia/Shanghai`), the vendor's total count, whether the seam capped the rows (`truncated`), and the arguments for the next page (`next`).
 
 The seam applies `maxRows` to the completed result and sets `truncated` when it drops rows. The provider's transport is where the vendor's own bounds apply.
 

@@ -12,7 +12,7 @@ Status: implemented
 
 布局声明 root 作用域的 keyed `main` slot。保留的 `conversation` key 属于 Conversation 插件，其 `main.conversation` 子 slot 保留可选的会话绑定。其他主面板条目不获得隐式会话绑定。
 
-侧栏拥有 root 作用域的 `sidebar.panellist` list。每个 list 条目提供图标，以及与主面板条目匹配的 id；字符串或随语言变化的标签提供普通可见文字、无障碍名称和折叠提示。默认组合不注册面板条目，因此空列表没有 DOM 或间距。选中操作检查实时主面板条目，对缺失的 key 报错而不替换当前面板。
+侧栏拥有 root 作用域的 `sidebar.panellist` list。每个 list 条目提供图标，以及与主面板条目匹配的 id；字符串或随语言变化的标签提供普通可见文字、无障碍名称和折叠提示。该 list 只渲染已注册的条目，因此不注册任何条目的组合在那里没有 DOM 或间距；默认组合在保留的对话行之外注册了[自选股面板](../feature/2026-09-21-watchlist-stock-analysis.zh.md)。选中操作检查实时主面板条目，对缺失的 key 报错而不替换当前面板。
 
 渲染器与布局控制器共享一个直接创建的 root 存储。其 `panelInfo` 和 `layoutInfo` 对象保持独立的引用。框架提供 `usePanelInfo`；各行和中央内容订阅所需的选中态值，AppFrame 仅读取布局信息。右侧 Sidebar 的 root 控制器决定是否挂载其会话子树，并把最终所需的列宽报告给框架。
 
@@ -34,4 +34,4 @@ DOM 焦点不是导航选中态。搜索和目录选择控件可以获得焦点�
 
 默认侧栏快照保持不变。扩展面板没有右侧 Sidebar，选择另一个全局面板不会改变布局偏好。在显示右侧 Sidebar 的 Conversation 与全局面板之间切换时，所需列宽仍会变化；这并不保证浏览器完全不计算布局。
 
-面板选中态是瞬时状态，刷新后重置。插件 dispose（资源释放）会移除其贡献；移除当前选中的主面板条目会使中央区域回到 Conversation。测试注册真实临时面板，覆盖行交互、焦点、存储引用的独立性、无效 id、过期异步导航、声明生命周期和默认空侧栏。[Slots 参考](../../../../docs/subsystems/slots.zh.md)拥有组合 API 的说明。
+面板选中态是瞬时状态，刷新后重置。插件 dispose（资源释放）会移除其贡献；移除当前选中的主面板条目会使中央区域回到 Conversation。测试注册真实临时面板，覆盖行交互、焦点、存储引用的独立性、无效 id、过期异步导航、声明生命周期，以及没有任何已注册条目的列表。[Slots 参考](../../../../docs/subsystems/slots.zh.md)拥有组合 API 的说明。

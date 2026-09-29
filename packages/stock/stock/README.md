@@ -85,7 +85,7 @@ No direct invalidation; the named consumer owns the request-prefix contribution 
 
 These limits define when the service is incomplete on its own. They are current package constraints.
 
-- **Rows keep the vendor's field names** — 82 capabilities return 82 row shapes, and no current consumer reads normalized domain objects, so no canonical `Quote`/`Bar` types exist yet. Adding them is a deliberate future change with a named consumer.
+- **Rows keep the vendor's field names** — the seam's 94 capabilities return 94 row shapes and it publishes no canonical `Quote`/`Bar` types; a consumer that needs a stable field set projects it, which is what the [stock controller's four reads](../../api/stock-controller/README.md) do.
 - **No caching of data responses** — only symbol lookups are cached. Repeated market-data reads in one turn issue repeated vendor requests, bounded by the provider's concurrency gate rather than by a cache.
 - **No cross-endpoint join** — a quote does not carry the Chinese name; `resolveSymbols` returns the name separately, and a caller that needs both issues two calls.
 - **Bounded history is the vendor's, not the seam's** — `window` records the vendor's limit per endpoint; the seam enforces only its own `maxRows`.

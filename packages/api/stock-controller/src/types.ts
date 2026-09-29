@@ -2,10 +2,10 @@
  * Browser-facing market-data vocabulary for the `stock` Remote namespace.
  *
  * The stock capability seam keeps the vendor's own field names on its rows,
- * because 82 capabilities return 82 row shapes. This module is the single
- * consumer that fixes a canonical type: the four reads the watchlist panel
- * needs, with the vendor's field names and encodings resolved once on the Host
- * so no view or store ever reads a vendor row.
+ * because the 94 capabilities it serves return 94 row shapes. This module is
+ * the single consumer that fixes a canonical type: the four reads the
+ * watchlist panel needs, with the vendor's field names and encodings resolved
+ * once on the Host so no view or store ever reads a vendor row.
  * @module @deepseek-ai/dsh-api-stock-controller/types
  */
 

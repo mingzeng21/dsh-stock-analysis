@@ -1,6 +1,6 @@
 /**
  * Wire normalization for the Hithink provider. The vendor answers every
- * capability with the same envelope and 82 different row shapes, so this module
+ * capability with the same envelope and 79 different row shapes, so this module
  * normalizes the envelope — which rows exist, which batch facts accompany them,
  * and whether a next page exists — and deliberately leaves every row's own field
  * names untouched.

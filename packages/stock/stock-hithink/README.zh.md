@@ -51,7 +51,7 @@ kind: "package-reference"
 
 ### 能力覆盖
 
-本提供方提供生成注册表中的 82 个能力。该注册表由厂商的 MCP 工具 schema、其 CLI 能力表与文档化的工具到路径映射拼接而成。`ctx.stock.catalog()` 读取该注册表；`ctx.stock.call()` 在发出任何请求之前用同一条记录校验参数。
+本提供方提供生成注册表中的 79 个能力——72 个来自厂商 MCP 工具 schema 的镜像，另有 7 个仅通过 REST 提供——该注册表由这些 schema、厂商的 CLI 能力表与文档化的工具到路径映射拼接而成。`ctx.stock.catalog()` 读取该注册表；`ctx.stock.call()` 在发出任何请求之前用同一条记录校验参数。
 
 <a id="understand-the-implementation"></a>
 ## 理解实现

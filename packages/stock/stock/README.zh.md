@@ -85,7 +85,7 @@ No direct invalidation; the named consumer owns the request-prefix contribution 
 
 这些限制界定了该服务何时自身不完整。它们是当前的包约束。
 
-- **行保留厂商字段名** — 82 个能力返回 82 种行结构，且目前没有消费者读取归一化的领域对象，因此暂时不存在规范的 `Quote`/`Bar` 类型。新增它们是一次有明确消费者的、有意的后续变更。
+- **行保留厂商字段名** — seam 的 94 个能力返回 94 种行结构，且不发布规范的 `Quote`/`Bar` 类型；需要稳定字段集的消费者自行投影，[stock controller 的四项读取](../../api/stock-controller/README.zh.md)正是如此。
 - **不缓存数据响应** — 只有标的查询被缓存。同一轮中重复的行情读取会产生重复的厂商请求，由提供方的并发闸而不是缓存来约束。
 - **不做跨接口拼装** — 行情不携带中文名；`resolveSymbols` 单独返回名称，同时需要两者的调用方要发起两次调用。
 - **历史窗口边界属于厂商而非本 seam** — `window` 记录厂商对每个端点的限制；seam 只强制自己的 `maxRows`。

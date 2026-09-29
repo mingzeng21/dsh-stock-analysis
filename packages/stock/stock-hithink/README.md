@@ -51,7 +51,7 @@ Load the stock service and the provider. Every field has a default, and an inval
 
 ### Endpoint coverage
 
-The provider serves the 82 capabilities in the generated vendor registry, which is the join of the vendor's MCP tool schemas, its CLI capability map, and its documented tool-to-path table. `ctx.stock.catalog()` reads that registry; `ctx.stock.call()` validates arguments against the same record before any request is issued.
+The provider serves the 79 capabilities in the generated vendor registry — 72 mirrored from the vendor's MCP tool schemas plus seven that exist over REST alone — which is the join of those schemas, the vendor's CLI capability map, and its documented tool-to-path table. `ctx.stock.catalog()` reads that registry; `ctx.stock.call()` validates arguments against the same record before any request is issued.
 
 <a id="understand-the-implementation"></a>
 ## Understand the implementation

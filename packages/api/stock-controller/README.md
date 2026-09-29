@@ -36,7 +36,7 @@ Mount the package beside `dsh-stock` and one provider. A Client calls `remote.st
 
 ### Normalization
 
-The seam keeps the vendor's own field names on its rows, because 82 capabilities return 82 row shapes and no consumer existed to justify a canonical type per shape. This package is that consumer, so the mapping happens here and the browser never reads a vendor row.
+The seam keeps the vendor's own field names on its rows, because its 94 capabilities return 94 row shapes and no consumer existed to justify a canonical type per shape. This package is that consumer, so the mapping happens here and the browser never reads a vendor row.
 
 | Wire field | Vendor field |
 |---|---|

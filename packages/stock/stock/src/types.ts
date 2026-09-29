@@ -36,9 +36,9 @@ export interface StockMeta {
 
 /**
  * Outcome of one endpoint call. `rows` preserves the vendor's field names on
- * purpose: 82 capabilities return 82 different row shapes, and inventing a
- * canonical type per shape without a consumer would fix the wrong model. The
- * envelope — bounds, `asOf`, pagination — is normalized.
+ * purpose: the seam's 94 capabilities return 94 different row shapes, and
+ * inventing a canonical type per shape without a consumer would fix the wrong
+ * model. The envelope — bounds, `asOf`, pagination — is normalized.
  */
 export interface StockResult {
   /** Capability id the rows came from. */

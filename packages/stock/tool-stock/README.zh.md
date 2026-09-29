@@ -81,7 +81,7 @@ kind: "package-reference"
 
 #### What the model sees
 
-The generated [`@deepseek-ai/dsh-tool-stock` schemas](../../../docs/tool-catalog.zh.md#deepseek-aidsh-tool-stock): one definition per registry record, named by the record's `tool` field (for example `stock_quote`, `stock_limit_up_pool`, `fund_nav`), described in Chinese, and parameterized by the record's own parameters — for the registry as generated, 82 definitions and 31,446 characters of JSON, of which 1,973 are names, 7,775 descriptions, and 18,171 parameter schemas. Names, descriptions, and parameter schemas are all functions of the registry, so a reader of the catalog knows the whole surface.
+The generated [`@deepseek-ai/dsh-tool-stock` schemas](../../../docs/tool-catalog.zh.md#deepseek-aidsh-tool-stock): one definition per registry record, named by the record's `tool` field (for example `stock_quote`, `stock_limit_up_pool`, `fund_performance_nav`), described in Chinese, and parameterized by the record's own parameters — for the shipped two-provider composition, 94 definitions and 36,840 characters of JSON, of which 2,219 are names, 9,124 descriptions, and 21,549 parameter schemas. Names, descriptions, and parameter schemas are all functions of the registry, so a reader of the catalog knows the whole surface.
 
 #### Token effect
 
@@ -185,10 +185,10 @@ Append-only; the error follows the reusable request prefix and does not invalida
 这些是本包当前的约束，不是待清理项。
 
 - **要么注册整个注册表，要么什么都不注册** — 激活时按注册表记录逐条注册，没有逐工具开关，因此想要更小目录的部署应改为收窄 preset 或作用域。在本包内裁剪目录会让模型可见面与注册表脱节。
-- **目录常驻每一次请求** — 就当前生成的注册表而言是 82 个定义与 31,446 字符 JSON。挂载本包就是决定支付这笔成本；harness 中不存在可推迟它的惰性工具面或检索式工具面。
+- **目录常驻每一次请求** — 就实际装配的组态而言是 94 个定义与 36,840 字符 JSON。挂载本包就是决定支付这笔成本；harness 中不存在可推迟它的惰性工具面或检索式工具面。
 - **schema 中没有范围与格式边界** — 工具 DSL 不携带 `minimum`、`maximum`、`pattern` 或长度词汇，因此像十年历史窗口或正数页大小这样的边界，是从 seam 的拒绝而不是从 schema 中得知的。把边界移进 schema 需要尚不存在的 DSL 支持。
 - **结构化参数声明为字符串** — `object` 与 `array` 参数以「字符串里的 JSON」形式发布给模型，因为厂商就是这样编码的。seam 会解析并做类型检查；模型写出的 JSON 得不到结构性校验。
-- **行保留厂商字段名** — 有意不提供逐能力的规范 DTO：82 个能力返回 82 种行布局，在没有消费者的情况下发明类型只会固化错误的模型。需要稳定字段集的消费者必须自行投影；该决定归 `@deepseek-ai/dsh-stock`。
+- **行保留厂商字段名** — 有意不提供逐能力的规范 DTO：seam 的 94 个能力返回 94 种行布局，在没有消费者的情况下发明类型只会固化错误的模型。需要稳定字段集的消费者必须自行投影；该决定归 `@deepseek-ai/dsh-stock`。
 - **渲染结果比规范值更早丢弃行** — 超过 `renderMaxChars` 后模型看到的是带计数的预览。只有 `run_code` 程序读取的规范值保留完整的一页。
 - **本包内没有 Loader 级组合测试** — 能端到端证明已挂载目录的是 `stock-analysis` preset 的真实 Loader/app 启动，那属于该 preset 自身的覆盖而非本包。本包的测试通过 `ctx.tools.execute` 用真实的 `ToolRuntime`、真实的 `ctx.stock` 与 fixture 提供方覆盖。
 - **No invariant companion is published because this package owns no runtime relation of its own** — it contributes tool definitions to `ctx.tools` and forwards every call to `ctx.stock`, so the relations worth checking (registry agreement, parameter validation, row bounds, provider selection) belong to the seam and the provider that own them.
