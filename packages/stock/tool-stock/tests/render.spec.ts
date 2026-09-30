@@ -84,7 +84,7 @@ describe('row rendering', () => {
   it('renders a row that is not a record as a single cell', () => {
     // A non-record row is the defensive case over untrusted vendor JSON, which
     // the seam's row type cannot express; the assertion is the point of the test.
-    const text = renderStockResult(toStockToolValue(result({ rows: ['600519.SH', 42] as unknown as StockResult['rows'] })), BUDGET)
+    const text = renderStockResult(toStockToolValue(result({ rows: ['600519.SH', 42] as readonly unknown[] as StockResult['rows'] })), BUDGET)
     expect(text).toContain('1. 600519.SH')
     expect(text).toContain('2. 42')
   })

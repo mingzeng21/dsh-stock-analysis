@@ -51,6 +51,6 @@ export function toStockToolValue(result: StockResult): StockToolValue {
     ...(result.meta.asOf === undefined ? {} : { asOf: result.meta.asOf }),
     ...(result.meta.total === undefined ? {} : { total: result.meta.total }),
     ...(result.meta.next === undefined ? {} : { next: result.meta.next }),
-    rows: result.rows as unknown as StockToolValue['rows'],
+    rows: result.rows as StockToolValue['rows'],
   }
 }

@@ -1,6 +1,19 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-09-21-remote-remove-method-collision.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-09-21-remote-remove-method-collision.md
-2026-09-21-remote-remove-method-collision.md: afb5b6c47f05de628147bfa93b3c4586b3436ec8
-2026-09-21-remote-remove-method-collision.zh.md: 01f9594a7a9421ebd34ded24b124ef326b086115
+/agent-note-keep-remote-namespace-cleanup-members-out-of-method-names:
+  en: 8a69361b93a3be4a
+  zh: 9c11eb4acd0ae089
+/agent-note-keep-remote-namespace-cleanup-members-out-of-method-names/problem:
+  en: f5242a6d5ee8b6fa
+  zh: 21bfa5ede16527cb
+/agent-note-keep-remote-namespace-cleanup-members-out-of-method-names/decision:
+  en: f38cc086bc1a8303
+  zh: b2cd66fad62ddd6d
+/agent-note-keep-remote-namespace-cleanup-members-out-of-method-names/alternatives-considered:
+  en: bea7d0d230602124
+  zh: c56e838c37ad9f18
+/agent-note-keep-remote-namespace-cleanup-members-out-of-method-names/consequences:
+  en: b338b5c2accc6b3b
+  zh: 6938b6513339d038

@@ -119,7 +119,7 @@ export function retryAfterMs(headers: Headers): number | undefined {
 /** Parse a response body as JSON, or `undefined` when the text is not JSON. */
 function parseJson(text: string): unknown {
   try {
-    return JSON.parse(text) as unknown
+    return JSON.parse(text)
   } catch {
     // The vendor answers every documented outcome with JSON, so a body that
     // does not parse cannot be an envelope; the reader reports it as malformed.

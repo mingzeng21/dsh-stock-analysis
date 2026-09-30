@@ -1,6 +1,64 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/api/watchlist-controller/README.md
-README.md: c5124953c4186f49ddfeb720d231cf224663a52f
-README.zh.md: d6ece5cfdf00f9d47db531737e30a775a083dc01
+/:
+  en: 0fc6d8bd03ae455b
+  zh: c042a7702e1ecba8
+/deepseek-ai-dsh-api-watchlist-controller:
+  en: e71f11160c196bfb
+  zh: 100e6a79c3244e10
+/deepseek-ai-dsh-api-watchlist-controller/summary:
+  en: d605e83c28ff7dc0
+  zh: a208bdc69273551d
+/deepseek-ai-dsh-api-watchlist-controller/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-api-watchlist-controller/use-this-package:
+  en: 250d191cc0d06c91
+  zh: d16a4d2a67730cea
+/deepseek-ai-dsh-api-watchlist-controller/use-this-package/every-mutation-returns-the-whole-list:
+  en: e739cfe2a912acd6
+  zh: d99e046d2b48c948
+/deepseek-ai-dsh-api-watchlist-controller/use-this-package/addition-resolves-before-it-stores:
+  en: 7d0d2449dfa401ba
+  zh: 2240ca1a4b127951
+/deepseek-ai-dsh-api-watchlist-controller/use-this-package/configuration:
+  en: a1663bd53343afb6
+  zh: 8b429e42a0774473
+/deepseek-ai-dsh-api-watchlist-controller/use-this-package/failures:
+  en: f8abeb3e7c32b886
+  zh: f6003005b69e2e42
+/deepseek-ai-dsh-api-watchlist-controller/use-this-package/client-model:
+  en: 683727a3c3cd8255
+  zh: 36b753c470007f0c
+/deepseek-ai-dsh-api-watchlist-controller/understand-the-implementation:
+  en: 42b15ac6321706aa
+  zh: ce1d25bffb6948cd
+/deepseek-ai-dsh-api-watchlist-controller/understand-the-implementation/one-durable-value-not-two:
+  en: 4c1ced34935e0a61
+  zh: 3f32135f21d113ed
+/deepseek-ai-dsh-api-watchlist-controller/understand-the-implementation/serialized-mutations:
+  en: 377a88d1705244de
+  zh: d03c3270738ed4b5
+/deepseek-ai-dsh-api-watchlist-controller/understand-the-implementation/cancellation:
+  en: 2ced6445d07e6b40
+  zh: 58a4f14b0777d356
+/deepseek-ai-dsh-api-watchlist-controller/understand-the-implementation/source-map:
+  en: ce06e9ab6348c5a2
+  zh: a3a22502d3766ad1
+/deepseek-ai-dsh-api-watchlist-controller/further-exploration:
+  en: 48cf9ea4d480eaf2
+  zh: 9cc0e715a30d5afb
+/deepseek-ai-dsh-api-watchlist-controller/model-experience:
+  en: 37b4264c8301323f
+  zh: d947c8ae302556cb
+/deepseek-ai-dsh-api-watchlist-controller/model-experience/kv-cache-effect:
+  en: ca75c51c89c2c9b0
+  zh: bacec35330ccc487
+/deepseek-ai-dsh-api-watchlist-controller/known-limitations-and-deferred-work:
+  en: 3bf4b2337024dc07
+  zh: 3cf499c54b27128b
+/deepseek-ai-dsh-api-watchlist-controller/known-limitations-and-deferred-work/dev-note:
+  en: e67f633dc6fe7773
+  zh: e88aeb617ffb74ea

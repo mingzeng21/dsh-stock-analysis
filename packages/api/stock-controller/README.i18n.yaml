@@ -1,6 +1,61 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/api/stock-controller/README.md
-README.md: 89daf1878d48c4b97c6db17dbd06c3b102ef38c9
-README.zh.md: 12dfb406519417e149ebd7f138c4c1f54067676b
+/:
+  en: 307dad47d35f2056
+  zh: 3af3e1dc82690ada
+/deepseek-ai-dsh-api-stock-controller:
+  en: fef1fd2a17befbb0
+  zh: 62a47a6df4d9ddf1
+/deepseek-ai-dsh-api-stock-controller/summary:
+  en: cc5c95d56b639755
+  zh: 3986fec9633db3ef
+/deepseek-ai-dsh-api-stock-controller/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-api-stock-controller/use-this-package:
+  en: f302c1473b57146c
+  zh: 8de577f80bc93cc3
+/deepseek-ai-dsh-api-stock-controller/use-this-package/normalization:
+  en: 798f35d9522c57ef
+  zh: 4f0bce05f077a180
+/deepseek-ai-dsh-api-stock-controller/use-this-package/periods-adjustments-and-windows:
+  en: 2033d1f3c7618bca
+  zh: e0de116388980489
+/deepseek-ai-dsh-api-stock-controller/use-this-package/documents:
+  en: 0114310272f273a8
+  zh: ec37fe2c39202322
+/deepseek-ai-dsh-api-stock-controller/use-this-package/configuration:
+  en: 0f75c0676443a74d
+  zh: 944910bd25116f18
+/deepseek-ai-dsh-api-stock-controller/use-this-package/failures:
+  en: cea622ddc3d9930b
+  zh: 96bd4ae4b44c7d57
+/deepseek-ai-dsh-api-stock-controller/use-this-package/client-read-face:
+  en: 53ab78a07d11a320
+  zh: dd698fbfb51b7bf2
+/deepseek-ai-dsh-api-stock-controller/understand-the-implementation:
+  en: 42b15ac6321706aa
+  zh: ce1d25bffb6948cd
+/deepseek-ai-dsh-api-stock-controller/understand-the-implementation/source-map:
+  en: 622079610528ef95
+  zh: d2a150cf2f24a742
+/deepseek-ai-dsh-api-stock-controller/understand-the-implementation/why-the-read-surface-is-a-share-only:
+  en: dfa48b3fa4beb981
+  zh: 4dfdcc718f898a4b
+/deepseek-ai-dsh-api-stock-controller/further-exploration:
+  en: 9b732065b2fc2a97
+  zh: 87affcbd42330e20
+/deepseek-ai-dsh-api-stock-controller/model-experience:
+  en: 6d0e9a6a2a3cae27
+  zh: 24f6d856dd21490d
+/deepseek-ai-dsh-api-stock-controller/model-experience/kv-cache-effect:
+  en: 0b75c6e99cd10f76
+  zh: 2b0b8463ef1088bd
+/deepseek-ai-dsh-api-stock-controller/known-limitations-and-deferred-work:
+  en: 7c3c70a639eb52f1
+  zh: e6941120eb12521c
+/deepseek-ai-dsh-api-stock-controller/known-limitations-and-deferred-work/dev-note:
+  en: e67f633dc6fe7773
+  zh: e88aeb617ffb74ea

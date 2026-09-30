@@ -20,7 +20,9 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | `@deepseek-ai/dsh-api-remotes` | no | Remote BFF assembly for application-selected Host capabilities |
 | `@deepseek-ai/dsh-api-session-controller` | yes | Session Remote commands, cold reads, and live control transport |
 | `@deepseek-ai/dsh-api-settings-controller` | yes | Remote owner for the configuration surfaces over the settings-domain seams |
+| `@deepseek-ai/dsh-api-stock-controller` | yes | Browser-facing market-data reads over the stock capability seam: normalized symbol matches, quote batches, candle series, and research documents on the stock Remote namespace |
 | `@deepseek-ai/dsh-api-terminal-controller` | yes | Session-owned interactive terminals with shell discovery, screen recovery and typed Remote control |
+| `@deepseek-ai/dsh-api-watchlist-controller` | yes | Durable personal instrument list over the storage-domain facility, exposed as the watchlist Remote namespace |
 | `@deepseek-ai/dsh-api-workspace-controller` | yes | Workspace Remote commands and reconnect-safe state transport |
 | `@deepseek-ai/dsh-api-workspace-files` | yes | Workspace file service and Client resource provider: bounded reads, directory listing, and live metadata over the workspaceFiles Remote namespace |
 
@@ -113,6 +115,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | `@deepseek-ai/dsh-client-ui-tool` | no | Client Tool call-tree renderer and keyed per-tool presentation slot |
 | `@deepseek-ai/dsh-client-ui-trajectory` | no | Trajectory event ledger with an interactive timing overview: pure-consumer plugin registering into the conversation ViewMap (no service) |
 | `@deepseek-ai/dsh-client-ui-user-questions` | no | Web ask_user_question composer takeover and plan-review presentation UI |
+| `@deepseek-ai/dsh-client-ui-watchlist` | no | Web watchlist global panel: the personal instrument list, its batched quotes, and the analysis surface for the selected instrument |
 | `@deepseek-ai/dsh-client-ui-workflow-run` | no | Durable workflow-run Conversation Node and nested member disclosure for dsh web |
 | `@deepseek-ai/dsh-client-ui-workspace` | no | Workspace picker plugin: one WorkspacePicker registered into the sidebar and empty-state workspace slots |
 
@@ -417,6 +420,15 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | `@deepseek-ai/dsh-sandbox-ssh` | no | Remote POSIX sandbox argv provider over the shared SSH helper |
 | `@deepseek-ai/dsh-ssh` | yes | Shared OpenSSH connection and versioned POSIX remote helper |
 | `@deepseek-ai/dsh-subprocess-ssh` | no | Subprocess and terminal provider over the shared POSIX SSH helper |
+
+## stock
+
+| Package | Config | Description |
+|---|---|---|
+| `@deepseek-ai/dsh-stock` | yes | Abstract stock-market data capability seam (ctx.stock) for the DeepSeek Harness — provider registry, endpoint vocabulary, canonical market-data types, and the StockError taxonomy |
+| `@deepseek-ai/dsh-stock-hithink` | yes | Hithink (同花顺) financial-data provider for the DeepSeek Harness stock capability seam (ctx.stock) — credentialed REST transport, vendor envelope classification, retry and concurrency policy, and wire normalization for the published capabilities |
+| `@deepseek-ai/dsh-stock-iwencai` | yes | 问财 (iwencai) OpenAPI gateway provider for the DeepSeek Harness stock capability seam: document search and natural-language research queries, with the gateway's per-skill identity headers |
+| `@deepseek-ai/dsh-tool-stock` | yes | Model-facing stock-market data tools over the DeepSeek Harness stock capability seam (ctx.stock) — one tool per capability in the generated vendor registry |
 
 ## storage
 

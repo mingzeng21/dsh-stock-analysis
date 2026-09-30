@@ -1,6 +1,19 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-09-22-client-remote-namespace-owner-context.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-09-22-client-remote-namespace-owner-context.md
-2026-09-22-client-remote-namespace-owner-context.md: 2ec5beb312e326f78ee23fde1af8622bff0c1cef
-2026-09-22-client-remote-namespace-owner-context.zh.md: 23effff4798de317a84bb48dfcc2f93ef08c8fe1
+/agent-note-bind-a-client-remote-namespace-where-its-owning-plugin-runs:
+  en: 4152a7b784846f04
+  zh: 7e952fa731309ac4
+/agent-note-bind-a-client-remote-namespace-where-its-owning-plugin-runs/problem:
+  en: f7c6be4463477dfe
+  zh: ae4c5f613fdf146e
+/agent-note-bind-a-client-remote-namespace-where-its-owning-plugin-runs/decision:
+  en: 69dadd04f1805249
+  zh: 06c15750d4ebdcd6
+/agent-note-bind-a-client-remote-namespace-where-its-owning-plugin-runs/alternatives-considered:
+  en: b60d55f00dd89e83
+  zh: bde48086cb11b055
+/agent-note-bind-a-client-remote-namespace-where-its-owning-plugin-runs/consequences:
+  en: 6f041345a7089e60
+  zh: a6daf5793149ce2a

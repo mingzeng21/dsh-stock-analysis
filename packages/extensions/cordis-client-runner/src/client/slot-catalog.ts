@@ -4226,7 +4226,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     ],
     replaceRisk: 'shadows-shipped-ui',
     example: 'return {\n  inject: [\'slots\'],\n  apply(ctx) {\n    ctx.slots.inject(\'watchlist.analysis\', () => ctx.slots.register(\n      { name: \'watchlist.analysis\' },\n      () => React.createElement(\'div\', null, \'hello\'),\n    ))\n  },\n}',
-    source: 'packages/client/ui-watchlist/src/client/index.ts:45',
+    source: 'packages/client/ui-watchlist/src/client/index.ts:47',
   },
 ]
 /* jscpd:ignore-end */

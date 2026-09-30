@@ -105,14 +105,17 @@ async function bench(options: {
   const selectPreset = vi.fn(async () => ({ ok: true as const, value: undefined }))
   const binding = vi.fn(() => (options.face === undefined ? undefined : { session: options.face }))
   const retained: SessionReference[] = []
+  const releases: ReturnType<typeof vi.fn>[] = []
   const retain = vi.fn((sessionId: SessionId) => {
+    const release = vi.fn()
     const reference = {
       sessionId,
       binding: { sessionId, session: options.face },
       ready: Promise.resolve({ sessionId, session: options.face }),
-      release: vi.fn(),
+      release,
     } as never as SessionReference
     retained.push(reference)
+    releases.push(release)
     return reference
   })
   ctx.provide('watchlist', watchlist as never)
@@ -134,13 +137,13 @@ async function bench(options: {
   ctx.provide('remote.agentPresets', { select: selectPreset } as never)
   const fiber = ctx.plugin({ inject: [...inject], apply })
   await fiber.await()
-  return { ctx, fiber, watchlist, stock, create, retain, retained, openInConversation, selectPreset, selectPanel, binding }
+  return { ctx, fiber, watchlist, stock, create, retain, retained, releases, openInConversation, selectPreset, selectPanel, binding }
 }
 
 /** The read face the panel entry injects. */
 function injectedFace(ctx: Context): WatchlistPanelInjected {
   const entry = ctx.slots.entries('main')[0]
-  return (entry?.inject as unknown as () => WatchlistPanelInjected)()
+  return (entry?.inject as never as () => WatchlistPanelInjected)()
 }
 
 describe('ui-watchlist browser half', () => {
@@ -227,7 +230,7 @@ describe('ui-watchlist browser half', () => {
 
   it('starts an analysis session, prompts it through its own echo, and opens it in the conversation', async () => {
     const face = sessionFace()
-    const { ctx, fiber, create, retain, retained, openInConversation, selectPreset } = await bench({ face, sessions: [SESSION] })
+    const { ctx, fiber, create, retain, retained, releases, openInConversation, selectPreset } = await bench({ face, sessions: [SESSION] })
     const injected = injectedFace(ctx)
     await expect(injected.startAnalysis()).resolves.toEqual({ ok: true, sessionId: SESSION })
     expect(create).toHaveBeenCalledWith({})
@@ -252,7 +255,7 @@ describe('ui-watchlist browser half', () => {
     await expect(injected.resumeAnalysis(SESSION)).resolves.toBe(true)
     injected.openAnalysisInConversation(SESSION)
     expect(openInConversation).toHaveBeenCalledWith(SESSION)
-    expect(retained[0]?.release).toHaveBeenCalledOnce()
+    expect(releases[0]).toHaveBeenCalledOnce()
     await fiber.dispose()
   })
 

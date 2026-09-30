@@ -146,7 +146,7 @@ function mount(fixture: Fixture = {}) {
     sendAnalysis,
     openAnalysisInConversation,
     renderSlot,
-  } as unknown as WatchlistPanelProps
+  } as WatchlistPanelProps
 
   if (fixture.selection != null) view.actions.select(fixture.selection)
   if (fixture.interval !== undefined) view.actions.setInterval(fixture.interval)

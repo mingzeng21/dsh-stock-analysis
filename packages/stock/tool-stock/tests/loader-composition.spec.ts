@@ -90,7 +90,7 @@ describe('tool-stock real Loader composition', () => {
         if (!modules.has(specifier)) throw new Error(`unexpected Loader import: ${specifier}`)
         return modules.get(specifier)
       },
-    } as unknown as NonNullable<typeof context.loader.internal>
+    } as Partial<NonNullable<typeof context.loader.internal>> as NonNullable<typeof context.loader.internal>
     await context.loader.create({
       name: 'cordis:include',
       config: { path: pathToFileURL(configPath).href },

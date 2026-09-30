@@ -1,6 +1,34 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for stock.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/subsystems/stock.md
-stock.md: c4da103d8308ffd878147b4a82bf1a368251690f
-stock.zh.md: 8e90d26c31e873567bbc7cb915b30e88cf136316
+/stock-market-data:
+  en: ac1a16607ced31e0
+  zh: f2784028cdc38dc5
+/stock-market-data/why-one-service-serves-every-asset-class:
+  en: a41148e5ea5e8dda
+  zh: 1055f2c66fa8bd21
+/stock-market-data/the-endpoint-registry:
+  en: 2ef735a86f2d8e9e
+  zh: 18f343380840279c
+/stock-market-data/parameter-validation:
+  en: 8740e6e345a20934
+  zh: b00d00543b7f1506
+/stock-market-data/results:
+  en: c1b18bb3a098b50a
+  zh: 0185e1c8c7bea4a6
+/stock-market-data/pagination:
+  en: b9ddbbff87eab473
+  zh: abc9da8ad5c08dc1
+/stock-market-data/symbol-disambiguation:
+  en: abd5b96618eb75bc
+  zh: 8474d6087522bdf5
+/stock-market-data/provider-availability:
+  en: a6972eac5d9e1b8b
+  zh: 42e8dd2ae2428ac0
+/stock-market-data/errors:
+  en: eeb0aaad5b4aac1c
+  zh: 23409e658d00aada
+/stock-market-data/the-service:
+  en: db493e297377aa50
+  zh: 3e77156575a4e2d6

@@ -1,6 +1,61 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/stock/stock-iwencai/README.md
-README.md: 5a65720a1c265462cdc5a08f04b82109039935fc
-README.zh.md: edb6526b5addffce1e6dafa6996439e5f673d3df
+/:
+  en: 525e6ed3155bd8f9
+  zh: c24e0da12a9dcbff
+/deepseek-ai-dsh-stock-iwencai:
+  en: 1247bbaa547bd50b
+  zh: 02d9e17a5d141e17
+/deepseek-ai-dsh-stock-iwencai/summary:
+  en: 54a8d740b6c45ae1
+  zh: 25ab6797a433070d
+/deepseek-ai-dsh-stock-iwencai/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 3b16bd576001df1e
+/deepseek-ai-dsh-stock-iwencai/use-this-package:
+  en: eb337811fc04f1fe
+  zh: 6a8668d74deaabae
+/deepseek-ai-dsh-stock-iwencai/use-this-package/registered-capabilities:
+  en: b53cc52388c68a42
+  zh: a4fc92f981702b54
+/deepseek-ai-dsh-stock-iwencai/understand-the-implementation:
+  en: f072dcc701f82b42
+  zh: e4dc30a10a20d9c1
+/deepseek-ai-dsh-stock-iwencai/understand-the-implementation/source-map:
+  en: 4741d54244c94734
+  zh: 19d6367e3a82ed9b
+/deepseek-ai-dsh-stock-iwencai/understand-the-implementation/adding-a-capability:
+  en: ef5fe94ece240bfb
+  zh: c86178b241db9545
+/deepseek-ai-dsh-stock-iwencai/understand-the-implementation/the-identity-gate:
+  en: 4869efb21147d5a1
+  zh: 44d83e75b0ca6538
+/deepseek-ai-dsh-stock-iwencai/further-exploration:
+  en: 489f17f13909bb0d
+  zh: 8ca2fb32055bba80
+/deepseek-ai-dsh-stock-iwencai/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-stock-iwencai/model-experience/rows-and-failures-rendered-by-dsh-tool-stock:
+  en: 48b1c84d2ccbb6be
+  zh: 48b1c84d2ccbb6be
+/deepseek-ai-dsh-stock-iwencai/model-experience/rows-and-failures-rendered-by-dsh-tool-stock/what-the-model-sees:
+  en: 4bac4988b1806a8f
+  zh: 4bac4988b1806a8f
+/deepseek-ai-dsh-stock-iwencai/model-experience/rows-and-failures-rendered-by-dsh-tool-stock/token-effect:
+  en: 8263b6d077d5cf85
+  zh: 8263b6d077d5cf85
+/deepseek-ai-dsh-stock-iwencai/model-experience/rows-and-failures-rendered-by-dsh-tool-stock/kv-cache-effect:
+  en: 5d554027d885725b
+  zh: 5d554027d885725b
+/deepseek-ai-dsh-stock-iwencai/known-limitations-and-deferred-work:
+  en: e702d26771c73f74
+  zh: 1cd59fadb5ee4158
+/deepseek-ai-dsh-stock-iwencai/known-limitations-and-deferred-work/dev-note:
+  en: 7f775cc79dbce94b
+  zh: b2a12333d9af9806
+/deepseek-ai-dsh-stock-iwencai/known-limitations-and-deferred-work/dev-note/future-curated-named-queries:
+  en: d50adf758ad5dcb7
+  zh: 109e6bf1518cf4c9

@@ -14,13 +14,13 @@ afterEach(cleanup)
 
 /** The Chat hook as the renderer binds it: one selector over the snapshot. */
 function chatHook(items: readonly { readonly anchorKey: string; readonly prompt: string; readonly response: string }[]) {
-  const snapshot = { navigation: { items: () => items } } as unknown as ChatSnapshot
+  const snapshot = { navigation: { items: () => items } } as ChatSnapshot
   return ((select: (value: ChatSnapshot) => unknown) => select(snapshot)) as AnalysisTranscriptProps['useChat']
 }
 
 /** Mount the transcript over one scripted Chat snapshot. */
 function mount(items: readonly { readonly anchorKey: string; readonly prompt: string; readonly response: string }[]) {
-  const props = { useChat: chatHook(items), t: makeTranslate(zh) } as unknown as AnalysisTranscriptProps
+  const props = { useChat: chatHook(items), t: makeTranslate(zh) } as AnalysisTranscriptProps
   render(<AnalysisTranscript {...props} />)
 }
 

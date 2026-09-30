@@ -1408,7 +1408,7 @@ describe('Client Typert API', () => {
     expect(ctx.get('remote.probe')).toBeUndefined()
     await vi.waitFor(() => { expect(ctx.typert.remotes.list()).toEqual([]) })
     const retry = await ctx.remote.$mount({ package: '@fixture/scoped-retry', descriptors: [contextDescriptor()] })
-    expect((ctx.get('remote.probe') as unknown as Record<string, unknown>).rename).toBeTypeOf('function')
+    expect((ctx.get('remote.probe') as { rename?: unknown }).rename).toBeTypeOf('function')
     await retry()
   })
 

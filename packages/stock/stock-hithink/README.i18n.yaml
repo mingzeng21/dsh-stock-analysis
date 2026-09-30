@@ -1,6 +1,58 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/stock/stock-hithink/README.md
-README.md: cee02008dd65c5cc3e3d771adb16ea0640bfc830
-README.zh.md: 40713c7e9ceab84f37039f5673eddfecc8e178ac
+/:
+  en: 3eb5c9e68a0b4005
+  zh: 38f91a7d15528656
+/deepseek-ai-dsh-stock-hithink:
+  en: cf763353dc9ce9c0
+  zh: 32ab1b3c9cea1351
+/deepseek-ai-dsh-stock-hithink/summary:
+  en: 031447caf5b9f618
+  zh: e892cd7c83fbe24d
+/deepseek-ai-dsh-stock-hithink/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-stock-hithink/use-this-package:
+  en: 29dc85cbd0606379
+  zh: 77aa2604ab5aec3c
+/deepseek-ai-dsh-stock-hithink/use-this-package/when-to-choose-it:
+  en: 62c528fff163e298
+  zh: 8da027d6732406f8
+/deepseek-ai-dsh-stock-hithink/use-this-package/minimal-configuration:
+  en: 69f261e2d44ada15
+  zh: 259cfafd583bee02
+/deepseek-ai-dsh-stock-hithink/use-this-package/endpoint-coverage:
+  en: 030529e6b25216f1
+  zh: 926abd8fea660e82
+/deepseek-ai-dsh-stock-hithink/understand-the-implementation:
+  en: 128b5d8b7a21cd43
+  zh: e14bf30005547134
+/deepseek-ai-dsh-stock-hithink/understand-the-implementation/source-map:
+  en: 023ec16a19fea8a1
+  zh: 0d83264ff9c3925d
+/deepseek-ai-dsh-stock-hithink/further-exploration:
+  en: f6310f3e77ff8b6c
+  zh: a6bf3b172bd2c901
+/deepseek-ai-dsh-stock-hithink/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-stock-hithink/model-experience/rows-and-failures-rendered-by-dsh-tool-stock:
+  en: 48b1c84d2ccbb6be
+  zh: bba8d9d316e72159
+/deepseek-ai-dsh-stock-hithink/model-experience/rows-and-failures-rendered-by-dsh-tool-stock/what-the-model-sees:
+  en: 558681f25810a5b1
+  zh: d799469c6be351ac
+/deepseek-ai-dsh-stock-hithink/model-experience/rows-and-failures-rendered-by-dsh-tool-stock/token-effect:
+  en: 7b5561075508175f
+  zh: c0c96ea09c265b90
+/deepseek-ai-dsh-stock-hithink/model-experience/rows-and-failures-rendered-by-dsh-tool-stock/kv-cache-effect:
+  en: d3105ced4539a4d0
+  zh: da359cba4be1fa66
+/deepseek-ai-dsh-stock-hithink/known-limitations-and-deferred-work:
+  en: ff829d10ceaeb29a
+  zh: a095b9b9f13bfc78
+/deepseek-ai-dsh-stock-hithink/known-limitations-and-deferred-work/dev-note:
+  en: e5f0db70903e2719
+  zh: 3f3a5f70029fcf77

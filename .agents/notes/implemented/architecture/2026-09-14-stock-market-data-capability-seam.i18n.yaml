@@ -1,6 +1,19 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-09-14-stock-market-data-capability-seam.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-14-stock-market-data-capability-seam.md
-2026-09-14-stock-market-data-capability-seam.md: 3d188822c83d0a8853105d9bf9604d5b1d972c04
-2026-09-14-stock-market-data-capability-seam.zh.md: c0072c506068fe956502647307df073c4de388e0
+/agent-note-stock-market-data-capability-seam:
+  en: 28ea8b0702e11bee
+  zh: 12452b7ab49c48c3
+/agent-note-stock-market-data-capability-seam/problem:
+  en: 68bfa03a8401b20b
+  zh: d824da2c5bfd0118
+/agent-note-stock-market-data-capability-seam/decision:
+  en: 6702d9b0dea0b871
+  zh: a0972e77edce4c30
+/agent-note-stock-market-data-capability-seam/alternatives-considered:
+  en: be83ff295d607203
+  zh: db858eceade1e630
+/agent-note-stock-market-data-capability-seam/consequences:
+  en: d27cc37ca9be7ebc
+  zh: 5424dfe81ff3498d

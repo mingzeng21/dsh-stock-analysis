@@ -1,6 +1,46 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-09-21-watchlist-stock-analysis.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-21-watchlist-stock-analysis.md
-2026-09-21-watchlist-stock-analysis.md: 677c08e5d79a1c205975b1b230ae51c5334251df
-2026-09-21-watchlist-stock-analysis.zh.md: a7a57d2c7bbc846b496d19ff1ea720a5a632b857
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client:
+  en: b020c646afc0e915
+  zh: 7ea9fb69208cbf79
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client/problem:
+  en: 628ccc9be4dc2a7f
+  zh: 284b6970bd9bb33b
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client/decision:
+  en: 449f0c63b2b04013
+  zh: 61a1432f27e1048b
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client/decision/placement-and-tab-semantics:
+  en: 77f6719c9d584eda
+  zh: 375991c5ee0f5a4d
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client/decision/panel-layout:
+  en: b488e67e32ab6d87
+  zh: dba99ba2ae31de2e
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client/decision/package-topology:
+  en: 2ea827e4d195c7b8
+  zh: 1f5f8410b2a816d1
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client/decision/market-data-surface:
+  en: 7e328709bc0f6fb7
+  zh: 49b1d60332a2ac1b
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client/decision/watchlist-durability:
+  en: 25426ffe14f57b27
+  zh: 1063780188977436
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client/decision/chart-rendering:
+  en: 26c3049254fb629d
+  zh: fe77ae934211765d
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client/decision/agent-conversation:
+  en: 699f4c65c9135e6f
+  zh: b2223ca232dce545
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client/decision/data-and-refresh-policy:
+  en: 470bab25661467c8
+  zh: 3d1e0925680b34bc
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client/decision/verification:
+  en: f456940489846a91
+  zh: ca27b4869fc4f81d
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client/alternatives-considered:
+  en: 8f9355df71069aba
+  zh: a9c3c15c835fecdf
+/agent-note-watchlist-stock-analysis-panel-for-the-web-client/consequences:
+  en: 00f1de363d3a8675
+  zh: b204d268c9dfa6b7

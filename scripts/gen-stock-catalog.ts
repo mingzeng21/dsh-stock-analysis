@@ -280,7 +280,7 @@ function dateEncodingOf(params: readonly StockParam[]): StockDateEncoding | 'non
  * authority for what it contains.
  */
 function readSnapshot(file: string): unknown {
-  return JSON.parse(readFileSync(join(CONTRACTS, file), 'utf8')) as unknown
+  return JSON.parse(readFileSync(join(CONTRACTS, file), 'utf8'))
 }
 
 /** Build the complete endpoint registry from the checked-in snapshots. */

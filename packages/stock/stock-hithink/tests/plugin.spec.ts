@@ -82,7 +82,7 @@ async function mount(
   if (credentials !== undefined) {
     ctx.provide('credentials', {
       resolve: () => Promise.resolve({ value: credentials, source: 'env' }),
-    } as unknown as CredentialProvider)
+    } as Partial<CredentialProvider> as CredentialProvider)
   }
   const fiber = await ctx.plugin(PLUGIN, config)
   return { ctx, fiber }

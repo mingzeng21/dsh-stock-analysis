@@ -88,7 +88,7 @@ async function mount(
   if (credentials !== undefined) {
     ctx.provide('credentials', {
       resolve: () => Promise.resolve({ value: credentials, source: 'env' }),
-    } as unknown as CredentialProvider)
+    } as Partial<CredentialProvider> as CredentialProvider)
   }
   const fiber = await ctx.plugin(PLUGIN, config)
   return { ctx, fiber }
@@ -307,7 +307,7 @@ describe('stock-iwencai identity guard', () => {
         provider = candidate
         return () => undefined
       },
-    } as unknown as StockRuntime)
+    } as StockRuntime)
     apply(ctx, defaults({ apiKey: 'literal-key' }))
 
     const registered = provider

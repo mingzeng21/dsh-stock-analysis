@@ -1,6 +1,25 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/stock/README.md
-README.md: 0531182e9df3567de3e8707ac45fa25c096975ba
-README.zh.md: 8f82e1414bdee2b1378d6ad51bd094401d090ad1
+/:
+  en: c3105690f62e1a04
+  zh: 832eacde69ca711c
+/stock-stock-market-data-capability-family:
+  en: e54b7ef26f652ef9
+  zh: 9786b712134ac725
+/stock-stock-market-data-capability-family/summary:
+  en: 872ff98c9ed97062
+  zh: d1f046f87c498256
+/stock-stock-market-data-capability-family/table-of-contents:
+  en: 1eb35b015a6c423f
+  zh: 86ac4703e05bd769
+/stock-stock-market-data-capability-family/packages:
+  en: 31832495b93ff2ec
+  zh: f6955af6584a0453
+/stock-stock-market-data-capability-family/related-documentation:
+  en: daf8e3e328e7eced
+  zh: 51aca20961491288
+/stock-stock-market-data-capability-family/dev-note:
+  en: 42831b194e5aebd1
+  zh: 55f22e5f814ffc87

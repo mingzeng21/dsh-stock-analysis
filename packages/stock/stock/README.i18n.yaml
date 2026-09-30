@@ -1,6 +1,46 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/stock/stock/README.md
-README.md: 4fb6c2d5472996de78a36faafdc549cb53301ebd
-README.zh.md: 749596f88d94b9acb9b22c0a8858c1b60f039841
+/:
+  en: 8d9c0b27fbfbc57f
+  zh: 46874feebb56eafc
+/deepseek-ai-dsh-stock:
+  en: 3a542a9f8419a704
+  zh: 792beed364fd9500
+/deepseek-ai-dsh-stock/summary:
+  en: 8a9c2dd19b5f7617
+  zh: 645a5ef7ce0fba4c
+/deepseek-ai-dsh-stock/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 3b16bd576001df1e
+/deepseek-ai-dsh-stock/use-this-package:
+  en: 5d04b1ed99561dc6
+  zh: 1f35dc0d8cedd702
+/deepseek-ai-dsh-stock/use-this-package/what-a-caller-does:
+  en: a25a5fa27992b254
+  zh: 47840ff9edb1bb5a
+/deepseek-ai-dsh-stock/understand-the-implementation:
+  en: ee4615a04fa6503d
+  zh: ee2c5fb2204a43cf
+/deepseek-ai-dsh-stock/understand-the-implementation/source-map:
+  en: 426611145ac0f483
+  zh: 72b8a35d5f8a5ad2
+/deepseek-ai-dsh-stock/further-exploration:
+  en: 4f71f518224f3a23
+  zh: c913d5ece52a63dc
+/deepseek-ai-dsh-stock/model-experience:
+  en: 6c7dc84078933899
+  zh: d296381804587bce
+/deepseek-ai-dsh-stock/model-experience/kv-cache-effect:
+  en: 733cbda01e56a628
+  zh: 733cbda01e56a628
+/deepseek-ai-dsh-stock/known-limitations-and-deferred-work:
+  en: 1d91e49264c20800
+  zh: a5fff212bdd1ddcc
+/deepseek-ai-dsh-stock/known-limitations-and-deferred-work/dev-note:
+  en: 7f775cc79dbce94b
+  zh: 5b09fca53e62da63
+/deepseek-ai-dsh-stock/known-limitations-and-deferred-work/dev-note/future-canonical-domain-types:
+  en: bad80ea03043a42b
+  zh: c948711c7c0a0f06

@@ -1191,13 +1191,13 @@ importers:
         specifier: workspace:*
         version: link:../settings-controller
       '@deepseek-ai/dsh-api-stock-controller':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../stock-controller
       '@deepseek-ai/dsh-api-terminal-controller':
         specifier: workspace:*
         version: link:../terminal-controller
       '@deepseek-ai/dsh-api-watchlist-controller':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../watchlist-controller
       '@deepseek-ai/dsh-api-workspace-controller':
         specifier: workspace:*
@@ -1463,7 +1463,7 @@ importers:
   packages/api/stock-controller:
     dependencies:
       '@deepseek-ai/dsh-typert-protocol':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../typert/protocol
       '@deepseek-ai/schemastery':
         specifier: link:../../../vendor/schemastery
@@ -1473,16 +1473,16 @@ importers:
         version: 4.4.3
     devDependencies:
       '@deepseek-ai/cordis':
-        specifier: workspace:^
+        specifier: workspace:~
         version: link:../../../vendor/cordis
       '@deepseek-ai/dsh-api-gateway':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../gateway
       '@deepseek-ai/dsh-client-test-runtime':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../test-support/client-runtime
       '@deepseek-ai/dsh-stock':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../stock/stock
 
   packages/api/terminal-controller:
@@ -1555,10 +1555,10 @@ importers:
   packages/api/watchlist-controller:
     dependencies:
       '@deepseek-ai/dsh-storage-domain':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../storage/storage-domain
       '@deepseek-ai/dsh-typert-protocol':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../typert/protocol
       '@deepseek-ai/schemastery':
         specifier: link:../../../vendor/schemastery
@@ -1568,19 +1568,19 @@ importers:
         version: 4.4.3
     devDependencies:
       '@deepseek-ai/cordis':
-        specifier: workspace:^
+        specifier: workspace:~
         version: link:../../../vendor/cordis
       '@deepseek-ai/dsh-api-gateway':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../gateway
       '@deepseek-ai/dsh-client-store':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../client/store
       '@deepseek-ai/dsh-client-test-runtime':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../test-support/client-runtime
       '@deepseek-ai/dsh-stock':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../stock/stock
 
   packages/api/workspace-controller:
@@ -2453,13 +2453,13 @@ importers:
         specifier: workspace:*
         version: link:../../api/settings-controller
       '@deepseek-ai/dsh-api-stock-controller':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../api/stock-controller
       '@deepseek-ai/dsh-api-terminal-controller':
         specifier: workspace:*
         version: link:../../api/terminal-controller
       '@deepseek-ai/dsh-api-watchlist-controller':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../api/watchlist-controller
       '@deepseek-ai/dsh-api-workspace-controller':
         specifier: workspace:*
@@ -2639,7 +2639,7 @@ importers:
         specifier: workspace:*
         version: link:../../client/ui-user-questions
       '@deepseek-ai/dsh-client-ui-watchlist':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../client/ui-watchlist
       '@deepseek-ai/dsh-client-ui-workflow-run':
         specifier: workspace:*
@@ -2732,13 +2732,13 @@ importers:
         specifier: workspace:*
         version: link:../../skill/skill-filesystem
       '@deepseek-ai/dsh-stock':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../stock/stock
       '@deepseek-ai/dsh-stock-hithink':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../stock/stock-hithink
       '@deepseek-ai/dsh-stock-iwencai':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../stock/stock-iwencai
       '@deepseek-ai/dsh-subprocess':
         specifier: workspace:*
@@ -2789,7 +2789,7 @@ importers:
         specifier: workspace:*
         version: link:../../skill/tool-skill
       '@deepseek-ai/dsh-tool-stock':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../stock/tool-stock
       '@deepseek-ai/dsh-tool-subagent':
         specifier: workspace:*
@@ -6211,58 +6211,58 @@ importers:
   packages/client/ui-watchlist:
     devDependencies:
       '@deepseek-ai/cordis':
-        specifier: workspace:^
+        specifier: workspace:~
         version: link:../../../vendor/cordis
       '@deepseek-ai/dsh-api-gateway':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../api/gateway
       '@deepseek-ai/dsh-api-session-controller':
         specifier: workspace:*
         version: link:../../api/session-controller
       '@deepseek-ai/dsh-api-stock-controller':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../api/stock-controller
       '@deepseek-ai/dsh-api-watchlist-controller':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../api/watchlist-controller
       '@deepseek-ai/dsh-client-locale':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../locale
       '@deepseek-ai/dsh-client-store':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../store
       '@deepseek-ai/dsh-client-test-runtime':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../test-support/client-runtime
       '@deepseek-ai/dsh-client-ui-chat':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../ui-chat
       '@deepseek-ai/dsh-client-ui-layout':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../ui-layout
       '@deepseek-ai/dsh-client-ui-primitives':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../ui-primitives
       '@deepseek-ai/dsh-client-ui-renderer':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../ui-renderer
       '@deepseek-ai/dsh-client-ui-sidebar':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../ui-sidebar
       '@deepseek-ai/dsh-client-ui-slots':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../ui-slots
       '@deepseek-ai/dsh-client-ui-theme':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../ui-theme
       '@deepseek-ai/dsh-client-ui-workspace':
         specifier: workspace:*
         version: link:../ui-workspace
       '@deepseek-ai/dsh-session':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../core/session
       '@deepseek-ai/dsh-typert-protocol':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../typert/protocol
       '@testing-library/react':
         specifier: ^16.1.0
@@ -12328,10 +12328,10 @@ importers:
         version: link:../../../vendor/schemastery
     devDependencies:
       '@deepseek-ai/cordis':
-        specifier: workspace:^
+        specifier: workspace:~
         version: link:../../../vendor/cordis
       '@deepseek-ai/dsh-llm':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../llm/llm
 
   packages/stock/stock-hithink:
@@ -12341,22 +12341,22 @@ importers:
         version: link:../../../vendor/schemastery
     devDependencies:
       '@deepseek-ai/cordis':
-        specifier: workspace:^
+        specifier: workspace:~
         version: link:../../../vendor/cordis
       '@deepseek-ai/dsh-credentials':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../credentials/credentials
       '@deepseek-ai/dsh-credentials-local':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../credentials/credentials-local
       '@deepseek-ai/dsh-launch-environment':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../util/launch-environment
       '@deepseek-ai/dsh-stock':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../stock
       '@deepseek-ai/dsh-timeout':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../util/timeout
 
   packages/stock/stock-iwencai:
@@ -12366,19 +12366,19 @@ importers:
         version: link:../../../vendor/schemastery
     devDependencies:
       '@deepseek-ai/cordis':
-        specifier: workspace:^
+        specifier: workspace:~
         version: link:../../../vendor/cordis
       '@deepseek-ai/dsh-credentials':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../credentials/credentials
       '@deepseek-ai/dsh-launch-environment':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../util/launch-environment
       '@deepseek-ai/dsh-llm':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../llm/llm
       '@deepseek-ai/dsh-stock':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../stock
 
   packages/stock/tool-stock:
@@ -12388,22 +12388,22 @@ importers:
         version: link:../../../vendor/schemastery
     devDependencies:
       '@deepseek-ai/cordis':
-        specifier: workspace:^
+        specifier: workspace:~
         version: link:../../../vendor/cordis
       '@deepseek-ai/dsh-llm':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../llm/llm
       '@deepseek-ai/dsh-stock':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../stock
       '@deepseek-ai/dsh-stock-hithink':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../stock-hithink
       '@deepseek-ai/dsh-system-prompt':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../core/system-prompt
       '@deepseek-ai/dsh-tools':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../core/tools
 
   packages/storage/storage:
@@ -14611,13 +14611,13 @@ importers:
         specifier: workspace:*
         version: link:../../packages/spill/spill
       '@deepseek-ai/dsh-stock':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../packages/stock/stock
       '@deepseek-ai/dsh-stock-hithink':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../packages/stock/stock-hithink
       '@deepseek-ai/dsh-stock-iwencai':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../packages/stock/stock-iwencai
       '@deepseek-ai/dsh-storage':
         specifier: workspace:*
@@ -14704,7 +14704,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/skill/tool-skill
       '@deepseek-ai/dsh-tool-stock':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../../packages/stock/tool-stock
       '@deepseek-ai/dsh-tool-str-replace-editor':
         specifier: workspace:*
