@@ -2,6 +2,14 @@
 
 DeepSeek Harness is an all-plugin Cordis agent harness. Read [docs/architecture.md](docs/architecture.md) before changing `packages/`; follow [docs/AGENTS.md](docs/AGENTS.md) for documentation.
 
+## Stock-analysis fork
+
+`dsh-stock-analysis` adapts DeepSeek Harness for stock analysis. `origin` is the [stock-analysis fork](https://github.com/mingzeng21/dsh-stock-analysis); `upstream` is the [official Harness repository](https://github.com/deepseek-ai/deepseek-harness). When syncing official changes, fetch both remotes, fast-forward local `main` from `origin/main`, merge `upstream/master` on a dedicated branch, adapt the stock features there, and merge that branch into the fork through a PR. Preserve published fork commits. Verify the official commit is an ancestor of `main` before claiming the fork is current; matching `origin/main` alone is insufficient.
+
+Keep market-data services and model tools in `packages/stock/`, browser-facing stock and watchlist controllers in their `packages/api/` packages, the watchlist UI in `packages/client/ui-watchlist/`, and the agent composition in the `stock-analysis` Web preset. Keep necessary edits to shared Harness packages small and review them after each upstream merge, especially Remote registration, Gateway, Web composition, and the conversation/sidebar layout. The stock preset copies `standard`; keep its drift guard aligned when the shipped standard preset changes. See the [market-data decision](.agents/notes/implemented/architecture/2026-09-14-stock-market-data-capability-seam.md) and [watchlist decision](.agents/notes/implemented/feature/2026-09-21-watchlist-stock-analysis.md).
+
+After an upstream update removes or renames a workspace, run `pnpm run clean` before rebuilding so ignored output from deleted packages cannot enter the build. For local manual Web checks, use port 3081 and open the complete token-bearing URL printed by `pnpm dsh web --port 3081`.
+
 ## Pre-stable APIs and released Session data
 
 Public APIs are pre-stable; update every consumer. Follow [version/status](docs/session-format-status.md) and [type acknowledgements](docs/cookbook/reviewing-persistence-type-changes.md). [Adjacent migration](.agents/notes/implemented/architecture/2026-08-31-released-session-format-migrations.md) may add a version-named successor but never move, overwrite, or delete committed generations; predecessors imply neither fallback nor downgrade support. SQLite uses monotonic `SCHEMA_VERSION`.
@@ -65,6 +73,7 @@ packages/    @deepseek-ai/dsh-<pkg> workspaces at packages/<group>/<pkg>/
   sdk/                  JSON-RPC SDK
   host/                 GUI host
   client/               GUI client
+  stock/                stock data service, providers, and model tools
   mcp/                  external tools
   experimental/         pre-stable prototypes; public by default with explicit private exceptions
   test-support/         test infrastructure
