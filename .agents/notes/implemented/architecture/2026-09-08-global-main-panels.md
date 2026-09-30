@@ -1,4 +1,4 @@
-# Agent Note: Global main panels without default UI additions
+# Agent Note: Global main panels with extension-owned navigation
 
 Status: implemented
 
@@ -10,13 +10,13 @@ Plugins need application-wide views that do not belong to a Session. A Session-s
 
 ## Decision
 
-The layout declares a root-scoped keyed `main` slot. The reserved `conversation` key belongs to the Conversation plugin, whose `main.conversation` child retains optional-Session binding. Other main entries receive no implicit Session binding.
+The layout declares a root-scoped keyed `main` slot. The reserved `conversation` key belongs to Conversation. `ui-session` derives the root Session binding from `uiWorkspace`'s `mainView` ownership marker; `main.conversation` and its associated right Sidebar inherit that Provider binding. Other main entries receive no implicit Session binding. [Client Session references](2026-09-15-client-session-references.md) owns acquisition and source metadata; this note owns global panel selection.
 
-The sidebar owns the root-scoped `sidebar.panellist` list. Each list entry supplies its icon and an id matching its main entry; its string or locale-aware label provides plain visible text, the accessible name, and the collapsed tooltip. The list renders only its registered entries, so a composition that registers none has no DOM or spacing there; the shipped composition registers the [watchlist panel](../feature/2026-09-21-watchlist-stock-analysis.md) beside the reserved conversation row. Selection validates the live main entry and rejects a missing key without replacing the current panel.
+The sidebar owns the root-scoped `sidebar.panellist` list. Each list entry supplies its icon and an id matching its main entry; its string or locale-aware label provides plain visible text, the accessible name, and the collapsed tooltip. The shipped composition registered no panel entry when this landed, so an empty list has no DOM or spacing; the shipped web composition registers the Plugin Manager and Watchlist panels through their own plugins ([plugin management moves to the Web sidebar](2026-09-09-plugin-management-in-the-web-sidebar.md) and [the Watchlist panel](../feature/2026-09-21-watchlist-stock-analysis.md)). Selection validates the live main entry and rejects a missing key without replacing the current panel.
 
 One eagerly created root store is shared by the renderer and layout controller. Its `panelInfo` and `layoutInfo` objects preserve independent references. The framework supplies `usePanelInfo`; individual rows and main content subscribe to their required selection values, while AppFrame reads only layout information. The right Sidebar's root controller decides whether to mount its Session subtree and reports the resulting track requirements to the frame.
 
-`uiWorkspace.openSession(id)` selects the Session before returning the main area to the Conversation, including when the same Session is selected again. `openWorkspace` and `forkSession` use the layout's `beginNavigation()` abort signal and their own service lifetime to commit only the latest navigation. The Workspace preparation callback moves drafts synchronously only while the request remains current. Supersession prevents a late UI commit, not Session creation. Panel navigation neither cancels the retained Session nor writes a Session event.
+`uiWorkspace.openSession(target)` acquires the explicit target before replacing its main reference and returning the main area to Conversation. `openWorkspace` and `forkSession` keep the layout's existing `beginNavigation()` signal and service lifetime. `openWorkspace` runs its existing synchronous preparation after acquisition and before replacing the main reference. Supersession prevents a late UI commit, not Session creation. Direct Session opening adds no global navigation cancellation. Panel navigation neither releases the retained main Session nor writes a Session event.
 
 DOM focus is not navigation selection. Search and directory-picker controls can receive focus while the global panel and its selected sidebar row remain visible; opening a Session changes the main selection.
 
@@ -32,6 +32,6 @@ DOM focus is not navigation selection. Search and directory-picker controls can 
 
 ## Consequences
 
-The default sidebar snapshots remain unchanged. Extension panels have no right Sidebar, and selecting a different global panel does not change layout preferences. Switching between a Conversation with a visible right Sidebar and a global panel still changes the required column widths; this is not a promise of zero browser layout work.
+The sidebar renders only panels registered by the active composition; the shipped web composition includes Plugin Manager and Watchlist entries. Extension panels have no right Sidebar, and selecting a different global panel does not change layout preferences. Switching between a Conversation with a visible right Sidebar and a global panel still changes the required column widths; this is not a promise of zero browser layout work.
 
-Panel selection is transient and resets on reload. Plugin disposal removes its contributions; removing the selected main entry returns the main area to the Conversation. Tests register real temporary panels and cover row interaction, focus, independent stored references, invalid ids, superseded asynchronous navigation, declaration lifetimes, and the list with no registered entries. The [Slots reference](../../../../docs/subsystems/slots.md) owns the composition API.
+Panel selection is transient and resets on reload. Plugin disposal removes its contributions; removing the selected main entry returns the main area to the Conversation. Tests register real temporary panels and cover row interaction, focus, independent stored references, invalid ids, superseded asynchronous navigation, declaration lifetimes, and a list with no registered entries. The [Slots reference](../../../../docs/subsystems/slots.md) owns the composition API.

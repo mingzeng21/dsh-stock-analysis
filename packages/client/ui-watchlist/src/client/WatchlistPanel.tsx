@@ -14,8 +14,10 @@ import type {
 } from '@deepseek-ai/dsh-api-stock-controller/client'
 import type { WatchlistEntry } from '@deepseek-ai/dsh-api-watchlist-controller/client'
 import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
+import type { SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import {
-  IconCloseOutline16, IconPlusOutline16, IconRefreshOutline16, IconSearchOutline16, IconTrashOutline16, Pill, Tooltip,
+  IconCloseOutlineRegular, IconPlusOutlineRegular, IconRefreshOutlineRegular, IconSearchOutlineRegular,
+  IconTrashOutlineRegular, Pill, Tooltip,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type {
   InjectFace, PropsLocale, PropsRenderSlots, PropsRuntime, PropsStore,
@@ -46,6 +48,8 @@ export interface WatchlistPanelInjected {
     documents: ObservableSnapshot<DocumentsSnapshot>
     /** Phase of the analysis pane's own work. */
     analysis: ObservableSnapshot<AnalysisState>
+    /** Retained Session that supplies the analysis transcript. */
+    analysisReference: ObservableSnapshot<SessionReference | undefined>
     /** Monotonic theme revision, so a canvas can repaint for a new palette. */
     themeRevision: ObservableSnapshot<number>
   }
@@ -66,7 +70,7 @@ export interface WatchlistPanelInjected {
   /** Create the panel's analysis session and make it current. */
   startAnalysis: () => Promise<AnalysisOutcome>
   /** Make a recorded analysis session current again, if the Host still lists it. */
-  resumeAnalysis: (sessionId: SessionId) => boolean
+  resumeAnalysis: (sessionId: SessionId) => Promise<boolean>
   /** Send one question, already carrying the instrument context, to the analysis session. */
   sendAnalysis: (sessionId: SessionId, text: string) => Promise<AnalysisOutcome>
   /** Continue the analysis in the full conversation surface. */
@@ -159,12 +163,12 @@ function AddInstrument({ t, onSearch, onAdd, onDismiss }: {
         />
         <Tooltip label={t('add.search')} delayMs={400}>
           <button type="button" className={css.iconButton} aria-label={t('add.search')} disabled={busy} onClick={runSearch}>
-            <IconSearchOutline16 size={14} />
+            <IconSearchOutlineRegular size={14} />
           </button>
         </Tooltip>
         <Tooltip label={t('add.cancel')} delayMs={400}>
           <button type="button" className={css.iconButton} aria-label={t('add.cancel')} onClick={onDismiss}>
-            <IconCloseOutline16 size={14} />
+            <IconCloseOutlineRegular size={14} />
           </button>
         </Tooltip>
       </div>
@@ -262,8 +266,8 @@ function DocumentList({ state, t, onRetry }: {
  * @returns the panel element tree.
  */
 export function WatchlistPanel({
-  useStore, actions, t, renderSlot,
-  useEntries, useQuotes, useListState, useCandles, useDocuments, useAnalysis, useThemeRevision,
+  useStore, actions, t, renderSlot, SessionProvider,
+  useEntries, useQuotes, useListState, useCandles, useDocuments, useAnalysis, useAnalysisReference, useThemeRevision,
   load, refreshQuotes, addInstrument, removeInstrument, searchInstruments, loadCandles, loadDocuments,
   startAnalysis, resumeAnalysis, sendAnalysis, openAnalysisInConversation,
 }: WatchlistPanelProps) {
@@ -277,6 +281,7 @@ export function WatchlistPanel({
   const candles = useCandles(state => state)
   const documents = useDocuments(state => state)
   const analysis = useAnalysis(state => state)
+  const analysisReference = useAnalysisReference(reference => reference)
   const themeRevision = useThemeRevision(revision => revision)
   const [adding, setAdding] = useState(false)
   const [removeFailure, setRemoveFailure] = useState<string | undefined>(undefined)
@@ -305,12 +310,15 @@ export function WatchlistPanel({
     loadDocuments(selectedEntry.name, documentKind)
   }, [selectedEntry, documentKind, loadDocuments])
 
-  // The transcript binds to whichever session is current, so returning to the
-  // panel makes the recorded analysis session current again; a session the Host
-  // no longer lists is forgotten rather than opened.
+  // The panel owns a separate reference so returning to it does not change the
+  // main Conversation selection. A session the Host no longer lists is forgotten.
   useEffect(() => {
     if (analysisSession === null) return
-    if (!resumeAnalysis(analysisSession)) actions.setAnalysisSession(null)
+    let active = true
+    void resumeAnalysis(analysisSession).then((resumed) => {
+      if (active && !resumed) actions.setAnalysisSession(null)
+    })
+    return () => { active = false }
   }, [analysisSession, resumeAnalysis, actions])
 
   const selectedQuote = selected === null ? undefined : quotes.byCode[selected]
@@ -354,7 +362,7 @@ export function WatchlistPanel({
               aria-label={t('list.refresh')}
               onClick={() => { refreshQuotes() }}
             >
-              <IconRefreshOutline16 size={14} />
+              <IconRefreshOutlineRegular size={14} />
             </button>
           </Tooltip>
           <Tooltip label={t('list.add')} delayMs={400}>
@@ -365,7 +373,7 @@ export function WatchlistPanel({
               aria-expanded={adding}
               onClick={() => { setAdding(open => !open) }}
             >
-              <IconPlusOutline16 size={14} />
+              <IconPlusOutlineRegular size={14} />
             </button>
           </Tooltip>
         </header>
@@ -420,7 +428,7 @@ export function WatchlistPanel({
                     aria-label={t('list.remove', { name: entry.name })}
                     onClick={() => { remove(entry) }}
                   >
-                    <IconTrashOutline16 size={14} />
+                    <IconTrashOutlineRegular size={14} />
                   </button>
                 </Tooltip>
               </li>
@@ -565,7 +573,11 @@ export function WatchlistPanel({
                 </>
               ) : (
                 <>
-                  {renderSlot('watchlist.analysis', {})}
+                  {analysisReference !== undefined && (
+                    <SessionProvider session={analysisReference}>
+                      {renderSlot('watchlist.analysis', {})}
+                    </SessionProvider>
+                  )}
                   <form className={css.composer} onSubmit={(event) => { ask(event, selectedEntry) }}>
                     <input
                       className={css.addInput}

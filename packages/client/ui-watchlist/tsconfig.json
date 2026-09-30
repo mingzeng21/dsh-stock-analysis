@@ -24,13 +24,13 @@
       "path": "../../core/session"
     },
     {
-      "path": "../locale"
+      "path": "../locale/tsconfig.client.json"
     },
     {
       "path": "../store"
     },
     {
-      "path": "../ui-chat"
+      "path": "../ui-chat/tsconfig.client.json"
     },
     {
       "path": "../ui-layout"
@@ -43,6 +43,9 @@
     },
     {
       "path": "../ui-sidebar"
+    },
+    {
+      "path": "../ui-workspace"
     },
     {
       "path": "../ui-slots"

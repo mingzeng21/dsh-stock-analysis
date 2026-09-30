@@ -21,6 +21,8 @@ import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type { MainPanelId } from '@deepseek-ai/dsh-client-ui-layout/client'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type {} from '@deepseek-ai/dsh-client-ui-theme/client'
+import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
+import type { SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { AnalysisSession, type AnalysisAck } from './analysis.ts'
 import { AnalysisTranscript } from './AnalysisTranscript.tsx'
@@ -46,11 +48,18 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
   }
 }
 
+declare module '@deepseek-ai/dsh-api-session-controller/client' {
+  interface SessionReferenceSourceMap {
+    /** The retained Session that supplies the stock-analysis transcript. */
+    watchlistAnalysis: unknown
+  }
+}
+
 export type { WatchlistPanelInjected, WatchlistPanelProps } from './WatchlistPanel.tsx'
 
 /** Services required by the panel: the durable list, market data, theme, slots, locale, sessions, and layout. */
 export const inject = [
-  'watchlist', 'stockClient', 'theme', 'slots', 'locale', 'sessions', 'layout', 'remote', 'remote.agentPresets',
+  'watchlist', 'stockClient', 'theme', 'slots', 'locale', 'sessions', 'layout', 'uiWorkspace', 'remote', 'remote.agentPresets',
 ]
 
 /** Sidebar row id and main-panel key; the two must agree for selection to resolve. */
@@ -80,14 +89,50 @@ async function promptSession(ctx: ClientContext, sessionId: SessionId, text: str
 export function apply(ctx: ClientContext): void {
   const surface = new WatchlistSurface(ctx.watchlist, ctx.stockClient)
   const store = createWatchlistStore()
+  const analysisReference = createSnapshotStore<SessionReference | undefined>(undefined)
+  let activeAnalysisReference: SessionReference | undefined
+  const openAnalysis = async (sessionId: SessionId): Promise<void> => {
+    if (activeAnalysisReference?.sessionId === sessionId) {
+      await activeAnalysisReference.ready
+      return
+    }
+    const next = ctx.sessions.retain(sessionId, { source: 'watchlistAnalysis' })
+    const previous = activeAnalysisReference
+    activeAnalysisReference = next
+    analysisReference.set(next)
+    try {
+      await next.ready
+    } catch (error: unknown) {
+      if (activeAnalysisReference === next) {
+        activeAnalysisReference = previous
+        analysisReference.set(previous)
+      }
+      next.release()
+      throw error
+    }
+    if (activeAnalysisReference === next) previous?.release()
+    else next.release()
+  }
+  const openAnalysisInConversation = (sessionId: SessionId): void => {
+    ctx.uiWorkspace.openSession(sessionId)
+    const reference = activeAnalysisReference
+    activeAnalysisReference = undefined
+    analysisReference.set(undefined)
+    reference?.release()
+  }
   const analysis = new AnalysisSession({
-    rows: () => ctx.sessions.list.getSnapshot(),
+    rows: () => ({ ...ctx.sessions.list.getSnapshot(), current: ctx.uiWorkspace.currentSessionId }),
     create: target => ctx.sessions.create(target),
     selectPreset: (sessionId, presetId) => ctx.remote.agentPresets.select(sessionId, presetId),
-    open: (sessionId) => { ctx.sessions.open(sessionId) },
-    leavePanel: () => { ctx.layout.selectPanel(null) },
+    open: openAnalysis,
+    openInConversation: openAnalysisInConversation,
     prompt: (sessionId, text) => promptSession(ctx, sessionId, text),
   })
+  ctx.effect(() => () => {
+    analysisReference.set(undefined)
+    activeAnalysisReference?.release()
+    activeAnalysisReference = undefined
+  }, 'ui-watchlist: analysis Session reference')
   // A canvas cannot follow a CSS variable, so the chart repaints when the theme
   // revision moves. The listener registers after ui-layout's presenter, which is
   // what guarantees the document already carries the new palette.
@@ -107,6 +152,7 @@ export function apply(ctx: ClientContext): void {
       candles: surface.candles,
       documents: surface.documents,
       analysis: analysis.state,
+      analysisReference,
       themeRevision,
     },
     load: () => { void surface.load() },

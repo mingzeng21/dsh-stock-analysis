@@ -43,10 +43,10 @@ export interface AnalysisPorts {
   readonly create: (target: { readonly cwd?: string }) => Promise<SessionId>
   /** Compose a blank session from the analysis preset. */
   readonly selectPreset: (sessionId: SessionId, presetId: string) => Promise<AnalysisAck>
-  /** Make a session current. */
-  readonly open: (sessionId: SessionId) => void
-  /** Return to the full conversation surface. */
-  readonly leavePanel: () => void
+  /** Retain a session for the analysis transcript and wait for its initial open. */
+  readonly open: (sessionId: SessionId) => Promise<void>
+  /** Transfer the analysis to the main Conversation. */
+  readonly openInConversation: (sessionId: SessionId) => void
   /** Send one text prompt into a listed session, through that session's own echo. */
   readonly prompt: (sessionId: SessionId, text: string) => Promise<AnalysisAck>
 }
@@ -94,7 +94,11 @@ export class AnalysisSession {
       return this.failed(error)
     }
     if (!selected.ok) return this.failed(selected.error)
-    this.ports.open(sessionId)
+    try {
+      await this.ports.open(sessionId)
+    } catch (error: unknown) {
+      return this.failed(error)
+    }
     this.store.set({ phase: 'idle' })
     return { ok: true, sessionId }
   }
@@ -119,14 +123,19 @@ export class AnalysisSession {
   }
 
   /**
-   * Make a recorded session current again so the transcript binds to it.
+   * Retain a recorded session so the panel transcript can bind to it.
    * @param sessionId - the identity the panel store recorded.
    * @returns whether the Host still lists that session.
    */
-  resume(sessionId: SessionId): boolean {
+  async resume(sessionId: SessionId): Promise<boolean> {
     if (!this.ports.rows().ids.includes(sessionId)) return false
-    this.ports.open(sessionId)
-    return true
+    try {
+      await this.ports.open(sessionId)
+      return true
+    } catch (error: unknown) {
+      this.failed(error)
+      return false
+    }
   }
 
   /**
@@ -134,8 +143,7 @@ export class AnalysisSession {
    * @param sessionId - the panel's analysis session.
    */
   openInConversation(sessionId: SessionId): void {
-    this.ports.open(sessionId)
-    this.ports.leavePanel()
+    this.ports.openInConversation(sessionId)
   }
 
   /**

@@ -1,6 +1,19 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-09-08-global-main-panels.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-09-08-global-main-panels.md
-2026-09-08-global-main-panels.md: 88a932b601029d9ece6c6bc229914f1d6793fffb
-2026-09-08-global-main-panels.zh.md: 967dd3249937345651183ac5204092cd56796bcd
+/agent-note-global-main-panels-with-extension-owned-navigation:
+  en: f8309feaca7ca655
+  zh: bec728f6cc9bb844
+/agent-note-global-main-panels-with-extension-owned-navigation/problem:
+  en: da6aa479acac3baf
+  zh: ed6316ea9953ff99
+/agent-note-global-main-panels-with-extension-owned-navigation/decision:
+  en: 60b4caa4dd901299
+  zh: 22f4448ff9ac37c9
+/agent-note-global-main-panels-with-extension-owned-navigation/alternatives-considered:
+  en: 18c8461d961490ee
+  zh: a26b37ff3aa15bbc
+/agent-note-global-main-panels-with-extension-owned-navigation/consequences:
+  en: a41e6f7aa4402a8b
+  zh: 07ab654aa128cfec

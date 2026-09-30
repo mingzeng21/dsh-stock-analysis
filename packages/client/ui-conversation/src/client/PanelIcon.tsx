@@ -4,14 +4,12 @@
  * Drawn here because the sidebar's panel list is the only consumer and the
  * shared icon set has no conversation mark.
  */
-import type { SidebarPanelIconOwnerProps } from '@deepseek-ai/dsh-client-ui-sidebar/client'
-
 /**
  * Render the Conversation's navigation glyph.
  * @param props - icon presentation supplied by the panel row.
  * @returns the glyph at the requested size.
  */
-export function ConversationPanelIcon({ size }: SidebarPanelIconOwnerProps) {
+export function ConversationPanelIcon({ size }: { size: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden>
       <path

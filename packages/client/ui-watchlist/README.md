@@ -31,7 +31,7 @@ Mount the two controller packages and their stock provider, then this panel. It 
 |---|---|---|
 | `{ id: 'watchlist', order: 10, label }` | `sidebar.panellist` | The navigation row, labelled from this package's dictionary |
 | `{ key: 'watchlist' }` | `main` | The panel the row selects |
-| `{ }` | `watchlist.analysis` | The analysis transcript, declared by the `main` registration and `session`-scoped so the renderer binds it to the current session |
+| `{ }` | `watchlist.analysis` | The analysis transcript, rendered inside the panel's retained Session reference |
 
 The row id and the main key are the same string by construction, because selecting the row is what dispatches the `main` entry.
 
@@ -63,15 +63,15 @@ A row shows its title, the source and publication date that let a reader judge i
 
 ### The analysis session
 
-One session serves every instrument. It is created the first time the reader asks for it, composed from the shipped `stock-analysis` preset, and remembered by the panel store, so browsing the list never creates a session and a follow-up question keeps its thread. The preset is selected while the session is still blank, because the Host refuses a composition swap once history exists under another one.
+One session serves every instrument. It is created the first time the reader asks for it, composed from the shipped `stock-analysis` preset, and remembered by the panel store, so browsing the list never creates a session and a follow-up question keeps its thread. The panel retains that Session for its transcript without changing the main Conversation selection. The preset is selected while the session is still blank, because the Host refuses a composition swap once history exists under another one.
 
 The selected instrument travels in the prompt itself — the panel prefixes the question with the instrument's name and thscode from its own dictionary — so the agent answers about what the reader is looking at without a per-instrument session. The composer sends through the session's own submission echo, so the question appears immediately and retires when the durable user message arrives.
 
-The transcript renders the bounded prompt and response previews the session's Chat target already publishes, not another feature's node renderers: the client layering keeps one feature plugin from importing another's components, and the previews are the widest plain-text projection available. "Open in conversation" makes the analysis session current and leaves the panel, so a long analysis continues in the full conversation surface with every shipped affordance.
+The transcript renders the bounded prompt and response previews the session's Chat target already publishes, not another feature's node renderers: the client layering keeps one feature plugin from importing another's components, and the previews are the widest plain-text projection available. "Open in conversation" transfers the session to the main Conversation and leaves the panel, so a long analysis continues in the full conversation surface with every shipped affordance.
 
 ### Selection
 
-The selected instrument lives in a declared store, not in component state, so switching to another panel and back returns to the instrument you were reading. Removing the selected instrument clears the selection; removing a different one leaves it. The analysis session's identity lives in the same store: returning to the panel makes it current again, and a session the Host no longer lists is forgotten.
+The selected instrument lives in a declared store, not in component state, so switching to another panel and back returns to the instrument you were reading. Removing the selected instrument clears the selection; removing a different one leaves it. The analysis session's identity lives in the same store: returning to the panel reacquires its retained reference, and a session the Host no longer lists is forgotten.
 
 -----
 
@@ -119,7 +119,7 @@ The durable list itself is not copied into either. It stays in the `watchlist` C
 - [Sidebar shell](../ui-sidebar/README.md) — the navigation column whose panel list the row joins.
 - [Layout](../ui-layout/README.md) — the `main` slot and the panel selection the row addresses.
 - [Chat](../ui-chat/README.md) — the session-scoped `chat` hook whose turn previews the transcript renders.
-- [Agent presets](../../preset/agent-presets/README.md) — the `stock-analysis` preset the analysis session is composed from.
+- [Agent presets](../../preset/agent-preset/README.md) — the `stock-analysis` preset the analysis session is composed from.
 
 -----
 

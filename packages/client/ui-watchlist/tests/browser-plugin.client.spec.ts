@@ -6,6 +6,7 @@
  */
 import { Context } from '@deepseek-ai/cordis'
 import type { IStockClient } from '@deepseek-ai/dsh-api-stock-controller/client'
+import type { SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { IWatchlist, WatchlistEntry } from '@deepseek-ai/dsh-api-watchlist-controller/client'
 import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
@@ -99,30 +100,41 @@ async function bench(options: {
     },
   } as never, () => null)
   const create = vi.fn(async () => SESSION)
-  const open = vi.fn()
+  const openInConversation = vi.fn()
   const selectPanel = vi.fn()
   const selectPreset = vi.fn(async () => ({ ok: true as const, value: undefined }))
   const binding = vi.fn(() => (options.face === undefined ? undefined : { session: options.face }))
+  const retained: SessionReference[] = []
+  const retain = vi.fn((sessionId: SessionId) => {
+    const reference = {
+      sessionId,
+      binding: { sessionId, session: options.face },
+      ready: Promise.resolve({ sessionId, session: options.face }),
+      release: vi.fn(),
+    } as never as SessionReference
+    retained.push(reference)
+    return reference
+  })
   ctx.provide('watchlist', watchlist as never)
   ctx.provide('stockClient', stock as never)
   ctx.provide('locale', new LocaleRuntime(ctx))
   ctx.provide('theme', { getTheme: () => ({ revision: 7 }) } as never)
   ctx.provide('layout', { selectPanel } as never)
+  ctx.provide('uiWorkspace', { currentSessionId: undefined, openSession: openInConversation } as never)
   ctx.provide('sessions', {
     list: createSnapshotStore({
       ids: options.sessions ?? [],
       byId: {},
-      current: undefined,
     }),
     create,
-    open,
+    retain,
     binding,
   } as never)
   ctx.provide('remote', { agentPresets: { select: selectPreset } } as never)
   ctx.provide('remote.agentPresets', { select: selectPreset } as never)
   const fiber = ctx.plugin({ inject: [...inject], apply })
   await fiber.await()
-  return { ctx, fiber, watchlist, stock, create, open, selectPreset, selectPanel, binding }
+  return { ctx, fiber, watchlist, stock, create, retain, retained, openInConversation, selectPreset, selectPanel, binding }
 }
 
 /** The read face the panel entry injects. */
@@ -134,7 +146,7 @@ function injectedFace(ctx: Context): WatchlistPanelInjected {
 describe('ui-watchlist browser half', () => {
   it('declares the services it binds', () => {
     expect(inject).toEqual([
-      'watchlist', 'stockClient', 'theme', 'slots', 'locale', 'sessions', 'layout', 'remote', 'remote.agentPresets',
+      'watchlist', 'stockClient', 'theme', 'slots', 'locale', 'sessions', 'layout', 'uiWorkspace', 'remote', 'remote.agentPresets',
     ])
   })
 
@@ -215,12 +227,13 @@ describe('ui-watchlist browser half', () => {
 
   it('starts an analysis session, prompts it through its own echo, and opens it in the conversation', async () => {
     const face = sessionFace()
-    const { ctx, fiber, create, open, selectPreset, selectPanel } = await bench({ face, sessions: [SESSION] })
+    const { ctx, fiber, create, retain, retained, openInConversation, selectPreset } = await bench({ face, sessions: [SESSION] })
     const injected = injectedFace(ctx)
     await expect(injected.startAnalysis()).resolves.toEqual({ ok: true, sessionId: SESSION })
     expect(create).toHaveBeenCalledWith({})
     expect(selectPreset).toHaveBeenCalledWith(SESSION, 'stock-analysis')
-    expect(open).toHaveBeenCalledWith(SESSION)
+    expect(retain).toHaveBeenCalledWith(SESSION, { source: 'watchlistAnalysis' })
+    expect(injected.hooks.analysisReference.getSnapshot()).toBe(retained[0])
     await expect(injected.sendAnalysis(SESSION, '当前标的：贵州茅台 600519.SH')).resolves.toEqual({
       ok: true,
       sessionId: 'session-1',
@@ -236,9 +249,10 @@ describe('ui-watchlist browser half', () => {
       undefined,
       'request-1',
     )
-    expect(injected.resumeAnalysis(SESSION)).toBe(true)
+    await expect(injected.resumeAnalysis(SESSION)).resolves.toBe(true)
     injected.openAnalysisInConversation(SESSION)
-    expect(selectPanel).toHaveBeenCalledWith(null)
+    expect(openInConversation).toHaveBeenCalledWith(SESSION)
+    expect(retained[0]?.release).toHaveBeenCalledOnce()
     await fiber.dispose()
   })
 
@@ -249,7 +263,7 @@ describe('ui-watchlist browser half', () => {
       ok: false,
       code: 'session/not-found',
     })
-    expect(injected.resumeAnalysis('session-9' as SessionId)).toBe(false)
+    await expect(injected.resumeAnalysis('session-9' as SessionId)).resolves.toBe(false)
     await fiber.dispose()
   })
 

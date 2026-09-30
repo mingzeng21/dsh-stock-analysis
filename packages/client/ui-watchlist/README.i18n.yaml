@@ -1,6 +1,61 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/client/ui-watchlist/README.md
-README.md: 606f6a145a6bd48fb1f08d310fde1c500f7934de
-README.zh.md: afe5e61959ffb56d0c0ae6ef7f17d180be1fb93d
+/:
+  en: c45e832a5624bb29
+  zh: 18d9d4c848fc4b28
+/deepseek-ai-dsh-client-ui-watchlist:
+  en: 8dbc56d21c69ceaf
+  zh: 3cfbf993c0ff1afb
+/deepseek-ai-dsh-client-ui-watchlist/summary:
+  en: a41ba0c536481867
+  zh: 0423a146a966bb88
+/deepseek-ai-dsh-client-ui-watchlist/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-client-ui-watchlist/use-this-package:
+  en: 8258e630dfc9c117
+  zh: 9b01a144169826ae
+/deepseek-ai-dsh-client-ui-watchlist/use-this-package/reading-and-refreshing:
+  en: df840b972c4d5575
+  zh: 65e7bcdb6e7ed8bd
+/deepseek-ai-dsh-client-ui-watchlist/use-this-package/adding-an-instrument:
+  en: d098399cf95b3f61
+  zh: 756f23dee8a680b5
+/deepseek-ai-dsh-client-ui-watchlist/use-this-package/the-chart:
+  en: c72c9e632c26d194
+  zh: d3f86421b6cba518
+/deepseek-ai-dsh-client-ui-watchlist/use-this-package/documents:
+  en: d26879696f6189ba
+  zh: c53607c6fdb12415
+/deepseek-ai-dsh-client-ui-watchlist/use-this-package/the-analysis-session:
+  en: 593c05021b3031ae
+  zh: 637cce2a2583bc04
+/deepseek-ai-dsh-client-ui-watchlist/use-this-package/selection:
+  en: 76d699ed6348f021
+  zh: 86ef67bb0755a560
+/deepseek-ai-dsh-client-ui-watchlist/understand-the-implementation:
+  en: 42b15ac6321706aa
+  zh: ce1d25bffb6948cd
+/deepseek-ai-dsh-client-ui-watchlist/understand-the-implementation/two-layers:
+  en: 99a6b1ddf5d38b32
+  zh: 29dcf2f2c2b68947
+/deepseek-ai-dsh-client-ui-watchlist/understand-the-implementation/source-map:
+  en: 742ef6bd5e9741ba
+  zh: ed2fe175e0baea44
+/deepseek-ai-dsh-client-ui-watchlist/further-exploration:
+  en: f11ae5e285da2707
+  zh: b2fd479a07e93f7e
+/deepseek-ai-dsh-client-ui-watchlist/model-experience:
+  en: 6e4ca4633d19b167
+  zh: 49c14dfac028cbe7
+/deepseek-ai-dsh-client-ui-watchlist/model-experience/kv-cache-effect:
+  en: dd86abb8a0a6a99d
+  zh: 85e04e06421e8d3c
+/deepseek-ai-dsh-client-ui-watchlist/known-limitations-and-deferred-work:
+  en: e93c225f95d19c29
+  zh: b606de25d50c59d0
+/deepseek-ai-dsh-client-ui-watchlist/known-limitations-and-deferred-work/dev-note:
+  en: e67f633dc6fe7773
+  zh: e88aeb617ffb74ea

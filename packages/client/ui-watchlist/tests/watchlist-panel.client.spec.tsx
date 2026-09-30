@@ -5,10 +5,12 @@
  * layer owns what a read means, and this suite owns what it renders.
  */
 import type { DocumentKind, DocumentRow, InstrumentMatch, Quote } from '@deepseek-ai/dsh-api-stock-controller/client'
+import type { SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { WatchlistEntry } from '@deepseek-ai/dsh-api-watchlist-controller/client'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { ReactNode } from 'react'
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { AnalysisOutcome, AnalysisState } from '../src/client/analysis.ts'
@@ -97,6 +99,11 @@ function mount(fixture: Fixture = {}) {
   const candleStore = createSnapshotStore<CandlesSnapshot>(fixture.candles ?? READY_CANDLES)
   const documentStore = createSnapshotStore<DocumentsSnapshot>(fixture.documents ?? READY_DOCUMENTS)
   const analysisStore = createSnapshotStore<AnalysisState>(fixture.analysis ?? { phase: 'idle' })
+  const analysisReferenceStore = createSnapshotStore<SessionReference | undefined>(
+    fixture.analysisSession === undefined
+      ? undefined
+      : { sessionId: fixture.analysisSession as SessionId } as SessionReference,
+  )
   const themeStore = createSnapshotStore<number>(fixture.themeRevision ?? 0)
   const load = vi.fn()
   const loadCandles = vi.fn()
@@ -104,7 +111,7 @@ function mount(fixture: Fixture = {}) {
   const refreshQuotes = vi.fn()
   const startAnalysis = vi.fn(fixture.startAnalysisImpl
     ?? (async (): Promise<AnalysisOutcome> => ({ ok: true, sessionId: ANALYSIS })))
-  const resumeAnalysis = vi.fn(() => fixture.transcriptMissing !== true)
+  const resumeAnalysis = vi.fn(async () => fixture.transcriptMissing !== true)
   const sendAnalysis = vi.fn(fixture.sendAnalysisImpl
     ?? (async (): Promise<AnalysisOutcome> => ({ ok: true, sessionId: ANALYSIS })))
   const openAnalysisInConversation = vi.fn()
@@ -124,7 +131,9 @@ function mount(fixture: Fixture = {}) {
     useCandles: bindSnapshotSelector(candleStore),
     useDocuments: bindSnapshotSelector(documentStore),
     useAnalysis: bindSnapshotSelector(analysisStore),
+    useAnalysisReference: bindSnapshotSelector(analysisReferenceStore),
     useThemeRevision: bindSnapshotSelector(themeStore),
+    SessionProvider: ({ children }: { readonly children: ReactNode }) => children,
     load,
     refreshQuotes,
     addInstrument,

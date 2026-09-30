@@ -31,7 +31,7 @@ kind: "package-reference"
 |---|---|---|
 | `{ id: 'watchlist', order: 10, label }` | `sidebar.panellist` | 导航行，标签来自本包的字典 |
 | `{ key: 'watchlist' }` | `main` | 该行选中的面板 |
-| `{ }` | `watchlist.analysis` | 分析对话记录；由 `main` 注册声明，作用域为 `session`，因此渲染器把它绑定到当前会话 |
+| `{ }` | `watchlist.analysis` | 分析对话记录，在面板持有的 Session reference 中渲染 |
 
 行的 id 与 main 的 key 在构造上就是同一个字符串，因为选中该行正是派发 `main` 条目的方式。
 
@@ -63,15 +63,15 @@ kind: "package-reference"
 
 ### 分析会话
 
-一个会话服务所有标的。它在读者第一次需要时创建，由已发布的 `stock-analysis` preset 组装，并记录在面板 store 中，因此浏览列表从不创建会话，追问也能延续同一条线索。preset 会在会话仍然为空时选定，因为一旦历史在另一套组合下产生，Host 就会拒绝更换组合。
+一个会话服务所有标的。它在读者第一次需要时创建，由已发布的 `stock-analysis` preset 组装，并记录在面板 store 中，因此浏览列表从不创建会话，追问也能延续同一条线索。面板为对话记录单独持有该 Session reference，不改变主 Conversation 的选中会话。preset 会在会话仍然为空时选定，因为一旦历史在另一套组合下产生，Host 就会拒绝更换组合。
 
 所选标的随提示词本身传递——面板用自己的字典把标的名称与 thscode 作为问题前缀——因此 agent 回答的正是读者在看的东西，而不需要按标的各建一个会话。输入框通过会话自身的提交回显发送，因此问题立刻出现，并在持久化用户消息到达时退役。
 
-对话记录渲染会话 Chat target 已经发布的、有界的提问与回答预览，而不是另一个特性插件的节点渲染器：客户端分层不允许一个特性插件导入另一个的组件，而这些预览是可得的最宽纯文本投影。"在会话中打开"会把分析会话设为当前并离开面板，因此长分析可以在具备全部既有能力的完整对话界面中继续。
+对话记录渲染会话 Chat target 已经发布的、有界的提问与回答预览，而不是另一个特性插件的节点渲染器：客户端分层不允许一个特性插件导入另一个的组件，而这些预览是可得的最宽纯文本投影。"在会话中打开"会把分析会话交给主 Conversation 并离开面板，因此长分析可以在具备全部既有能力的完整对话界面中继续。
 
 ### 选中态
 
-所选标的保存在声明的 store 中而不是组件状态里，因此切换到其他面板再回来，仍会回到你刚才在看的标的。移除所选标的会清空选中态；移除另一只则保持不变。分析会话的身份也保存在同一个 store 中：回到面板会让它重新成为当前会话，而 Host 已不再列出的会话会被遗忘。
+所选标的保存在声明的 store 中而不是组件状态里，因此切换到其他面板再回来，仍会回到你刚才在看的标的。移除所选标的会清空选中态；移除另一只则保持不变。分析会话的身份也保存在同一个 store 中：回到面板会重新获取它的 Session reference，而 Host 已不再列出的会话会被遗忘。
 
 -----
 
@@ -119,7 +119,7 @@ kind: "package-reference"
 - [侧栏外壳](../ui-sidebar/README.zh.md) —— 该行加入的面板列表所在的导航列。
 - [布局](../ui-layout/README.zh.md) —— 该行寻址的 `main` slot 与面板选中态。
 - [Chat](../ui-chat/README.zh.md) —— 对话记录所渲染的、会话作用域的 `chat` hook 回合预览。
-- [Agent preset](../../preset/agent-presets/README.zh.md) —— 分析会话所组装自的 `stock-analysis` preset。
+- [Agent preset](../../preset/agent-preset/README.zh.md) —— 分析会话所组装自的 `stock-analysis` preset。
 
 -----
 

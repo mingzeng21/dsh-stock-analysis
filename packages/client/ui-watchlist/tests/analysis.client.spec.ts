@@ -19,23 +19,23 @@ function rows(overrides: Partial<AnalysisSessionRows> = {}): AnalysisSessionRows
 function ports(overrides: Partial<AnalysisPorts> = {}) {
   const create = vi.fn(async () => SESSION)
   const selectPreset = vi.fn(async () => ({ ok: true as const }))
-  const open = vi.fn()
-  const leavePanel = vi.fn()
+  const open = vi.fn(async () => {})
+  const openInConversation = vi.fn()
   const prompt = vi.fn(async () => ({ ok: true as const }))
   const all: AnalysisPorts = {
     rows: () => rows(),
     create,
     selectPreset,
     open,
-    leavePanel,
+    openInConversation,
     prompt,
     ...overrides,
   }
-  return { all, create, selectPreset, open, leavePanel, prompt }
+  return { all, create, selectPreset, open, openInConversation, prompt }
 }
 
 describe('AnalysisSession.start', () => {
-  it('creates a session, composes it from the analysis preset, and makes it current', async () => {
+  it('creates a session, composes it from the analysis preset, and retains it for the panel', async () => {
     const { all, create, selectPreset, open } = ports()
     const analysis = new AnalysisSession(all)
     await expect(analysis.start()).resolves.toEqual({ ok: true, sessionId: SESSION })
@@ -121,22 +121,22 @@ describe('AnalysisSession.send', () => {
 })
 
 describe('AnalysisSession selection', () => {
-  it('makes a listed session current again', () => {
+  it('retains a listed session for its transcript', async () => {
     const { all, open } = ports({ rows: () => rows({ ids: [SESSION], byId: { [SESSION]: {} } }) })
-    expect(new AnalysisSession(all).resume(SESSION)).toBe(true)
+    await expect(new AnalysisSession(all).resume(SESSION)).resolves.toBe(true)
     expect(open).toHaveBeenCalledWith(SESSION)
   })
 
-  it('reports a recorded session the Host no longer lists', () => {
+  it('reports a recorded session the Host no longer lists', async () => {
     const { all, open } = ports()
-    expect(new AnalysisSession(all).resume(SESSION)).toBe(false)
+    await expect(new AnalysisSession(all).resume(SESSION)).resolves.toBe(false)
     expect(open).not.toHaveBeenCalled()
   })
 
   it('opens the analysis in the conversation surface', () => {
-    const { all, open, leavePanel } = ports()
+    const { all, open, openInConversation } = ports()
     new AnalysisSession(all).openInConversation(SESSION)
-    expect(open).toHaveBeenCalledWith(SESSION)
-    expect(leavePanel).toHaveBeenCalledTimes(1)
+    expect(open).not.toHaveBeenCalled()
+    expect(openInConversation).toHaveBeenCalledWith(SESSION)
   })
 })
