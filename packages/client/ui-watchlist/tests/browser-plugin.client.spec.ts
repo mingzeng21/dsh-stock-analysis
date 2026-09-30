@@ -87,6 +87,10 @@ async function bench(options: {
   readonly stock?: IStockClient
   readonly sessions?: readonly string[]
   readonly face?: ReturnType<typeof sessionFace> | undefined
+  /** When set, every retained reference's `ready` rejects with this error. */
+  readonly retainFailure?: Error
+  /** When set, every retained reference's `ready` waits on this gate. */
+  readonly readyGate?: Promise<void>
 } = {}) {
   const watchlist = options.watchlist ?? watchlistStub([MAOTAI])
   const stock = options.stock ?? stockStub()
@@ -108,10 +112,13 @@ async function bench(options: {
   const releases: ReturnType<typeof vi.fn>[] = []
   const retain = vi.fn((sessionId: SessionId) => {
     const release = vi.fn()
+    const ready = options.retainFailure !== undefined
+      ? Promise.reject(options.retainFailure)
+      : (options.readyGate ?? Promise.resolve()).then(() => ({ sessionId, session: options.face }))
     const reference = {
       sessionId,
       binding: { sessionId, session: options.face },
-      ready: Promise.resolve({ sessionId, session: options.face }),
+      ready,
       release,
     } as never as SessionReference
     retained.push(reference)
@@ -256,6 +263,64 @@ describe('ui-watchlist browser half', () => {
     injected.openAnalysisInConversation(SESSION)
     expect(openInConversation).toHaveBeenCalledWith(SESSION)
     expect(releases[0]).toHaveBeenCalledOnce()
+    await fiber.dispose()
+  })
+
+  it('withdraws a retained analysis reference whose ready failed', async () => {
+    const { ctx, fiber, releases } = await bench({
+      face: sessionFace(),
+      sessions: [SESSION],
+      retainFailure: new RemoteError('session/not-found', 'gone', { sessionId: SESSION }),
+    })
+    const injected = injectedFace(ctx)
+    await expect(injected.startAnalysis()).resolves.toEqual({ ok: false, code: 'session/not-found' })
+    expect(releases[0]).toHaveBeenCalledOnce()
+    expect(injected.hooks.analysisReference.getSnapshot()).toBeUndefined()
+    await fiber.dispose()
+  })
+
+  it('keeps the newest retained reference when a later selection supersedes an open one', async () => {
+    let openGate = (): void => {}
+    const gate = new Promise<void>((resolve) => { openGate = resolve })
+    const other = 'session-2' as SessionId
+    const { ctx, fiber, releases, retained } = await bench({
+      face: sessionFace(),
+      sessions: [SESSION, other],
+      readyGate: gate,
+    })
+    const injected = injectedFace(ctx)
+    const first = injected.startAnalysis()
+    await vi.waitFor(() => { expect(retained).toHaveLength(1) })
+    const second = injected.resumeAnalysis(other)
+    await vi.waitFor(() => { expect(retained).toHaveLength(2) })
+    openGate()
+    await expect(first).resolves.toEqual({ ok: true, sessionId: SESSION })
+    await expect(second).resolves.toBe(true)
+    expect(injected.hooks.analysisReference.getSnapshot()).toBe(retained[1])
+    expect(releases[0]).toHaveBeenCalled()
+    await fiber.dispose()
+  })
+
+  it('releases a superseded reference whose ready failed without republishing it', async () => {
+    let fail = (): void => {}
+    const gate = new Promise<void>((_resolve, reject) => {
+      fail = () => { reject(new RemoteError('gateway/internal', 'retain failed', {})) }
+    })
+    const other = 'session-2' as SessionId
+    const { ctx, fiber, releases, retained } = await bench({
+      face: sessionFace(),
+      sessions: [SESSION, other],
+      readyGate: gate,
+    })
+    const injected = injectedFace(ctx)
+    const first = injected.startAnalysis()
+    await vi.waitFor(() => { expect(retained).toHaveLength(1) })
+    const second = injected.resumeAnalysis(other)
+    await vi.waitFor(() => { expect(retained).toHaveLength(2) })
+    fail()
+    await expect(first).resolves.toEqual({ ok: false, code: 'gateway/internal' })
+    await expect(second).resolves.toBe(false)
+    expect(releases[0]).toHaveBeenCalled()
     await fiber.dispose()
   })
 

@@ -95,6 +95,17 @@ describe('AnalysisSession.start', () => {
     })
     await expect(new AnalysisSession(all).start()).resolves.toEqual({ ok: false, code: 'gateway/internal' })
   })
+
+  it('publishes a retention that threw as its Remote code', async () => {
+    const { all } = ports({
+      open: async () => {
+        throw new RemoteError('gateway/internal', 'retain unavailable', {})
+      },
+    })
+    const analysis = new AnalysisSession(all)
+    await expect(analysis.start()).resolves.toEqual({ ok: false, code: 'gateway/internal' })
+    expect(analysis.state.getSnapshot()).toEqual({ phase: 'failed', failure: 'gateway/internal' })
+  })
 })
 
 describe('AnalysisSession.send', () => {
@@ -131,6 +142,18 @@ describe('AnalysisSession selection', () => {
     const { all, open } = ports()
     await expect(new AnalysisSession(all).resume(SESSION)).resolves.toBe(false)
     expect(open).not.toHaveBeenCalled()
+  })
+
+  it('reports a retention that failed while resuming', async () => {
+    const { all } = ports({
+      rows: () => rows({ ids: [SESSION], byId: { [SESSION]: {} } }),
+      open: async () => {
+        throw new RemoteError('gateway/internal', 'retain unavailable', {})
+      },
+    })
+    const analysis = new AnalysisSession(all)
+    await expect(analysis.resume(SESSION)).resolves.toBe(false)
+    expect(analysis.state.getSnapshot()).toEqual({ phase: 'failed', failure: 'gateway/internal' })
   })
 
   it('opens the analysis in the conversation surface', () => {
