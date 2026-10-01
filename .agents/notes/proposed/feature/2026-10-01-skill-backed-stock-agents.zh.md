@@ -6,7 +6,7 @@ Status: proposed
 
 ## 问题
 
-这个 fork 已有股票工具和自选股，但用户还没有可重复使用的研究任务入口。现有 `stock-analysis` preset 已提供股票工具与 skill 加载，而从标准 preset 继承的 coding agent 人设和工具不符合专注研究的产品定位。具名 Agents 的目录需要可找回的分析记录、清楚的数据依据，以及低成本新增专题的方式。
+这个 fork 已有股票工具和自选股，但用户还没有可重复使用的研究任务入口。现有 `stock-analysis` preset 已提供股票工具与 skill 加载，而从标准 preset 继承的 coding agent 人设和工具不符合专注研究的产品定位。具名 Agents 的目录需要可找回的分析记录、可见的数据来源和时间，以及低成本新增专题的方式。
 
 ## 提案
 

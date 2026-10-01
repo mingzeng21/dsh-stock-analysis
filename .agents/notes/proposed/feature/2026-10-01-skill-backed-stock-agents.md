@@ -6,7 +6,7 @@ English | [中文](2026-10-01-skill-backed-stock-agents.zh.md)
 
 ## Problem
 
-The fork has stock-market tools and a Watchlist, but users have no guided entry for repeatable research tasks. The existing `stock-analysis` preset exposes stock tools and skill loading, while its inherited coding persona and tools do not match a focused research product. A directory of named Agents must have durable runs, clear data provenance, and a cheap path to add another specialist.
+The fork has stock-market tools and a Watchlist, but users have no guided entry for repeatable research tasks. The existing `stock-analysis` preset exposes stock tools and skill loading, while its inherited coding persona and tools do not match a focused research product. A directory of named Agents must have durable runs, visible source names and data times, and a cheap path to add another specialist.
 
 ## Proposal
 
