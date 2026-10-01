@@ -7,6 +7,7 @@
  */
 
 import { Command } from 'commander'
+import { fileURLToPath } from 'node:url'
 import type { Context } from '@deepseek-ai/cordis'
 import { parseCmdline } from '@deepseek-ai/dsh-cmdline'
 
@@ -18,6 +19,16 @@ export const inject = ['cmdlineArgs']
 
 /** Service provided by this ordinary plugin and injected by flag-configured rows. */
 export const WEB_STARTUP_SERVICE = 'webStartup'
+
+/** Bundled specialist skills, stable from source and built package entries. */
+export const STOCK_AGENT_SKILL_DIR = fileURLToPath(new URL('../skills', import.meta.url))
+
+declare module '@deepseek-ai/cordis' {
+  interface Context {
+    /** Skill root shipped by this Web application. */
+    stockAgentSkillDir: string
+  }
+}
 
 /** What the web rows read from {@link WEB_STARTUP_SERVICE}. */
 export interface WebStartupValues {
@@ -64,10 +75,11 @@ Examples:
  * Parse and provide the Web invocation as an ordinary Cordis service. The
  * command's action publishes the flags this invocation named; `--host 0.0.0.0`
  * or a non-numeric `--port` is a usage error, so on rejection (and on `--help`)
- * nothing is provided.
+ * the Web flag service is not provided.
  * @param ctx - plugin context carrying the command line.
  */
 export function apply(ctx: Context): void {
+  ctx.provide('stockAgentSkillDir', STOCK_AGENT_SKILL_DIR)
   const program = webCommand()
   program.action(() => {
     const options = program.opts<WebOptions>()

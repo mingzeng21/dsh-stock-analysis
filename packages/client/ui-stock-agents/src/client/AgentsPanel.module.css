@@ -1,0 +1,32 @@
+.panel {
+  flex: 1;
+  overflow: auto;
+  padding: 32px clamp(20px, 5vw, 72px);
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-bg-base);
+  font-family: var(--dsw-font-family);
+}
+.header { max-width: 900px; margin: 0 auto 28px; }
+.header h1 { margin: 0 0 8px; font-size: 24px; }
+.header p, .launch p, .history p { color: var(--dsw-alias-label-secondary); }
+.cards { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.card { display: grid; gap: 12px; min-height: 130px; padding: 20px; text-align: left; border: 1px solid var(--dsw-alias-border-l2); border-radius: 12px; color: inherit; background: var(--dsw-alias-bg-base); cursor: pointer; }
+.card:hover, .card:focus-visible { background: var(--dsw-alias-interactive-bg-hover); }
+.card strong { font-size: 16px; }
+.card span { color: var(--dsw-alias-label-secondary); line-height: 1.5; }
+.launch, .history { max-width: 900px; margin: 28px auto 0; }
+.launch { display: grid; gap: 12px; }
+.launch label { font-weight: 600; }
+.launch textarea { min-height: 110px; resize: vertical; padding: 12px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; color: inherit; background: var(--dsw-alias-bg-base); font: inherit; }
+.examples { display: flex; flex-wrap: wrap; gap: 8px; }
+.examples h2 { width: 100%; margin: 4px 0; font-size: 13px; }
+.examples button, .history button, .back { padding: 6px 10px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; color: inherit; background: transparent; cursor: pointer; }
+.primary { justify-self: start; padding: 9px 16px; border: 0; border-radius: 8px; color: white; background: var(--dsw-alias-interactive-bg-active); cursor: pointer; }
+.primary:disabled { opacity: .5; cursor: default; }
+.history h2 { font-size: 17px; }
+.history ul { padding: 0; list-style: none; }
+.history li { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px 0; border-top: 1px solid var(--dsw-alias-border-l2); }
+.history li span:nth-child(2) { flex: 1; min-width: 180px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--dsw-alias-label-secondary); }
+.history time { color: var(--dsw-alias-label-tertiary); font-size: 12px; }
+.history small { color: var(--dsw-alias-label-tertiary); }
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; color: var(--dsw-alias-label-secondary); font-size: 11px; white-space: nowrap; }

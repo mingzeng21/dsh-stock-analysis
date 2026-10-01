@@ -51,16 +51,28 @@ function byId(preset: string): Map<string, PluginRow> {
 }
 
 describe('shipped stock-analysis preset', () => {
-  it('carries every standard plugin row unchanged and adds tool-stock', () => {
+  it('retains shared standard infrastructure while excluding coding tools', () => {
     const standard = byId('standard')
     const stockAnalysis = byId('stock-analysis')
 
+    const omitted = new Set([
+      'agent-instructions', 'tool-bash', 'tool-pwsh', 'tool-fs', 'tool-fs-search',
+      'tool-jobs', 'planning', 'delegation', 'tool-todo',
+    ])
+    const adapted = new Set(['persona', 'skill-filesystem'])
+
     for (const [id, row] of standard) {
+      if (omitted.has(id)) {
+        expect(stockAnalysis.has(id), `coding plugin "${id}" remains in stock-analysis`).toBe(false)
+        continue
+      }
       expect(stockAnalysis.has(id), `stock-analysis is missing standard plugin "${id}"`).toBe(true)
-      expect(stockAnalysis.get(id), `stock-analysis plugin "${id}" drifted from standard`).toEqual(row)
+      if (!adapted.has(id)) expect(stockAnalysis.get(id), `stock-analysis plugin "${id}" drifted from standard`).toEqual(row)
     }
 
     const extra = [...stockAnalysis.keys()].filter(id => !standard.has(id)).sort()
     expect(extra).toEqual(['tool-stock'])
+    expect(stockAnalysis.get('skill-filesystem')).toMatchObject({ inject: ['stockAgentSkillDir'] })
+    expect(stockAnalysis.get('persona')).toMatchObject({ name: '@deepseek-ai/dsh-persona' })
   })
 })

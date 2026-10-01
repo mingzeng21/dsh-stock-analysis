@@ -144,6 +144,7 @@ export const SERVICE_PAGE: Record<string, string> = {
   terminalController: 'workspace.md',
   directoryPickerController: 'workspace.md',
   stockController: 'stock.md',
+  stockAgentsController: 'stock.md',
   watchlistController: 'storage.md',
 }
 
@@ -202,6 +203,8 @@ export const SERVICE_WALK_EXEMPTIONS: Record<string, string> = {
   theme: 'client-side interface-typed browser service — packages/client/ui-theme/README.md owns the API',
   workspaces: 'client-side interface-typed browser service — packages/api/workspace-controller/README.md owns the API',
   stockClient: 'client-side interface-typed browser service — packages/api/stock-controller/README.md owns the API',
+  stockAgentsClient: 'client-side catalog read service — packages/api/stock-agents-controller/README.md owns the API',
+  stockAgentSkillDir: 'Web startup-owned bundled skill directory — packages/bundle/web-app/README.md owns the value',
   watchlist: 'client-side interface-typed browser service — packages/api/watchlist-controller/README.md owns the API',
   resources: 'client-side resource model (protocol providers, pins, live sources) — packages/client/resources/README.md owns the API',
   sidebarRight: 'client-side right-Sidebar navigation face — packages/client/ui-sidebar-right/README.md owns the API',
@@ -953,6 +956,7 @@ export const TYPE_LINK_EXEMPTIONS: Readonly<Record<string, string>> = {
   WorkspaceFileStat: 'Host workspace file endpoint contract is owned by packages/api/workspace-files/README.md',
   WorkspaceFileText: 'Host workspace file endpoint contract is owned by packages/api/workspace-files/README.md',
   InstrumentMatch: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
+  StockAgentCard: 'Stock Agent catalog fields are owned by packages/api/stock-agents-controller/README.md',
   Quote: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   QuoteBatch: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   Candle: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',

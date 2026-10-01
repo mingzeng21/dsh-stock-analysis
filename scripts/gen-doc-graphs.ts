@@ -302,6 +302,13 @@ const SERVICE_ROLES: ServiceRole[] = [
     note: 'Serves four reads over the stock seam — symbol search, a quote batch, a candle series, and research documents — and resolves the vendor\'s row fields, encodings, and search vocabulary once on the Host.',
   },
   {
+    key: 'stockAgentsController',
+    pkg: 'api-stock-agents-controller',
+    title: 'Stock research Agent catalog and Session identity',
+    mode: 'core',
+    note: 'Lists bundled specialist skills without loading their bodies, records each Session\'s specialist identity, and loads the current skill on follow-up turns.',
+  },
+  {
     key: 'watchlistController',
     pkg: 'api-watchlist-controller',
     title: 'Durable watchlist Remote controller',

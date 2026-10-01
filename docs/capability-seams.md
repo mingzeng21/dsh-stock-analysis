@@ -80,6 +80,8 @@ flowchart LR
   svc_workspaceFiles["ctx.workspaceFiles<br/>Host workspace file Remote service"]
   pkg_api_stock_controller["api-stock-controller"]
   svc_stockController["ctx.stockController<br/>Browser-facing stock Remote controller"]
+  pkg_api_stock_agents_controller["api-stock-agents-controller"]
+  svc_stockAgentsController["ctx.stockAgentsController<br/>Stock research Agent catalog and Session identity"]
   pkg_api_watchlist_controller["api-watchlist-controller"]
   svc_watchlistController["ctx.watchlistController<br/>Durable watchlist Remote controller"]
   pkg_workspace_changes["workspace-changes"]
@@ -295,6 +297,7 @@ flowchart LR
   pkg_api_session_controller --> svc_sessionSkillCatalog
   pkg_api_settings_controller --> svc_credentialsController
   pkg_api_settings_controller --> svc_settingsController
+  pkg_api_stock_agents_controller --> svc_stockAgentsController
   pkg_api_stock_controller --> svc_stockController
   pkg_api_terminal_controller --> svc_terminalController
   pkg_api_watchlist_controller --> svc_watchlistController
@@ -615,6 +618,7 @@ flowchart LR
 | `ctx.settingsController` | `core` | [`api-settings-controller`](../packages/api/settings-controller) | - | - | - | Projects the user-settings seam onto the generated Remote namespace: the read is always redacted and every refusal is classified here, not on the seam Definition. |
 | `ctx.workspaceFiles` | `core` | [`api-workspace-files`](../packages/api/workspace-files) | - | - | - | Serves stat, paged text, byte windows, directory listings, and the change feed for files inside a Session's workspace root, confined by lstat, containment, and a stat re-check. |
 | `ctx.stockController` | `core` | [`api-stock-controller`](../packages/api/stock-controller) | - | - | - | Serves four reads over the stock seam — symbol search, a quote batch, a candle series, and research documents — and resolves the vendor's row fields, encodings, and search vocabulary once on the Host. |
+| `ctx.stockAgentsController` | `core` | [`api-stock-agents-controller`](../packages/api/stock-agents-controller) | - | - | - | Lists bundled specialist skills without loading their bodies, records each Session's specialist identity, and loads the current skill on follow-up turns. |
 | `ctx.watchlistController` | `core` | [`api-watchlist-controller`](../packages/api/watchlist-controller) | - | - | - | Owns the ordered personal instrument list as one storage-domain value and serves its list, add, remove, and reorder operations. |
 | `ctx.workspaceChanges` | `core` | [`workspace-changes`](../packages/deliverables/workspace-changes) | - | - | - | Serves the summary each workspace/changes event announced and each listed file's turn-start and turn-end comparison, by Session and event sequence, until that Session is disposed; the log carries only the turn. |
 | `ctx.terminalController` | `core` | [`api-terminal-controller`](../packages/api/terminal-controller) | - | - | - | Owns user terminal processes, default shell resolution and bounded screen recovery through the subprocess provider and typed Remote transport. |

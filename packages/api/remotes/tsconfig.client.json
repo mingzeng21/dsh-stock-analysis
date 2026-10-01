@@ -11,7 +11,9 @@
     "src/types.ts"
   ],
   "references": [
-    { "path": "../../client/product-analytics/tsconfig.client.json" },
+    {
+      "path": "../../client/product-analytics/tsconfig.client.json"
+    },
     {
       "path": "../../../vendor/cordis"
     },
@@ -77,6 +79,9 @@
     },
     {
       "path": "../session-controller/tsconfig.client.json"
+    },
+    {
+      "path": "../stock-agents-controller/tsconfig.client.json"
     },
     {
       "path": "../workspace-files/tsconfig.client.json"

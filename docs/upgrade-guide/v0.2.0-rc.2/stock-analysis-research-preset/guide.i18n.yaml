@@ -1,0 +1,16 @@
+# Bilingual-pair consistency record for guide.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.2.0-rc.2/stock-analysis-research-preset/guide.md
+/:
+  en: e9e83d6efded5ddb
+  zh: 527b8f5b0a2b14e0
+/stock-analysis-becomes-a-research-preset:
+  en: 4813b8757036a10b
+  zh: e1d02089fb438e30
+/stock-analysis-becomes-a-research-preset/change:
+  en: e02dd4db65d9af69
+  zh: c852bea1fcbe8ade
+/stock-analysis-becomes-a-research-preset/migration:
+  en: cb477161e97f1e9c
+  zh: ca4b9c65be02bb10

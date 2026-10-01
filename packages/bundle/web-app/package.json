@@ -36,6 +36,7 @@
     "presets/minimal.patch.yml",
     "presets/cordis.patch.yml",
     "presets/stock-analysis.patch.yml",
+    "skills/**/*",
     "lib/types/**/*.d.ts"
   ],
   "license": "MIT",
@@ -61,6 +62,7 @@
     "@deepseek-ai/dsh-api-remotes": "workspace:*",
     "@deepseek-ai/dsh-api-session-controller": "workspace:*",
     "@deepseek-ai/dsh-api-settings-controller": "workspace:*",
+    "@deepseek-ai/dsh-api-stock-agents-controller": "workspace:*",
     "@deepseek-ai/dsh-api-stock-controller": "workspace:*",
     "@deepseek-ai/dsh-api-terminal-controller": "workspace:*",
     "@deepseek-ai/dsh-api-watchlist-controller": "workspace:*",
@@ -118,6 +120,7 @@
     "@deepseek-ai/dsh-client-ui-sidebar-right": "workspace:*",
     "@deepseek-ai/dsh-client-ui-sidebar-terminal": "workspace:*",
     "@deepseek-ai/dsh-client-ui-skill": "workspace:*",
+    "@deepseek-ai/dsh-client-ui-stock-agents": "workspace:*",
     "@deepseek-ai/dsh-client-ui-subagent": "workspace:*",
     "@deepseek-ai/dsh-client-ui-theme": "workspace:*",
     "@deepseek-ai/dsh-client-ui-tool": "workspace:*",
@@ -206,6 +209,7 @@
     "@deepseek-ai/dsh-system-prompt": "workspace:*",
     "@deepseek-ai/dsh-typert-registry": "workspace:*",
     "@deepseek-ai/libreoffice-kit": "^0.1.1",
-    "@deepseek-ai/dsh-otel": "workspace:*"
+    "@deepseek-ai/dsh-otel": "workspace:*",
+    "@deepseek-ai/dsh-skill": "workspace:*"
   }
 }
