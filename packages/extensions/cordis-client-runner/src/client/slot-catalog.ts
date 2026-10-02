@@ -1358,7 +1358,6 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     occupants: [
       'client-ui-agent-preset AgentPresetLabel id \'agent-preset\'',
       'client-ui-jobs JobListAction id \'job-list\'',
-      'client-ui-stock-agents AgentBadge id \'stock-agent-identity\'',
       'client-ui-subagent SubagentCatalogAction id \'subagent-catalog\'',
       'experimental-client-ui-agent-team TeamAction id \'agent-team\'',
     ],
@@ -4029,7 +4028,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     ],
     replaceRisk: 'shadows-shipped-ui',
     example: 'return {\n  inject: [\'slots\'],\n  apply(ctx) {\n    ctx.slots.inject(\'stock-agents.conversation\', () => ctx.slots.register(\n      { name: \'stock-agents.conversation\' },\n      () => React.createElement(\'div\', null, \'hello\'),\n    ))\n  },\n}',
-    source: 'packages/client/ui-stock-agents/src/client/index.ts:26',
+    source: 'packages/client/ui-stock-agents/src/client/index.ts:25',
   },
   {
     key: 'tool.call.images',

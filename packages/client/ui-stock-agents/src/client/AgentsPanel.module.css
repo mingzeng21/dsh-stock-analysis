@@ -61,8 +61,6 @@
 .examples button { padding: 6px 10px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; color: inherit; background: transparent; cursor: pointer; }
 .primary { justify-self: start; padding: 9px 16px; border: 0; border-radius: 8px; color: white; background: var(--dsw-alias-interactive-bg-active); cursor: pointer; }
 .primary:disabled { opacity: .5; cursor: default; }
-.badge { display: inline-flex; align-items: center; padding: 2px 8px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 999px; color: var(--dsw-alias-label-secondary); font-size: 11px; white-space: nowrap; }
-
 @media (max-width: 720px) {
   .historyRail { flex-basis: 220px; }
   .content { padding: 20px; }

@@ -1,7 +1,7 @@
 /** Catalog, launch form, and collapsible history rail for stock Agents. */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { StockAgentCard } from '@deepseek-ai/dsh-api-stock-agents-controller/types'
-import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/client'
+import type { SessionListState, SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import type { InjectFace, PropsLocale, PropsRenderSlots, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
@@ -15,40 +15,79 @@ export interface AgentsPanelInjected {
     catalogError: ObservableSnapshot<string | null>
   }
   loadCatalog: () => void
-  start: (card: StockAgentCard, query: string) => Promise<SessionId>
-  openSession: (sessionId: SessionId) => void
+  start: (card: StockAgentCard, query: string) => Promise<SessionReference>
+  openSession: (sessionId: SessionId) => SessionReference
 }
 export type AgentsPanelProps = PropsRuntime<'main'> & PropsRenderSlots<'stock-agents.conversation'>
   & PropsLocale<'stockAgents'> & InjectFace<AgentsPanelInjected>
 
 /** Render stock Agent launch surfaces beside a collapsible Session history rail. */
 export function AgentsPanel({
-  t, renderSlot, useCatalog, useSessions, useCatalogError, loadCatalog, start, openSession,
+  t, renderSlot, SessionProvider, useCatalog, useSessions, useCatalogError, loadCatalog, start, openSession,
 }: AgentsPanelProps) {
   const catalog = useCatalog(value => value)
   const sessions = useSessions(value => value)
   const catalogError = useCatalogError(value => value)
   const dateFormat = new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' })
   const [selected, setSelected] = useState<StockAgentCard | null>(null)
-  const [activeSessionId, setActiveSessionId] = useState<SessionId | null>(null)
+  const [active, setActive] = useState<{ id: SessionId; reference: SessionReference } | null>(null)
+  const activeReference = useRef<SessionReference | null>(null)
+  const ownedReferences = useRef(new Set<SessionReference>())
+  const mounted = useRef(false)
   const [query, setQuery] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [historyVisible, setHistoryVisible] = useState(true)
   useEffect(() => { loadCatalog() }, [loadCatalog])
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+      for (const reference of ownedReferences.current) reference.release()
+      ownedReferences.current.clear()
+      activeReference.current = null
+    }
+  }, [])
+  useEffect(() => {
+    const reference = active?.reference
+    return () => {
+      if (reference === undefined) return
+      ownedReferences.current.delete(reference)
+      reference.release()
+      if (activeReference.current === reference) activeReference.current = null
+    }
+  }, [active])
   const records = sessions.ids.flatMap((id) => {
     const summary = sessions.byId[id]
     const record = summary?.projectionValues?.stockAgent
     return summary === undefined || record === null || record === undefined ? [] : [{ id, record, updatedAt: summary.updatedAt }]
   })
+  const clearActiveSession = () => {
+    activeReference.current = null
+    setActive(null)
+  }
+  const showReference = (reference: SessionReference) => {
+    if (!mounted.current) {
+      reference.release()
+      return
+    }
+    ownedReferences.current.add(reference)
+    activeReference.current = reference
+    setActive({ id: reference.sessionId, reference })
+    setError(null)
+    void reference.ready.catch(() => {
+      if (activeReference.current === reference) setError('failed')
+    })
+  }
+  const showSession = (sessionId: SessionId) => { showReference(openSession(sessionId)) }
   const choose = (card: StockAgentCard, initial = '') => {
-    setActiveSessionId(null)
+    clearActiveSession()
     setSelected(card)
     setQuery(initial)
     setError(null)
     if (card.launch === 'immediate') {
       setBusy(true)
-      void start(card, '').then(setActiveSessionId)
+      void start(card, '').then(showReference)
         .catch(() => { setError('failed') }).finally(() => { setBusy(false) })
     }
   }
@@ -56,7 +95,7 @@ export function AgentsPanel({
     if (selected === null || busy || (selected.launch === 'query' && query.trim() === '')) return
     setBusy(true)
     setError(null)
-    void start(selected, query.trim()).then(setActiveSessionId)
+    void start(selected, query.trim()).then(showReference)
       .catch(() => { setError('failed') }).finally(() => { setBusy(false) })
   }
   const historyToggle = <button
@@ -84,8 +123,8 @@ export function AgentsPanel({
             type="button"
             className={css.historyOpen}
             aria-label={t('panel.open')}
-            aria-current={activeSessionId === id ? 'true' : undefined}
-            onClick={() => { openSession(id); setSelected(card ?? null); setActiveSessionId(id) }}
+            aria-current={active?.id === id ? 'true' : undefined}
+            onClick={() => { showSession(id); setSelected(card ?? null) }}
           >
             <span className={css.historyAgent}>{card?.title.zh ?? t('panel.removedAgent')}</span>
             {record.query !== '' && <span className={css.historyQuery}>{record.query}</span>}
@@ -98,19 +137,24 @@ export function AgentsPanel({
       })}
     </ul>}
   </aside>
-  if (activeSessionId !== null) {
-    const active = records.find(item => item.id === activeSessionId)
-    const card = selected ?? catalog.find(item => item.name === active?.record.name)
+  if (active !== null) {
+    const activeRecord = records.find(item => item.id === active.id)
+    const card = selected ?? catalog.find(item => item.name === activeRecord?.record.name)
     return <main className={css.panel}>
       {historyRail}
       <section className={css.detail}>
         <nav className={css.detailNav} aria-label={t('panel.title')}>
           {!historyVisible && historyToggle}
-          <button type="button" className={css.back} onClick={() => { setActiveSessionId(null); setSelected(null) }}>{t('panel.back')}</button>
+          <button type="button" className={css.back} onClick={() => { clearActiveSession(); setSelected(null) }}>{t('panel.back')}</button>
           <span>{card?.title.zh ?? t('panel.removedAgent')}</span>
-          {card !== undefined && <button type="button" onClick={() => { choose(card, active?.record.query ?? query) }}>{t('panel.rerun')}</button>}
+          {card !== undefined && <button type="button" onClick={() => { choose(card, activeRecord?.record.query ?? query) }}>{t('panel.rerun')}</button>}
         </nav>
-        <div className={css.detailConversation}>{renderSlot('stock-agents.conversation', {})}</div>
+        {error !== null && <p role="alert">{t('panel.failure')}</p>}
+        <div className={css.detailConversation}>
+          <SessionProvider session={active.reference}>
+            {renderSlot('stock-agents.conversation', {})}
+          </SessionProvider>
+        </div>
       </section>
     </main>
   }

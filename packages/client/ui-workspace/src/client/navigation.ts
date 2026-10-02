@@ -19,6 +19,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 import type { RowToast } from './contract/slots.ts'
 import { pinOrderAccounts, pinOrderSource } from './pin-order.ts'
 import type { WorkspaceViewStoreActions } from './stores.ts'
+import { isConversationSession } from './session-visibility.ts'
 
 interface MainSelection {
   readonly sessionId?: SessionId
@@ -337,7 +338,9 @@ class UiWorkspaceService extends Service implements UiWorkspace {
       this.replaceMain(saved.subagentAddress, this.lifetime.signal, 'preserve')
       return
     }
-    const summary = saved.sessionId === undefined ? undefined : sessions.byId[saved.sessionId]
+    const savedSummary = saved.sessionId === undefined ? undefined : sessions.byId[saved.sessionId]
+    const summary = savedSummary !== undefined && isConversationSession(savedSummary) ? savedSummary : undefined
+    if (savedSummary !== undefined && summary === undefined) this.selection.set({})
     const workspace = summary === undefined ? undefined
       : workspaces.items.find(item => item.sessionIds.includes(summary.id))
     if (summary !== undefined && (!summary.blank || workspace === undefined)) {

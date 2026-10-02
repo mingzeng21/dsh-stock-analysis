@@ -3,16 +3,15 @@ import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-api-stock-agents-controller/remote'
 import type {} from '@deepseek-ai/dsh-api-stock-agents-controller/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
-import type {} from '@deepseek-ai/dsh-client-ui-workspace/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 import type {} from '@deepseek-ai/dsh-client-ui-slots'
 import type { StockAgentCard } from '@deepseek-ai/dsh-api-stock-agents-controller/types'
+import type { SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { MainPanelId } from '@deepseek-ai/dsh-client-ui-layout/client'
 import { AgentsPanel, type AgentsPanelInjected } from './AgentsPanel.tsx'
-import { AgentBadge, type AgentBadgeInjected } from './AgentBadge.tsx'
 import { AgentConversation } from './AgentConversation.tsx'
 import { en, NS, zh, type StockAgentsKey } from './locales.ts'
 import { StockAgentsIcon } from './PanelIcon.tsx'
@@ -29,25 +28,23 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 
 declare module '@deepseek-ai/dsh-api-session-controller/client' {
   interface SessionReferenceSourceMap {
-    /** Temporary reference while a specialist's first prompt starts. */
+    /** Session references held by the Agents workspace. */
     stockAgent: unknown
   }
 }
 
 const PANEL_ID = 'stock-agents' as MainPanelId
-export const inject = ['slots', 'locale', 'layout', 'sessions', 'uiWorkspace', 'stockAgentsClient', 'remote', 'remote.agentPresets']
+export const inject = ['slots', 'locale', 'layout', 'sessions', 'stockAgentsClient', 'remote', 'remote.agentPresets']
 
 /** Register the single navigation row and its catalog/history panel. */
 export function apply(ctx: Context): void {
   const catalog = createSnapshotStore<readonly StockAgentCard[]>([])
-  const catalogReady = createSnapshotStore(false)
   const catalogError = createSnapshotStore<string | null>(null)
   const loadCatalog = () => {
     void ctx.stockAgentsClient.list().then((result) => {
       if (result.ok) {
         catalog.set(result.value)
         catalogError.set(null)
-        catalogReady.set(true)
       } else {
         catalogError.set(result.error.code)
         ctx.logger.warn(`Stock Agents catalog failed: ${result.error.code}`)
@@ -58,15 +55,12 @@ export function apply(ctx: Context): void {
     })
   }
   loadCatalog()
-  const start = async (card: StockAgentCard, query: string): Promise<SessionId> => {
-    const rows = ctx.sessions.list.getSnapshot()
-    const current = ctx.uiWorkspace.currentSessionId
-    const cwd = current === undefined ? undefined : rows.byId[current]?.cwd
-    const target = cwd === undefined ? {} : { cwd }
-    const id = await ctx.sessions.create(target)
+  const start = async (card: StockAgentCard, query: string): Promise<SessionReference> => {
+    const id = await ctx.sessions.create()
     const selected = await ctx.remote.agentPresets.select(id, 'stock-analysis')
     if (!selected.ok) throw new Error(selected.error.code)
     const reference = ctx.sessions.retain(id, { source: 'stockAgent' })
+    let handedOff = false
     try {
       await reference.ready
       const face = ctx.sessions.binding(id)?.session
@@ -79,10 +73,10 @@ export function apply(ctx: Context): void {
       const submission = face.beginSubmission({ mode: 'queue', text, attachments: [] })
       const result = await face.prompt([{ type: 'text', text }], 'queue', undefined, submission.requestId)
       if (!result.ok) throw new Error(result.error.code)
-      ctx.uiWorkspace.selectSession(id)
-      return id
+      handedOff = true
+      return reference
     } finally {
-      reference.release()
+      if (!handedOff) reference.release()
     }
   }
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'ui-stock-agents: dictionaries')
@@ -97,14 +91,10 @@ export function apply(ctx: Context): void {
       hooks: { catalog, sessions: ctx.sessions.list, catalogError },
       loadCatalog,
       start,
-      openSession: (sessionId: SessionId) => { ctx.uiWorkspace.selectSession(sessionId) },
+      openSession: (sessionId: SessionId) => ctx.sessions.retain(sessionId, { source: 'stockAgent' }),
     }),
   }, AgentsPanel))
   ctx.slots.inject('stock-agents.conversation', () => ctx.slots.register({
     name: 'stock-agents.conversation',
   }, AgentConversation))
-  ctx.slots.inject('conversation.session.header.actions', () => ctx.slots.register({
-    name: 'conversation.session.header.actions', id: 'stock-agent-identity', order: 5, locale: NS,
-    inject: (): AgentBadgeInjected => ({ hooks: { catalog, sessions: ctx.sessions.list, catalogReady } }),
-  }, AgentBadge))
 }
