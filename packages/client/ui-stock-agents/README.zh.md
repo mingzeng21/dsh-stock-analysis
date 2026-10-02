@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-Web 客户端注册一个股票分析侧边栏入口，从 Host 的 skill 元数据构建卡片，并列出持久化的专属 Agent Session。无论应用语言如何设置，Agents 自有界面文案均使用简体中文；股票 preset 要求回答使用简体中文。卡片依据 `SKILL.md` 元数据打开输入表单，或直接开始分析。
+Web 客户端注册一个股票分析侧边栏入口，从 Host 的 skill 元数据构建卡片，并在分析内容左侧的可折叠栏中显示持久化的专属 Agent Session。无论应用语言如何设置，Agents 自有界面文案均使用简体中文；股票 preset 要求回答使用简体中文。卡片依据 `SKILL.md` 元数据打开输入表单，或直接开始分析。
 
 ## 目录
 
@@ -25,12 +25,12 @@ Web 客户端注册一个股票分析侧边栏入口，从 Host 的 skill 元数
 <a id="use-this-package"></a>
 ## 使用本包
 
-与 Session 服务、股票 Agents Remote、locale、slots 和 Workspace UI 一起挂载。点击立即启动的卡片会创建新 Session 并开始分析；输入类卡片会等到用户提交条件后再启动。每次运行都会在首轮前选中 `stock-analysis`、发送显式 `/skill-name` 提示词，并在面板内显示流式对话。面板根据 Session 列表投影显示所有专属记录；重新分析会使用可编辑的旧条件创建另一个 Session。
+与 Session 服务、股票 Agents Remote、locale、slots 和 Workspace UI 一起挂载。点击立即启动的卡片会创建新 Session 并开始分析；输入类卡片会等到用户提交条件后再启动。每次运行都会在首轮前选中 `stock-analysis`、发送显式 `/skill-name` 提示词，并在面板内显示流式对话。专属记录显示在应用导航侧栏右侧、分析内容左侧；选择记录可打开结果，也可以在目录、启动表单或对话视图中收起该栏。
 
 <a id="understand-the-implementation"></a>
 ## 理解实现
 
-卡片元数据来自随包 skill 中的 `metadata.stockAgent`，面板只显示其中的中文字段。面板只持有启动状态；回答和追问由 Session 日志持有。结果与追问复用 `conversation.content` factory，不离开面板。同一 Session 在普通 Chat 打开时，对话标题旁显示专属 Agent 身份。skill 移除后历史仍可打开，但不提供重新运行的卡片。
+卡片元数据来自随包 skill 中的 `metadata.stockAgent`，面板只显示其中的中文字段。面板持有启动状态和临时的记录栏显隐状态；回答和追问由 Session 日志持有。结果与追问复用 `conversation.content` factory，不离开面板。打开对话时仍可使用记录栏；同一 Session 在普通 Chat 打开时，对话标题旁显示专属 Agent 身份。skill 移除后历史仍可打开，但不提供重新运行的卡片。
 
 <a id="further-exploration"></a>
 ## 进一步探索
