@@ -13,12 +13,17 @@ import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { MainPanelId } from '@deepseek-ai/dsh-client-ui-layout/client'
 import { AgentsPanel, type AgentsPanelInjected } from './AgentsPanel.tsx'
 import { AgentBadge, type AgentBadgeInjected } from './AgentBadge.tsx'
+import { AgentConversation } from './AgentConversation.tsx'
 import { en, NS, zh, type StockAgentsKey } from './locales.ts'
 import { StockAgentsIcon } from './PanelIcon.tsx'
 
 declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface LocaleNamespaceMap {
     stockAgents: StockAgentsKey
+  }
+  interface SlotMap {
+    /** Selected Session body inside the Agents main panel. */
+    'stock-agents.conversation': { kind: 'single'; scope: 'session-maybe' }
   }
 }
 
@@ -53,7 +58,7 @@ export function apply(ctx: Context): void {
     })
   }
   loadCatalog()
-  const start = async (card: StockAgentCard, query: string): Promise<void> => {
+  const start = async (card: StockAgentCard, query: string): Promise<SessionId> => {
     const rows = ctx.sessions.list.getSnapshot()
     const current = ctx.uiWorkspace.currentSessionId
     const cwd = current === undefined ? undefined : rows.byId[current]?.cwd
@@ -74,7 +79,8 @@ export function apply(ctx: Context): void {
       const submission = face.beginSubmission({ mode: 'queue', text, attachments: [] })
       const result = await face.prompt([{ type: 'text', text }], 'queue', undefined, submission.requestId)
       if (!result.ok) throw new Error(result.error.code)
-      ctx.uiWorkspace.openSession(id)
+      ctx.uiWorkspace.selectSession(id)
+      return id
     } finally {
       reference.release()
     }
@@ -86,13 +92,17 @@ export function apply(ctx: Context): void {
   }, StockAgentsIcon))
   ctx.slots.inject('main', () => ctx.slots.register({
     name: 'main', key: PANEL_ID, locale: NS,
+    children: { 'stock-agents.conversation': { kind: 'single', scope: 'session-maybe' } },
     inject: (): AgentsPanelInjected => ({
       hooks: { catalog, sessions: ctx.sessions.list, locale: ctx.locale, catalogError },
       loadCatalog,
       start,
-      openSession: (sessionId: SessionId) => { ctx.uiWorkspace.openSession(sessionId) },
+      openSession: (sessionId: SessionId) => { ctx.uiWorkspace.selectSession(sessionId) },
     }),
   }, AgentsPanel))
+  ctx.slots.inject('stock-agents.conversation', () => ctx.slots.register({
+    name: 'stock-agents.conversation',
+  }, AgentConversation))
   ctx.slots.inject('conversation.session.header.actions', () => ctx.slots.register({
     name: 'conversation.session.header.actions', id: 'stock-agent-identity', order: 5, locale: NS,
     inject: (): AgentBadgeInjected => ({ hooks: { catalog, sessions: ctx.sessions.list, locale: ctx.locale, catalogReady } }),

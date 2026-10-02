@@ -35,6 +35,11 @@ export interface UiWorkspace {
    */
   openSession(target: SessionTarget): void
   /**
+   * Select a Session for a panel that embeds the Conversation without changing the active panel.
+   * @param target - known Session identity or durable direct-parent subagent address to display.
+   */
+  selectSession(target: SessionTarget): void
+  /**
    * Connect a Workspace and open its Session unless a later navigation supersedes it.
    * @param workspaceId - target Workspace.
    * @param beforeOpen - optional synchronous preparation for the selected Session,
@@ -206,6 +211,10 @@ class UiWorkspaceService extends Service implements UiWorkspace {
 
   openSession(target: SessionTarget): void {
     this.replaceMain(target, this.lifetime.signal, 'reveal')
+  }
+
+  selectSession(target: SessionTarget): void {
+    this.replaceMain(target, this.lifetime.signal, 'preserve')
   }
 
   async openWorkspace(workspaceId: WorkspaceId, beforeOpen?: (sessionId: SessionId) => void): Promise<void> {

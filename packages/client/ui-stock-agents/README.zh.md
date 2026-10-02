@@ -25,12 +25,12 @@ Web 客户端注册一个 Agents 侧边栏入口，从 Host 的 skill 元数据�
 <a id="use-this-package"></a>
 ## 使用本包
 
-与 Session 服务、股票 Agents Remote、locale、slots 和 Workspace UI 一起挂载。选择卡片后创建新 Session，在首轮前选中 `stock-analysis`，提交显式 `/skill-name` 提示词，并打开完整的流式对话。Agents 面板根据 Session 列表投影显示所有专属记录；重新分析使用可编辑的旧条件创建另一个 Session。
+与 Session 服务、股票 Agents Remote、locale、slots 和 Workspace UI 一起挂载。选择卡片后创建新 Session，在首轮前选中 `stock-analysis`，提交显式 `/skill-name` 提示词，并在 Agents 面板内显示流式对话。Agents 面板根据 Session 列表投影显示所有专属记录；重新分析使用可编辑的旧条件创建另一个 Session。
 
 <a id="understand-the-implementation"></a>
 ## 理解实现
 
-卡片及其双语标签来自随包 skill 中的 `metadata.stockAgent`。面板只持有启动状态；回答和追问由 Session 日志持有。同一 Session 在普通 Chat 打开时，对话标题旁显示专属 Agent 身份。skill 移除后历史仍可打开，但不提供重新运行的卡片。
+卡片及其双语标签来自随包 skill 中的 `metadata.stockAgent`。面板只持有启动状态；回答和追问由 Session 日志持有。结果与追问复用 `conversation.content` factory，不离开 Agents。同一 Session 在普通 Chat 打开时，对话标题旁显示专属 Agent 身份。skill 移除后历史仍可打开，但不提供重新运行的卡片。
 
 <a id="further-exploration"></a>
 ## 进一步探索
@@ -63,5 +63,5 @@ Web 客户端注册一个 Agents 侧边栏入口，从 Host 的 skill 元数据�
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- 首版在完整对话中呈现专属 Agent 结果，不提供独立仪表盘。Host Remote 可用后目录才会显示卡片。
+- 专属 Agent 结果在 Agents 内复用完整对话视图，不提供独立仪表盘。Host Remote 可用后目录才会显示卡片。
 - 不发布运行时不变量配套模块；页面直接呈现 Host 维护的 Session 与目录状态，不另存一份持久副本。

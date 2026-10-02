@@ -25,12 +25,12 @@ The Web client registers one Agents sidebar entry, builds cards from Host skill 
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount it beside the Session service, stock Agents Remote, locale, slots, and Workspace UI. Selecting a card creates a fresh Session, selects `stock-analysis` before the first turn, sends an explicit `/skill-name` prompt, and opens the full streaming Conversation. The Agents panel shows all specialist records from Session list projections; rerun starts another Session with editable prior conditions.
+Mount it beside the Session service, stock Agents Remote, locale, slots, and Workspace UI. Selecting a card creates a fresh Session, selects `stock-analysis` before the first turn, sends an explicit `/skill-name` prompt, and shows the streaming Conversation inside the Agents panel. The Agents panel shows all specialist records from Session list projections; rerun starts another Session with editable prior conditions.
 
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
-Cards and their bilingual labels come from `metadata.stockAgent` in bundled skills. The panel owns launch state only; the Session log owns answers and follow-ups. A Conversation header badge shows specialist identity when the same Session is opened in ordinary Chat. Removed skills leave history open but have no rerun card.
+Cards and their bilingual labels come from `metadata.stockAgent` in bundled skills. The panel owns launch state only; the Session log owns answers and follow-ups. It reuses the `conversation.content` factory for results and follow-ups without leaving Agents. A Conversation header badge shows specialist identity when the same Session is opened in ordinary Chat. Removed skills leave history open but have no rerun card.
 
 <a id="further-exploration"></a>
 ## Further Exploration
@@ -63,5 +63,5 @@ The first prompt and skill instruction are durable messages, so later turns reta
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- The first release renders specialist results in the full Conversation rather than a dedicated dashboard. The catalog needs the Host Remote to be available before cards appear.
+- Specialist results use the shared Conversation view inside Agents rather than a dedicated dashboard. The catalog needs the Host Remote to be available before cards appear.
 - No runtime invariant companion is published; this panel renders Host-owned Session and catalog state without keeping an independent durable copy.

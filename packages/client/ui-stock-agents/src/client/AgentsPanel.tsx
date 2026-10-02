@@ -5,7 +5,7 @@ import type { SessionListState } from '@deepseek-ai/dsh-api-session-controller/c
 import type { LocaleSnapshot } from '@deepseek-ai/dsh-client-locale/client'
 import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
-import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import type { InjectFace, PropsLocale, PropsRenderSlots, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import css from './AgentsPanel.module.css'
 
 /** Panel data and actions supplied by the plugin. */
@@ -17,19 +17,23 @@ export interface AgentsPanelInjected {
     catalogError: ObservableSnapshot<string | null>
   }
   loadCatalog: () => void
-  start: (card: StockAgentCard, query: string) => Promise<void>
+  start: (card: StockAgentCard, query: string) => Promise<SessionId>
   openSession: (sessionId: SessionId) => void
 }
-export type AgentsPanelProps = PropsRuntime<'main'> & PropsLocale<'stockAgents'> & InjectFace<AgentsPanelInjected>
+export type AgentsPanelProps = PropsRuntime<'main'> & PropsRenderSlots<'stock-agents.conversation'>
+  & PropsLocale<'stockAgents'> & InjectFace<AgentsPanelInjected>
 
 /** Render cards, editable launch input, and recorded runs. */
-export function AgentsPanel({ t, useCatalog, useSessions, useLocale, useCatalogError, loadCatalog, start, openSession }: AgentsPanelProps) {
+export function AgentsPanel({
+  t, renderSlot, useCatalog, useSessions, useLocale, useCatalogError, loadCatalog, start, openSession,
+}: AgentsPanelProps) {
   const catalog = useCatalog(value => value)
   const sessions = useSessions(value => value)
   const lang = useLocale(value => value.active === 'en' ? 'en' : 'zh')
   const catalogError = useCatalogError(value => value)
   const dateFormat = new Intl.DateTimeFormat(lang === 'en' ? 'en-US' : 'zh-CN', { dateStyle: 'medium', timeStyle: 'short' })
   const [selected, setSelected] = useState<StockAgentCard | null>(null)
+  const [activeSessionId, setActiveSessionId] = useState<SessionId | null>(null)
   const [query, setQuery] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -40,19 +44,34 @@ export function AgentsPanel({ t, useCatalog, useSessions, useLocale, useCatalogE
     return summary === undefined || record === null || record === undefined ? [] : [{ id, record, updatedAt: summary.updatedAt }]
   })
   const choose = (card: StockAgentCard, initial = '') => {
+    setActiveSessionId(null)
     setSelected(card)
     setQuery(initial)
     setError(null)
     if (card.launch === 'immediate') {
       setBusy(true)
-      void start(card, '').catch((cause: unknown) => { setError(String(cause)) }).finally(() => { setBusy(false) })
+      void start(card, '').then(setActiveSessionId)
+        .catch((cause: unknown) => { setError(String(cause)) }).finally(() => { setBusy(false) })
     }
   }
   const run = () => {
     if (selected === null || busy || (selected.launch === 'query' && query.trim() === '')) return
     setBusy(true)
     setError(null)
-    void start(selected, query.trim()).catch((cause: unknown) => { setError(String(cause)) }).finally(() => { setBusy(false) })
+    void start(selected, query.trim()).then(setActiveSessionId)
+      .catch((cause: unknown) => { setError(String(cause)) }).finally(() => { setBusy(false) })
+  }
+  if (activeSessionId !== null) {
+    const active = records.find(item => item.id === activeSessionId)
+    const card = selected ?? catalog.find(item => item.name === active?.record.name)
+    return <main className={css.detail}>
+      <nav className={css.detailNav} aria-label={t('panel.title')}>
+        <button type="button" className={css.back} onClick={() => { setActiveSessionId(null); setSelected(null) }}>{t('panel.back')}</button>
+        <span>{card?.title[lang] ?? active?.record.name}</span>
+        {card !== undefined && <button type="button" onClick={() => { choose(card, active?.record.query ?? query) }}>{t('panel.rerun')}</button>}
+      </nav>
+      <div className={css.detailConversation}>{renderSlot('stock-agents.conversation', {})}</div>
+    </main>
   }
   return <main className={css.panel}>
     <header className={css.header}>
@@ -87,7 +106,7 @@ export function AgentsPanel({ t, useCatalog, useSessions, useLocale, useCatalogE
           <span>{card?.title[lang] ?? record.name}</span>
           {record.query !== '' && <span>{record.query}</span>}
           <time dateTime={new Date(updatedAt).toISOString()}>{dateFormat.format(updatedAt)}</time>
-          <button type="button" onClick={() => { openSession(id) }}>{t('panel.open')}</button>
+          <button type="button" onClick={() => { openSession(id); setSelected(card ?? null); setActiveSessionId(id) }}>{t('panel.open')}</button>
           {card !== undefined
             ? <button type="button" onClick={() => { choose(card, record.query) }}>{t('panel.rerun')}</button>
             : <small>{t('panel.missing')}</small>}

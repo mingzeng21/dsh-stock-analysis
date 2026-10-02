@@ -12,11 +12,17 @@
 .cards { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
 .card { display: grid; gap: 12px; min-height: 130px; padding: 20px; text-align: left; border: 1px solid var(--dsw-alias-border-l2); border-radius: 12px; color: inherit; background: var(--dsw-alias-bg-base); cursor: pointer; }
 .card:hover, .card:focus-visible { background: var(--dsw-alias-interactive-bg-hover); }
-.card strong { font-size: 16px; }
+.card strong { font-size: 16px; font-weight: 500; }
 .card span { color: var(--dsw-alias-label-secondary); line-height: 1.5; }
+.detail { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; color: var(--dsw-alias-label-primary); background: var(--dsw-alias-bg-base); font-family: var(--dsw-font-family); }
+.detailNav { display: flex; flex: none; align-items: center; gap: 12px; padding: 8px 20px; border-bottom: 1px solid var(--dsw-alias-border-l2); }
+:global([data-platform='darwin']) .detailNav { padding-top: calc(28px + var(--dsh-frame-top-clearance, 0px)); }
+.detailNav span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.detailNav button { padding: 6px 10px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; color: inherit; background: transparent; cursor: pointer; }
+.detailConversation { display: flex; flex: 1; min-height: 0; }
 .launch, .history { max-width: 900px; margin: 28px auto 0; }
 .launch { display: grid; gap: 12px; }
-.launch label { font-weight: 600; }
+.launch label { font-weight: 500; }
 .launch textarea { min-height: 110px; resize: vertical; padding: 12px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; color: inherit; background: var(--dsw-alias-bg-base); font: inherit; }
 .examples { display: flex; flex-wrap: wrap; gap: 8px; }
 .examples h2 { width: 100%; margin: 4px 0; font-size: 13px; }
