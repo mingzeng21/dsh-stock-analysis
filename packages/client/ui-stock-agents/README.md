@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-The Web client registers one Agents sidebar entry, builds cards from Host skill metadata, and lists durable specialist Sessions. A card opens an input form or starts immediately according to its `SKILL.md` metadata.
+The Web client registers one stock-analysis sidebar entry, builds cards from Host skill metadata, and lists durable specialist Sessions. Agents-owned labels use Simplified Chinese regardless of the app locale, and the stock preset requires Simplified Chinese replies. A card opens an input form or starts immediately according to its `SKILL.md` metadata.
 
 ## Table of Contents
 
@@ -25,12 +25,12 @@ The Web client registers one Agents sidebar entry, builds cards from Host skill 
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount it beside the Session service, stock Agents Remote, locale, slots, and Workspace UI. Selecting a card creates a fresh Session, selects `stock-analysis` before the first turn, sends an explicit `/skill-name` prompt, and shows the streaming Conversation inside the Agents panel. The Agents panel shows all specialist records from Session list projections; rerun starts another Session with editable prior conditions.
+Mount it beside the Session service, stock Agents Remote, locale, slots, and Workspace UI. Selecting an immediate card creates a fresh Session and starts analysis in one click; an input card waits for submitted conditions. Each run selects `stock-analysis` before the first turn, sends an explicit `/skill-name` prompt, and shows the streaming Conversation inside the panel. The panel shows all specialist records from Session list projections; rerunning starts another Session with editable prior conditions.
 
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
-Cards and their bilingual labels come from `metadata.stockAgent` in bundled skills. The panel owns launch state only; the Session log owns answers and follow-ups. It reuses the `conversation.content` factory for results and follow-ups without leaving Agents. A Conversation header badge shows specialist identity when the same Session is opened in ordinary Chat. Removed skills leave history open but have no rerun card.
+Card metadata comes from `metadata.stockAgent` in bundled skills, and the panel displays its Chinese fields. The panel owns launch state only; the Session log owns answers and follow-ups. It reuses the `conversation.content` factory for results and follow-ups without leaving the panel. A Conversation header badge shows specialist identity when the same Session is opened in ordinary Chat. Removed skills leave history open but have no rerun card.
 
 <a id="further-exploration"></a>
 ## Further Exploration
@@ -49,7 +49,7 @@ New specialist content belongs in `packages/bundle/web-app/skills/<name>/SKILL.m
 
 #### What the model sees
 
-The first turn contains the user's selected request prefixed with `/stock-…`. The Host skill loader then logs the selected skill body as a separate instruction message. The UI registers no tool schema.
+The first turn contains the user's selected request prefixed with `/stock-…`; immediate tasks use the Chinese prompt stored with the card. The Host skill loader then logs the selected skill body as a separate instruction message. The stock preset and its skills require Simplified Chinese replies. The UI registers no tool schema.
 
 #### Token effect
 

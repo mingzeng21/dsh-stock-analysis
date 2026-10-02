@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-Web 客户端注册一个 Agents 侧边栏入口，从 Host 的 skill 元数据构建卡片，并列出持久化的专属 Agent Session。卡片依据 `SKILL.md` 元数据打开输入表单，或直接运行。
+Web 客户端注册一个股票分析侧边栏入口，从 Host 的 skill 元数据构建卡片，并列出持久化的专属 Agent Session。无论应用语言如何设置，Agents 自有界面文案均使用简体中文；股票 preset 要求回答使用简体中文。卡片依据 `SKILL.md` 元数据打开输入表单，或直接开始分析。
 
 ## 目录
 
@@ -25,12 +25,12 @@ Web 客户端注册一个 Agents 侧边栏入口，从 Host 的 skill 元数据�
 <a id="use-this-package"></a>
 ## 使用本包
 
-与 Session 服务、股票 Agents Remote、locale、slots 和 Workspace UI 一起挂载。选择卡片后创建新 Session，在首轮前选中 `stock-analysis`，提交显式 `/skill-name` 提示词，并在 Agents 面板内显示流式对话。Agents 面板根据 Session 列表投影显示所有专属记录；重新分析使用可编辑的旧条件创建另一个 Session。
+与 Session 服务、股票 Agents Remote、locale、slots 和 Workspace UI 一起挂载。点击立即启动的卡片会创建新 Session 并开始分析；输入类卡片会等到用户提交条件后再启动。每次运行都会在首轮前选中 `stock-analysis`、发送显式 `/skill-name` 提示词，并在面板内显示流式对话。面板根据 Session 列表投影显示所有专属记录；重新分析会使用可编辑的旧条件创建另一个 Session。
 
 <a id="understand-the-implementation"></a>
 ## 理解实现
 
-卡片及其双语标签来自随包 skill 中的 `metadata.stockAgent`。面板只持有启动状态；回答和追问由 Session 日志持有。结果与追问复用 `conversation.content` factory，不离开 Agents。同一 Session 在普通 Chat 打开时，对话标题旁显示专属 Agent 身份。skill 移除后历史仍可打开，但不提供重新运行的卡片。
+卡片元数据来自随包 skill 中的 `metadata.stockAgent`，面板只显示其中的中文字段。面板只持有启动状态；回答和追问由 Session 日志持有。结果与追问复用 `conversation.content` factory，不离开面板。同一 Session 在普通 Chat 打开时，对话标题旁显示专属 Agent 身份。skill 移除后历史仍可打开，但不提供重新运行的卡片。
 
 <a id="further-exploration"></a>
 ## 进一步探索
@@ -49,7 +49,7 @@ Web 客户端注册一个 Agents 侧边栏入口，从 Host 的 skill 元数据�
 
 #### What the model sees
 
-首轮包含以 `/stock-…` 为前缀的用户请求。Host skill 加载器随后将所选 skill 正文记为独立的指令消息。UI 不注册工具 schema。
+首轮包含以 `/stock-…` 为前缀的用户请求；立即分析任务使用卡片提供的中文提示词。Host skill 加载器随后将所选 skill 正文记为独立的指令消息。stock-analysis preset 及其 skill 要求始终使用简体中文回答。UI 不注册工具 schema。
 
 #### Token effect
 

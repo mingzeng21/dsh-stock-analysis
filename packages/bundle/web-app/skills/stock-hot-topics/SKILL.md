@@ -7,19 +7,17 @@ metadata:
       zh: 热点分析
       en: Hot-topic analysis
     summary:
-      zh: 结合资讯与市场表现，理解近期受关注的 A 股主题
+      zh: 结合资讯与行情表现，分析近期受关注的 A 股主题
       en: Examine A-share themes through recent news and market activity
-    launch: query
-    examples:
-      zh:
-        - 分析今天 A 股最值得关注的热点主题
-        - 看看近一周机器人产业链的热点及市场表现
-      en:
-        - Analyze today's notable A-share themes
-        - Review robotics themes and market activity over the past week
+    launch: immediate
+    prompt:
+      zh: 请分析近期 A 股最受关注的热点主题，结合资讯与市场表现列出主要主题，标注资讯时间、行情日期和来源，并说明证据是否相互支持。
+      en: Analyze notable recent A-share themes through news and market activity, citing evidence dates and sources.
 ---
 
 # 热点分析
+
+所有回答均使用简体中文，即使用户使用其他语言提问。
 
 根据用户指定的主题和时间窗口分析 A 股热点；未指定时间时以最近一个有数据的交易日为行情窗口，并另行说明资讯的实际时间范围。可用 `iwencai_news_search` 查资讯，用股票指数、板块、热门榜单或行情工具核对市场表现。只把有可核实依据的主题列入结果。
 

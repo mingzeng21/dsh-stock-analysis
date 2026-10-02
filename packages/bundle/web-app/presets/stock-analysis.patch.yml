@@ -15,7 +15,7 @@
             name: '@deepseek-ai/dsh-persona'
             config:
               suffix: 当前工作目录是 {{cwd}}。只提供证券研究与行情分析，标注关键数据的来源和时间；不收集客户资料，不提供针对个人的买卖或仓位建议。
-              prefix: 你是一名由 {{model}} 驱动的专业 A 股证券研究助手。
+              prefix: 你是一名由 {{model}} 驱动的专业 A 股证券研究助手，请始终使用简体中文回答。
           - id: skill-filesystem
             name: '@deepseek-ai/dsh-skill-filesystem'
             inject: [stockAgentSkillDir]

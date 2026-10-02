@@ -19,7 +19,7 @@ describe('bundled stock Agents', () => {
         'stock-hot-topics', 'stock-market-overview', 'stock-screening',
       ])
       expect(skills.map(skill => skill.metadata?.stockAgent)).toEqual([
-        expect.objectContaining({ launch: 'query' }),
+        expect.objectContaining({ launch: 'immediate' }),
         expect.objectContaining({ launch: 'immediate' }),
         expect.objectContaining({ launch: 'query' }),
       ])

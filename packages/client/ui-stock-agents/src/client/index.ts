@@ -72,7 +72,7 @@ export function apply(ctx: Context): void {
       const face = ctx.sessions.binding(id)?.session
       if (face === undefined) throw new Error('session/not-found')
       const prompt = card.launch === 'immediate'
-        ? card.prompt?.[ctx.locale.getSnapshot().active === 'en' ? 'en' : 'zh']
+        ? card.prompt?.zh
         : query
       if (prompt === undefined || prompt.trim() === '') throw new Error('agent/empty-query')
       const text = `/${card.name} ${prompt}`
@@ -94,7 +94,7 @@ export function apply(ctx: Context): void {
     name: 'main', key: PANEL_ID, locale: NS,
     children: { 'stock-agents.conversation': { kind: 'single', scope: 'session-maybe' } },
     inject: (): AgentsPanelInjected => ({
-      hooks: { catalog, sessions: ctx.sessions.list, locale: ctx.locale, catalogError },
+      hooks: { catalog, sessions: ctx.sessions.list, catalogError },
       loadCatalog,
       start,
       openSession: (sessionId: SessionId) => { ctx.uiWorkspace.selectSession(sessionId) },
@@ -105,6 +105,6 @@ export function apply(ctx: Context): void {
   }, AgentConversation))
   ctx.slots.inject('conversation.session.header.actions', () => ctx.slots.register({
     name: 'conversation.session.header.actions', id: 'stock-agent-identity', order: 5, locale: NS,
-    inject: (): AgentBadgeInjected => ({ hooks: { catalog, sessions: ctx.sessions.list, locale: ctx.locale, catalogReady } }),
+    inject: (): AgentBadgeInjected => ({ hooks: { catalog, sessions: ctx.sessions.list, catalogReady } }),
   }, AgentBadge))
 }
