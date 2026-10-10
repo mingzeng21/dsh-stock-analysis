@@ -81,7 +81,7 @@ it('renders a newly launched Agent in the Agents panel and returns to its catalo
   await waitFor(() => { expect(screen.getByTestId('conversation')).toBeTruthy() })
   expect(start).toHaveBeenCalledWith(SCREENING, '半导体公司')
   expect(renderSlot).toHaveBeenCalledWith('stock-agents.conversation', {})
-  fireEvent.click(screen.getByRole('button', { name: '返回股票分析' }))
+  fireEvent.click(screen.getByRole('button', { name: '返回Agents' }))
   expect(screen.queryByTestId('conversation')).toBeNull()
   expect(screen.getByRole('button', { name: /智能选股/ })).toBeTruthy()
 })
