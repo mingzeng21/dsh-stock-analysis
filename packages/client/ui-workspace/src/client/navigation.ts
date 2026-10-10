@@ -19,6 +19,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 import type { RowToast } from './contract/slots.ts'
 import { pinOrderAccounts, pinOrderSource } from './pin-order.ts'
 import type { WorkspaceViewStoreActions } from './stores.ts'
+import { isConversationSession } from './session-visibility.ts'
 
 interface MainSelection {
   readonly sessionId?: SessionId
@@ -34,6 +35,11 @@ export interface UiWorkspace {
    * @param target - known Session identity or durable direct-parent subagent address to display.
    */
   openSession(target: SessionTarget): void
+  /**
+   * Select a Session for a panel that embeds the Conversation without changing the active panel.
+   * @param target - known Session identity or durable direct-parent subagent address to display.
+   */
+  selectSession(target: SessionTarget): void
   /**
    * Connect a Workspace and open its Session unless a later navigation supersedes it.
    * @param workspaceId - target Workspace.
@@ -208,6 +214,10 @@ class UiWorkspaceService extends Service implements UiWorkspace {
     this.replaceMain(target, this.lifetime.signal, 'reveal')
   }
 
+  selectSession(target: SessionTarget): void {
+    this.replaceMain(target, this.lifetime.signal, 'preserve')
+  }
+
   async openWorkspace(workspaceId: WorkspaceId, beforeOpen?: (sessionId: SessionId) => void): Promise<void> {
     const navigation = AbortSignal.any([this.ctx.layout.beginNavigation(), this.lifetime.signal])
     let sessionId: SessionId
@@ -328,7 +338,9 @@ class UiWorkspaceService extends Service implements UiWorkspace {
       this.replaceMain(saved.subagentAddress, this.lifetime.signal, 'preserve')
       return
     }
-    const summary = saved.sessionId === undefined ? undefined : sessions.byId[saved.sessionId]
+    const savedSummary = saved.sessionId === undefined ? undefined : sessions.byId[saved.sessionId]
+    const summary = savedSummary !== undefined && isConversationSession(savedSummary) ? savedSummary : undefined
+    if (savedSummary !== undefined && summary === undefined) this.selection.set({})
     const workspace = summary === undefined ? undefined
       : workspaces.items.find(item => item.sessionIds.includes(summary.id))
     if (summary !== undefined && (!summary.blank || workspace === undefined)) {

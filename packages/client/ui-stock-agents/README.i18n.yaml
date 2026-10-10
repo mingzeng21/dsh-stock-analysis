@@ -1,0 +1,46 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/client/ui-stock-agents/README.md
+/:
+  en: 62d32894f87c2b86
+  zh: a5f7266dc0434cea
+/deepseek-ai-dsh-client-ui-stock-agents:
+  en: 523b1823914412ad
+  zh: a7cd7809ec56ef75
+/deepseek-ai-dsh-client-ui-stock-agents/summary:
+  en: 4a3cce2bce0091f0
+  zh: 88affc1e35a635bb
+/deepseek-ai-dsh-client-ui-stock-agents/table-of-contents:
+  en: 07f3642294ee905d
+  zh: b73c83ce583f5a94
+/deepseek-ai-dsh-client-ui-stock-agents/use-this-package:
+  en: 9276a0dd0c2de6f8
+  zh: 6f30af2c58d64ba1
+/deepseek-ai-dsh-client-ui-stock-agents/understand-the-implementation:
+  en: 4e15888f95b184cf
+  zh: ff88155daf9ae78a
+/deepseek-ai-dsh-client-ui-stock-agents/further-exploration:
+  en: dcd113641d07c1c9
+  zh: 089770db75cc04dd
+/deepseek-ai-dsh-client-ui-stock-agents/dev-note:
+  en: 8146971ef4ee89c8
+  zh: 61af1a896df023e8
+/deepseek-ai-dsh-client-ui-stock-agents/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-client-ui-stock-agents/model-experience/explicit-card-invocation:
+  en: 0761f237dbedc55a
+  zh: a9d67f23bd990969
+/deepseek-ai-dsh-client-ui-stock-agents/model-experience/explicit-card-invocation/what-the-model-sees:
+  en: 4b7a102d053d926d
+  zh: fac2a5c9e11fa33a
+/deepseek-ai-dsh-client-ui-stock-agents/model-experience/explicit-card-invocation/token-effect:
+  en: 549d5182efefcf9e
+  zh: 5c5fe50f15f9ae0c
+/deepseek-ai-dsh-client-ui-stock-agents/model-experience/explicit-card-invocation/kv-cache-effect:
+  en: 667c06dc95176b78
+  zh: 697814ff9fb8181f
+/deepseek-ai-dsh-client-ui-stock-agents/known-limitations-and-deferred-work:
+  en: 23ae19e9cd343ca1
+  zh: 2a619dfbcb7ea00f

@@ -82,6 +82,8 @@ flowchart LR
   svc_workspaceFiles["ctx.workspaceFiles<br/>Host workspace file Remote service"]
   pkg_api_stock_controller["api-stock-controller"]
   svc_stockController["ctx.stockController<br/>Browser-facing stock Remote controller"]
+  pkg_api_stock_agents_controller["api-stock-agents-controller"]
+  svc_stockAgentsController["ctx.stockAgentsController<br/>Stock research Agent catalog and Session identity"]
   pkg_api_watchlist_controller["api-watchlist-controller"]
   svc_watchlistController["ctx.watchlistController<br/>Durable watchlist Remote controller"]
   pkg_workspace_changes["workspace-changes"]
@@ -297,6 +299,7 @@ flowchart LR
   pkg_api_session_controller --> svc_sessionSkillCatalog
   pkg_api_settings_controller --> svc_credentialsController
   pkg_api_settings_controller --> svc_settingsController
+  pkg_api_stock_agents_controller --> svc_stockAgentsController
   pkg_api_stock_controller --> svc_stockController
   pkg_api_terminal_controller --> svc_terminalController
   pkg_api_watchlist_controller --> svc_watchlistController
@@ -617,6 +620,7 @@ flowchart LR
 | `ctx.settingsController` | `core` | [`api-settings-controller`](../packages/api/settings-controller) | - | - | - | 把用户设置 seam 投影到生成的 Remote namespace：读取一律脱敏，所有拒绝在这里分类，而不在 seam Definition 上。 |
 | `ctx.workspaceFiles` | `core` | [`api-workspace-files`](../packages/api/workspace-files) | - | - | - | 为会话工作区根内的文件提供 stat、分页文本、字节窗口、目录列举与变更流，经 lstat、包含关系与 stat 重检限定。 |
 | `ctx.stockController` | `core` | [`api-stock-controller`](../packages/api/stock-controller) | - | - | - | 在股票 seam 之上提供四项读取——标的检索、批量快照、K 线序列与研究文档——并在 Host 上一次性解析 vendor 的行字段、编码与检索词汇。 |
+| `ctx.stockAgentsController` | `core` | [`api-stock-agents-controller`](../packages/api/stock-agents-controller) | - | - | - | 列出随包专题 skill 而不加载正文，记录每个 Session 的专题身份，并在追问时加载当前版本的 skill。 |
 | `ctx.watchlistController` | `core` | [`api-watchlist-controller`](../packages/api/watchlist-controller) | - | - | - | 把有序的个人标的列表作为一个 storage-domain 值拥有，并提供其 list、add、remove 与 reorder 操作。 |
 | `ctx.workspaceChanges` | `core` | [`workspace-changes`](../packages/deliverables/workspace-changes) | - | - | - | Serves the summary each workspace/changes event announced and each listed file's turn-start and turn-end comparison, by Session and event sequence, until that Session is disposed; the log carries only the turn. |
 | `ctx.terminalController` | `core` | [`api-terminal-controller`](../packages/api/terminal-controller) | - | - | - | 通过子进程提供方与类型化 Remote 传输管理用户终端进程、解析默认 shell，并恢复有界终端屏幕。 |

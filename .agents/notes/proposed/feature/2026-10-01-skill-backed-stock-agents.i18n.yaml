@@ -1,0 +1,22 @@
+# Bilingual-pair consistency record for 2026-10-01-skill-backed-stock-agents.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/proposed/feature/2026-10-01-skill-backed-stock-agents.md
+/agent-note-skill-backed-stock-analysis-agents:
+  en: 6242b18cc92903c4
+  zh: e278a7e859f93285
+/agent-note-skill-backed-stock-analysis-agents/problem:
+  en: 65c8c3cb5aa185a3
+  zh: 877d2c26895403dc
+/agent-note-skill-backed-stock-analysis-agents/proposal:
+  en: 218e8433e236e786
+  zh: 97dc396f1a54f9db
+/agent-note-skill-backed-stock-analysis-agents/alternatives-considered:
+  en: b43906402988b4f4
+  zh: 953733f42e670cd0
+/agent-note-skill-backed-stock-analysis-agents/acceptance-criteria:
+  en: b8c651f85fa13aea
+  zh: 1d4d98f426d5f03a
+/agent-note-skill-backed-stock-analysis-agents/risks:
+  en: 0ce24f29c0f4b67e
+  zh: 13a7b38acbcfc83e

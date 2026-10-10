@@ -1,0 +1,46 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/api/stock-agents-controller/README.md
+/:
+  en: e00c0e63dd3cf30c
+  zh: 4e789a62f16f9d79
+/deepseek-ai-dsh-api-stock-agents-controller:
+  en: 3b2b281a52d56c08
+  zh: 8ba89f38bda41578
+/deepseek-ai-dsh-api-stock-agents-controller/summary:
+  en: 4700ac522d3b92b5
+  zh: 1fd23703197253a4
+/deepseek-ai-dsh-api-stock-agents-controller/table-of-contents:
+  en: 07f3642294ee905d
+  zh: b73c83ce583f5a94
+/deepseek-ai-dsh-api-stock-agents-controller/use-this-package:
+  en: 628103da945246f4
+  zh: 7e62c1f569d44d2a
+/deepseek-ai-dsh-api-stock-agents-controller/understand-the-implementation:
+  en: f579f826e54864e7
+  zh: a06bf74e2cdc82a9
+/deepseek-ai-dsh-api-stock-agents-controller/further-exploration:
+  en: 4d535199d8e36903
+  zh: 8832090cb9bb74d3
+/deepseek-ai-dsh-api-stock-agents-controller/dev-note:
+  en: f806d95d4dc3ec57
+  zh: dea803bc77c3bc23
+/deepseek-ai-dsh-api-stock-agents-controller/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-api-stock-agents-controller/model-experience/follow-up-skill-instructions:
+  en: aeab6c610b342817
+  zh: 70342d6de84b9b70
+/deepseek-ai-dsh-api-stock-agents-controller/model-experience/follow-up-skill-instructions/what-the-model-sees:
+  en: bea4051b3d07771c
+  zh: beb1442c7690d502
+/deepseek-ai-dsh-api-stock-agents-controller/model-experience/follow-up-skill-instructions/token-effect:
+  en: 2896bbe6523cc72a
+  zh: 614feb395a50dd6a
+/deepseek-ai-dsh-api-stock-agents-controller/model-experience/follow-up-skill-instructions/kv-cache-effect:
+  en: d665302bcd79f534
+  zh: 2723474dfa3160a1
+/deepseek-ai-dsh-api-stock-agents-controller/known-limitations-and-deferred-work:
+  en: ffcd5b5b6d2dddee
+  zh: 60dbc1f499e039cf

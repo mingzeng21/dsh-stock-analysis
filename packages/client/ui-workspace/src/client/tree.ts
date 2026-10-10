@@ -1,7 +1,7 @@
 /**
  * Derives the workspace browser tree from caller-projected Workspace and
- * Session order. Unassigned Sessions trail under Ungrouped; only the selected
- * blank Session remains visible.
+ * Session order. Agent-owned Sessions stay in Agents history; only ordinary
+ * conversations and the selected blank Session appear in this browser.
  */
 import {
   type SessionListState, type SessionSearchResultItem, type SessionSummary,
@@ -13,6 +13,7 @@ import type {
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { assertNever } from '@deepseek-ai/dsh-util-values'
 import { workspaceTitleOf } from '@deepseek-ai/dsh-util-workspace-path'
+import { isConversationSession } from './session-visibility.ts'
 
 /** Group key for Sessions outside every Workspace. */
 export const UNGROUPED_KEY = ''
@@ -37,7 +38,7 @@ type SessionStatuses = SessionStatusSnapshot
 
 function mainSessionId(list: SessionListState): SessionId | undefined {
   return Object.values(list.byId)
-    .find(session => (session.retainedBy.mainView ?? 0) > 0)?.id
+    .find(session => (session.retainedBy.mainView ?? 0) > 0 && isConversationSession(session))?.id
 }
 
 /** One top-level session row in a group or the flat list. */
@@ -230,10 +231,10 @@ export function pinCurrentBlank(
 export type ArchivedFilter = 'default' | 'show' | 'only'
 
 /**
- * Ordinary sessions are visible; among blank sessions, only the current one
- * is visible. Subagent children use their parent header catalog; archived
- * sessions follow the archived filter, while their accounting slots remain
- * either way so unarchiving restores position.
+ * Ordinary conversations are visible; Agent records and subagent children use
+ * their own surfaces. Among blank sessions, only the current one is visible.
+ * Archived sessions follow the archived filter, while their accounting slots
+ * remain either way so unarchiving restores position.
  */
 function sessionVisible(
   session: SessionSummary,
@@ -241,7 +242,7 @@ function sessionVisible(
   archived: ReadonlySet<SessionId>,
   archivedFilter: ArchivedFilter,
 ): boolean {
-  if (session.origin === 'subagent') return false
+  if (!isConversationSession(session)) return false
   if (session.blank && session.id !== current) return false
   switch (archivedFilter) {
     case 'default':
@@ -418,7 +419,7 @@ function sessionNode(
 }
 
 /**
- * Derive the workspace browser groups with every session as a top-level row.
+ * Derive Workspace groups with each visible ordinary conversation as a row.
  *
  * Every group shows, except that the archived-only filter drops groups
  * without visible members; sessions populate under expanded groups with

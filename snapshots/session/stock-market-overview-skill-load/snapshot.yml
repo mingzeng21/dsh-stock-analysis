@@ -1,0 +1,9 @@
+version: 1
+scenario: stock-market-overview-skill-load
+profile: headless
+composition: default
+recording: authored
+header:
+  class: skill
+workspace:
+  setup: stock-agent-skills

@@ -159,6 +159,10 @@
     - id: watchlist-controller
       name: '@deepseek-ai/dsh-api-watchlist-controller'
 
+    - id: stock-agents-controller
+      name: '@deepseek-ai/dsh-api-stock-agents-controller'
+      inject: [stockAgentSkillDir]
+
     - id: cordis-host-runner
       name: '@deepseek-ai/dsh-cordis-host-runner'
 
@@ -359,6 +363,9 @@
     # surface for the selected instrument, over the stock and watchlist Remotes.
     - id: ui-watchlist
       name: '@deepseek-ai/dsh-client-ui-watchlist'
+
+    - id: ui-stock-agents
+      name: '@deepseek-ai/dsh-client-ui-stock-agents'
     # Durable workflow lifecycle as an independent Chat node after the
     # existing generic workflow tool row.
     - id: ui-workflow-run

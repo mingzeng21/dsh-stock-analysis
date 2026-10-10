@@ -145,6 +145,22 @@ async resolveSymbols(query: string, options: SymbolQueryOptions = {}): Promise<r
 
 Source: [`packages/stock/stock/src/index.ts`](../../packages/stock/stock/src/index.ts)
 
+<a id="ctxstockagentscontroller--stockagentscontroller"></a>
+
+### `ctx.stockAgentsController` — `StockAgentsController`
+
+Catalog over skills mounted by the stock-analysis preset.
+
+```ts cordis-catalog
+/**
+ * Read marked bundled skills without loading their instruction bodies.
+ * @returns cards for the current stock preset.
+ */
+@Remote async list(): Promise<readonly StockAgentCard[]>
+```
+
+Source: [`packages/api/stock-agents-controller/src/index.ts`](../../packages/api/stock-agents-controller/src/index.ts)
+
 <a id="ctxstockcontroller--stockcontroller"></a>
 
 ### `ctx.stockController` — `StockController`

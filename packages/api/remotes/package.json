@@ -67,6 +67,7 @@
     "@deepseek-ai/dsh-api-job-controller": "workspace:*",
     "@deepseek-ai/dsh-api-session-controller": "workspace:*",
     "@deepseek-ai/dsh-api-settings-controller": "workspace:*",
+    "@deepseek-ai/dsh-api-stock-agents-controller": "workspace:*",
     "@deepseek-ai/dsh-api-stock-controller": "workspace:*",
     "@deepseek-ai/dsh-api-terminal-controller": "workspace:*",
     "@deepseek-ai/dsh-api-watchlist-controller": "workspace:*",

@@ -2831,6 +2831,19 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'stockAgentsController',
+    summary: 'Catalog over skills mounted by the stock-analysis preset.',
+    description: 'Catalog over skills mounted by the stock-analysis preset.',
+    methods: [
+      {
+        signature: '@Remote async list(): Promise<readonly StockAgentCard[]>',
+        description: 'Read marked bundled skills without loading their instruction bodies.',
+        parameters: [],
+        returns: 'cards for the current stock preset.',
+      },
+    ],
+  },
+  {
     key: 'stockController',
     summary: 'Host Remote reads over the stock capability seam.',
     description: 'Host Remote reads over the stock capability seam.',
@@ -7236,7 +7249,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'SkillSummary',
-    declaration: 'export interface SkillSummary {\n    readonly path?: string;\n    readonly name: string;\n    readonly description: string;\n    readonly whenToUse?: string;\n    readonly invocation: SkillInvocationPolicy;\n    readonly source: SkillSource;\n    readonly provider: string;\n    readonly resourceBase?: SkillResourceBase;\n}',
+    declaration: 'export interface SkillSummary {\n    readonly path?: string;\n    readonly name: string;\n    readonly description: string;\n    readonly whenToUse?: string;\n    readonly invocation: SkillInvocationPolicy;\n    readonly source: SkillSource;\n    readonly provider: string;\n    readonly resourceBase?: SkillResourceBase;\n    readonly metadata?: Readonly<Record<string, unknown>>;\n}',
   },
   {
     name: 'SkillViewOptions',
@@ -7341,6 +7354,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'SshStreamEndpoint',
     declaration: 'export type SshStreamEndpoint = z.infer<typeof streamEndpointSchema>;',
+  },
+  {
+    name: 'StockAgentCard',
+    declaration: 'export interface StockAgentCard {\n    readonly name: string;\n    readonly title: Readonly<Record<\'zh\' | \'en\', string>>;\n    readonly summary: Readonly<Record<\'zh\' | \'en\', string>>;\n    readonly launch: \'query\' | \'immediate\';\n    readonly examples?: Readonly<Record<\'zh\' | \'en\', readonly string[]>>;\n    readonly prompt?: Readonly<Record<\'zh\' | \'en\', string>>;\n}',
   },
   {
     name: 'StockAvailability',

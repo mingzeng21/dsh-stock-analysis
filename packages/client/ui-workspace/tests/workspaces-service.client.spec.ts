@@ -414,6 +414,17 @@ describe('UiWorkspaceService', () => {
     expect(b.sessions.refreshProjections).not.toHaveBeenCalled()
   })
 
+  it('selects a Session for an embedded Conversation without leaving its panel', () => {
+    const b = bench()
+    const panel = 'stock-agents' as MainPanelId
+    b.layout.selectPanel(panel)
+    b.selectPanel.mockClear()
+    b.uiWorkspace.selectSession(sid('analysis'))
+    expect(b.uiWorkspace.currentSessionId).toBe(sid('analysis'))
+    expect(b.sessions.retain).toHaveBeenCalledWith(sid('analysis'), { source: 'mainView' })
+    expect(b.selectPanel).not.toHaveBeenCalled()
+  })
+
   it('keeps the current panel when retaining the target fails', () => {
     const b = bench()
     b.sessions.retain.mockImplementationOnce(() => { throw new Error('open failed') })
