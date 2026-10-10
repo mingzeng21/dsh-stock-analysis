@@ -16,9 +16,10 @@ describe('bundled stock Agents', () => {
       await ctx.plugin(SkillFileSystem, { includeDefaultRoots: false, bundledSkillDir: skillsDir, watch: false })
       const skills = await ctx.skills.list({ cwd: process.cwd() })
       expect(skills.map(skill => skill.name)).toEqual([
-        'stock-hot-topics', 'stock-key-announcements', 'stock-market-overview', 'stock-screening',
+        'stock-hot-topics', 'stock-key-announcements', 'stock-limit-up-analysis', 'stock-market-overview', 'stock-screening',
       ])
       expect(skills.map(skill => skill.metadata?.stockAgent)).toEqual([
+        expect.objectContaining({ launch: 'immediate' }),
         expect.objectContaining({ launch: 'immediate' }),
         expect.objectContaining({ launch: 'immediate' }),
         expect.objectContaining({ launch: 'immediate' }),
