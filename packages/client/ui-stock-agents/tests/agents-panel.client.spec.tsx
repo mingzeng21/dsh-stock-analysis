@@ -91,7 +91,7 @@ it('opens a recorded Agent inside the same panel', () => {
   fireEvent.click(screen.getByRole('button', { name: '查看结果' }))
   expect(openSession).toHaveBeenCalledWith(SESSION)
   expect(screen.getByTestId('conversation')).toBeTruthy()
-  fireEvent.click(within(screen.getByRole('navigation', { name: '股票分析智能体' })).getByRole('button', { name: '重新分析' }))
+  fireEvent.click(within(screen.getByRole('navigation', { name: '投研Agents' })).getByRole('button', { name: '重新分析' }))
   expect(screen.queryByTestId('conversation')).toBeNull()
   expect(screen.getByLabelText('描述你的筛选条件')).toHaveProperty('value', '半导体公司')
 })

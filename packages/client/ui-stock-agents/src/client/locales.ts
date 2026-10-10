@@ -3,8 +3,8 @@ export const NS = 'stockAgents'
 /** Chinese copy for the catalog, launch form, and history. */
 export const zh = {
   'panel.nav': 'Agents',
-  'panel.title': '股票分析智能体',
-  'panel.intro': '选择研究任务，查看分析并继续追问。',
+  'panel.title': '投研Agents',
+  'panel.intro': '选择合适的 Agent 开始研究，在分析结果中继续追问。',
   'panel.back': '返回股票分析',
   'panel.history': '分析记录',
   'panel.historyHide': '隐藏分析记录',
@@ -25,8 +25,8 @@ export const zh = {
 /** Keep the stock Agents feature in Simplified Chinese for every app locale. */
 export const en: Record<keyof typeof zh, string> = {
   'panel.nav': 'Agents',
-  'panel.title': '股票分析智能体',
-  'panel.intro': '选择研究任务，查看分析并继续追问。',
+  'panel.title': '投研Agents',
+  'panel.intro': '选择合适的 Agent 开始研究，在分析结果中继续追问。',
   'panel.back': '返回股票分析',
   'panel.history': '分析记录',
   'panel.historyHide': '隐藏分析记录',
