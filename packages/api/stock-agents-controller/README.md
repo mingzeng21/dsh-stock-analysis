@@ -30,7 +30,7 @@ Mount it with the `stock-analysis` preset, skill registry, Session projection re
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
-The catalog leases the current stock preset scope and lists its winning skills. It accepts only skills whose source path is inside the bundled skill directory and validates their bilingual title, summary, launch mode, examples, and immediate prompt. The `stockAgent` projection folds the human prompt immediately preceding the first explicit `skill-invocation` message into `{ name, query }`, which the normal Session list can expose while the Session is cold. Later turns reload that skill from the current catalog and append its instructions to the committed model input. If the skill is missing, the turn is refused.
+The catalog leases the current stock preset scope and lists its winning skills. It accepts only skills whose source path is inside the bundled skill directory and validates their bilingual title, summary, launch mode, optional query input label and control kind, examples, and immediate prompt. The `stockAgent` projection folds the human prompt immediately preceding the first explicit `skill-invocation` message into `{ name, query }`, which the normal Session list can expose while the Session is cold. Later turns reload that skill from the current catalog and append its instructions to the committed model input. If the skill is missing, the turn is refused.
 
 <a id="further-exploration"></a>
 ## Further Exploration

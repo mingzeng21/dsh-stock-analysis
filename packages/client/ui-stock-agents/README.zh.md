@@ -25,7 +25,7 @@ Web 客户端注册一个股票分析侧边栏入口，从 Host 的 skill 元数
 <a id="use-this-package"></a>
 ## 使用本包
 
-与 Session 服务、股票 Agents Remote、locale 和 slots 一起挂载。点击立即启动的卡片会创建新 Session 并开始分析；输入类卡片会等到用户提交条件后再启动。每次运行都会在首轮前选中 `stock-analysis`、发送显式 `/skill-name` 提示词，并在 Agents 工作区内显示流式对话。专属记录显示在 Agents 自有历史栏中；选择记录会打开对应结果，不会改变普通 Conversation 的当前选择。目录、启动表单或结果视图中都可以通过图标按钮收起和展开历史栏。
+与 Session 服务、股票 Agents Remote、locale 和 slots 一起挂载。点击立即启动的卡片会创建新 Session 并开始分析；输入类卡片会等到用户提交内容后再启动。卡片可提供本地化输入标签与单行文本框；未提供时面板沿用选股条件标签和多行文本框。每次运行都会在首轮前选中 `stock-analysis`、发送显式 `/skill-name` 提示词，并在 Agents 工作区内显示流式对话。专属记录显示在 Agents 自有历史栏中；选择记录会打开对应结果，不会改变普通 Conversation 的当前选择。目录、启动表单或结果视图中都可以通过图标按钮收起和展开历史栏。
 
 <a id="understand-the-implementation"></a>
 ## 理解实现

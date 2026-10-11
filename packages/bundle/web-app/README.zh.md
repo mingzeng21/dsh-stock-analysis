@@ -67,7 +67,7 @@ dsh --profile web --no-open --port 8080
 
 ### 按会话的 agent 设置
 
-新建浏览器会话使用唯一随发行版装载的 `stock-analysis` preset，面向 A 股研究与行情分析。股票 preset 使用研究身份、要求始终以简体中文回答，并移除了继承的编程工具。侧边栏列出本包 `skills/` 目录中带标记的任务：点击热点分析、重点公告、连板分析或盘后总结卡片会立即启动；智能选股会先收集筛选条件。每次运行都会创建新的 stock-analysis Session。预设选择设置项已隐藏，部署将 `stock-analysis` 固定为新会话默认项；Web profile 仍可覆盖其子插件。首次使用的研究文件存放在 `$DSH_HOME/workspaces/stock-analysis`，已有工作区继续使用其记录的路径。只有 Host 提供可编辑的 profile 时，Creator 的插件管理工具才会启用。
+新建浏览器会话使用唯一随发行版装载的 `stock-analysis` preset，面向 A 股研究与行情分析。股票 preset 使用研究身份、要求始终以简体中文回答，并移除了继承的编程工具。侧边栏列出本包 `skills/` 目录中带标记的任务：点击热点分析、重点公告、连板分析或盘后总结卡片会立即启动；智能选股先收集筛选条件，分析个股先收集股票名称或代码，分析板块先收集板块名称。每次运行都会创建新的 stock-analysis Session。预设选择设置项已隐藏，部署将 `stock-analysis` 固定为新会话默认项；Web profile 仍可覆盖其子插件。首次使用的研究文件存放在 `$DSH_HOME/workspaces/stock-analysis`，已有工作区继续使用其记录的路径。只有 Host 提供可编辑的 profile 时，Creator 的插件管理工具才会启用。
 
 -----
 

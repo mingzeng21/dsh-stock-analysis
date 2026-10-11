@@ -16,14 +16,16 @@ describe('bundled stock Agents', () => {
       await ctx.plugin(SkillFileSystem, { includeDefaultRoots: false, bundledSkillDir: skillsDir, watch: false })
       const skills = await ctx.skills.list({ cwd: process.cwd() })
       expect(skills.map(skill => skill.name)).toEqual([
-        'stock-hot-topics', 'stock-key-announcements', 'stock-limit-up-analysis', 'stock-market-overview', 'stock-screening',
+        'stock-company-analysis', 'stock-hot-topics', 'stock-key-announcements', 'stock-limit-up-analysis', 'stock-market-overview', 'stock-screening', 'stock-sector-analysis',
       ])
       expect(skills.map(skill => skill.metadata?.stockAgent)).toEqual([
+        expect.objectContaining({ launch: 'query', queryInput: { label: { zh: '输入股票名称或代码', en: 'Enter a stock name or code' }, kind: 'text' } }),
         expect.objectContaining({ launch: 'immediate' }),
         expect.objectContaining({ launch: 'immediate' }),
         expect.objectContaining({ launch: 'immediate' }),
         expect.objectContaining({ launch: 'immediate' }),
         expect.objectContaining({ launch: 'query' }),
+        expect.objectContaining({ launch: 'query', queryInput: { label: { zh: '输入板块名称', en: 'Enter a sector name' }, kind: 'text' } }),
       ])
     } finally {
       await ctx.fiber.dispose()

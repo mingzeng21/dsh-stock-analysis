@@ -7,6 +7,7 @@ export interface StockAgentCard {
   readonly title: Readonly<Record<'zh' | 'en', string>>
   readonly summary: Readonly<Record<'zh' | 'en', string>>
   readonly launch: 'query' | 'immediate'
+  readonly queryInput?: Readonly<{ label: Readonly<Record<'zh' | 'en', string>>; kind: 'text' | 'textarea' }>
   readonly examples?: Readonly<Record<'zh' | 'en', readonly string[]>>
   readonly prompt?: Readonly<Record<'zh' | 'en', string>>
 }

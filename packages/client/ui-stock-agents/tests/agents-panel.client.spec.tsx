@@ -20,11 +20,25 @@ const SCREENING: StockAgentCard = {
   launch: 'query',
   examples: { zh: ['半导体公司'], en: ['Semiconductor companies'] },
 }
+const COMPANY: StockAgentCard = {
+  name: 'stock-company-analysis',
+  title: { zh: '分析个股', en: 'Company analysis' },
+  summary: { zh: '分析一只 A 股', en: 'Analyze an A-share company' },
+  launch: 'query',
+  queryInput: { label: { zh: '输入股票名称或代码', en: 'Enter a stock name or code' }, kind: 'text' },
+}
+const SECTOR: StockAgentCard = {
+  name: 'stock-sector-analysis',
+  title: { zh: '分析板块', en: 'Sector analysis' },
+  summary: { zh: '分析一个 A 股板块', en: 'Analyze an A-share sector' },
+  launch: 'query',
+  queryInput: { label: { zh: '输入板块名称', en: 'Enter a sector name' }, kind: 'text' },
+}
 
 afterEach(cleanup)
 
-function mount(history = false) {
-  const catalog = createSnapshotStore<readonly StockAgentCard[]>([SCREENING])
+function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) {
+  const catalog = createSnapshotStore<readonly StockAgentCard[]>(cards)
   const sessions = createSnapshotStore<SessionListState>({
     ids: history ? [SESSION] : [],
     byId: history ? {
@@ -84,6 +98,26 @@ it('renders a newly launched Agent in the Agents panel and returns to its catalo
   fireEvent.click(screen.getByRole('button', { name: '返回Agents' }))
   expect(screen.queryByTestId('conversation')).toBeNull()
   expect(screen.getByRole('button', { name: /智能选股/ })).toBeTruthy()
+})
+
+it('starts company analysis from a stock name or code field', async () => {
+  const { start } = mount(false, [COMPANY])
+  fireEvent.click(screen.getByRole('button', { name: /分析个股/ }))
+  const input = screen.getByLabelText('输入股票名称或代码')
+  expect(input.tagName).toBe('INPUT')
+  fireEvent.change(input, { target: { value: '600519' } })
+  fireEvent.click(screen.getByRole('button', { name: '运行分析' }))
+  await waitFor(() => { expect(start).toHaveBeenCalledWith(COMPANY, '600519') })
+})
+
+it('starts sector analysis from a sector name field', async () => {
+  const { start } = mount(false, [SECTOR])
+  fireEvent.click(screen.getByRole('button', { name: /分析板块/ }))
+  const input = screen.getByLabelText('输入板块名称')
+  expect(input.tagName).toBe('INPUT')
+  fireEvent.change(input, { target: { value: '人工智能' } })
+  fireEvent.click(screen.getByRole('button', { name: '运行分析' }))
+  await waitFor(() => { expect(start).toHaveBeenCalledWith(SECTOR, '人工智能') })
 })
 
 it('opens a recorded Agent inside the same panel', () => {

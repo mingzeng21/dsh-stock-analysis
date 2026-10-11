@@ -30,7 +30,7 @@ kind: "package-reference"
 <a id="understand-the-implementation"></a>
 ## 理解实现
 
-目录租用当前股票 preset 的 scope，并列出其中生效的 skill。它只接受来源路径位于随包 skill 目录中的定义，校验双语标题、摘要、启动方式、样例和免输入提示词。`stockAgent` 投影将首次显式 `skill-invocation` 消息之前的最近一条人工输入折叠成 `{ name, query }`，普通 Session 列表可在 Session 未激活时读取。后续轮次从当前目录重新加载该 skill，将新指令作为模型输入写入日志。skill 缺失时拒绝该轮次。
+目录租用当前股票 preset 的 scope，并列出其中生效的 skill。它只接受来源路径位于随包 skill 目录中的定义，校验双语标题、摘要、启动方式、可选输入标签与控件类型、样例和免输入提示词。`stockAgent` 投影将首次显式 `skill-invocation` 消息之前的最近一条人工输入折叠成 `{ name, query }`，普通 Session 列表可在 Session 未激活时读取。后续轮次从当前目录重新加载该 skill，将新指令作为模型输入写入日志。skill 缺失时拒绝该轮次。
 
 <a id="further-exploration"></a>
 ## 进一步探索

@@ -476,7 +476,7 @@ async function seedWorkspace(scenario: HeadlessScenario, cwd: string): Promise<v
 
 const workspaceSetups: Record<string, (cwd: string) => Promise<void>> = {
   async 'stock-agent-skills'(cwd) {
-    for (const name of ['stock-screening', 'stock-hot-topics', 'stock-market-overview', 'stock-key-announcements', 'stock-limit-up-analysis']) {
+    for (const name of ['stock-screening', 'stock-hot-topics', 'stock-market-overview', 'stock-key-announcements', 'stock-limit-up-analysis', 'stock-company-analysis', 'stock-sector-analysis']) {
       const target = join(cwd, '.dsh', 'skills', name, 'SKILL.md')
       await mkdir(dirname(target), { recursive: true })
       await copyFile(join(repoRoot, 'packages/bundle/web-app/skills', name, 'SKILL.md'), target)

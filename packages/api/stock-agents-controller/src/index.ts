@@ -27,6 +27,7 @@ const cardSchema = z.object({
   title: localeText,
   summary: localeText,
   launch: z.enum(['query', 'immediate']),
+  queryInput: z.object({ label: localeText, kind: z.enum(['text', 'textarea']) }).optional(),
   examples: z.object({ zh: z.array(z.string()), en: z.array(z.string()) }).optional(),
   prompt: localeText.optional(),
 }).superRefine((card, issue) => {
@@ -130,8 +131,9 @@ export class StockAgentsController extends TypertRemoteService {
       if (skill.path === undefined || !resolve(skill.path).startsWith(root)) return []
       const parsed = cardSchema.safeParse(skill.metadata?.stockAgent)
       if (!parsed.success) throw new Error(`Invalid stock Agent metadata in ${skill.path}: ${parsed.error.message}`)
-      const { title, summary, launch, examples, prompt } = parsed.data
+      const { title, summary, launch, queryInput, examples, prompt } = parsed.data
       return [{ name: skill.name, title, summary, launch,
+        ...queryInput === undefined ? {} : { queryInput },
         ...examples === undefined ? {} : { examples },
         ...prompt === undefined ? {} : { prompt },
       }]

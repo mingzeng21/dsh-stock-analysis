@@ -181,8 +181,10 @@ export function AgentsPanel({
       </div> : <section className={css.launch}>
         <p>{selected.summary.zh}</p>
         {selected.launch === 'query' && <>
-          <label htmlFor="stock-agent-query">{t('panel.query')}</label>
-          <textarea id="stock-agent-query" value={query} onChange={(event) => { setQuery(event.target.value) }} />
+          <label htmlFor="stock-agent-query">{selected.queryInput?.label.zh ?? t('panel.query')}</label>
+          {selected.queryInput?.kind === 'text'
+            ? <input id="stock-agent-query" type="text" value={query} onChange={(event) => { setQuery(event.target.value) }} />
+            : <textarea id="stock-agent-query" value={query} onChange={(event) => { setQuery(event.target.value) }} />}
           {selected.examples?.zh !== undefined && <div className={css.examples}>
             <h2>{t('panel.examples')}</h2>
             {selected.examples.zh.map(example => <button type="button" key={example} onClick={() => { setQuery(example) }}>{example}</button>)}
