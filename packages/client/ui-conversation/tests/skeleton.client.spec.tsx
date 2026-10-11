@@ -411,7 +411,7 @@ describe('Hero chrome', () => {
   it('renders the stock research headline and subtitle only in research mode', () => {
     const view = render(<HeroShell t={makeTranslate(zh, commonZh)} renderSlot={() => null} stockResearchHome />)
     expect(view.getByText('今天想研究什么？')).toBeTruthy()
-    expect(view.getByText(/从 A 股市场的海量信息中/)).toBeTruthy()
+    expect(view.getByText('围绕 A 股公司、行业和市场问题，快速获得清晰、深入的研究分析。')).toBeTruthy()
   })
 })
 
