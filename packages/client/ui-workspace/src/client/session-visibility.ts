@@ -10,6 +10,6 @@ export function isConversationSession(session: SessionSummary): boolean {
 
 /** A non-null stockAgent projection marks a Session as an Agents record. */
 function isStockAgentSession(session: SessionSummary): boolean {
-  return Object.entries(session.projectionValues ?? {}).some(([key, value]) =>
-    key === 'stockAgent' && value !== null && value !== undefined)
+  const stockAgent = session.projectionValues?.stockAgent
+  return stockAgent !== undefined && stockAgent !== null
 }

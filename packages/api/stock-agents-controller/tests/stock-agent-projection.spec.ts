@@ -51,8 +51,11 @@ describe('specialist follow-up', () => {
     }))
     expect(result.kind).toBe('enter')
     if (result.kind !== 'enter') return
-    expect(result.messages[1]?.source).toEqual({ kind: 'skill-invocation', name: 'stock-screening', form: 'instructions' })
-    expect(result.messages[1]?.content[0]).toMatchObject({ type: 'text', text: expect.stringContaining('当前版研究要求') })
+    const instruction = result.messages[1]
+    expect(instruction?.source).toEqual({ kind: 'skill-invocation', name: 'stock-screening', form: 'instructions' })
+    expect(instruction?.content[0]?.type).toBe('text')
+    if (instruction?.content[0]?.type !== 'text') return
+    expect(instruction.content[0].text).toContain('当前版研究要求')
   })
 
   it('blocks follow-up when its skill was removed', async () => {
