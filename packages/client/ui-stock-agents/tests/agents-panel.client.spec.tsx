@@ -95,3 +95,18 @@ it('opens a recorded Agent inside the same panel', () => {
   expect(screen.queryByTestId('conversation')).toBeNull()
   expect(screen.getByLabelText('描述你的筛选条件')).toHaveProperty('value', '半导体公司')
 })
+
+it('collapses and restores Agent history with an icon button', () => {
+  mount(true)
+  const history = screen.getByRole('complementary', { name: '分析记录' })
+  const hide = within(history).getByRole('button', { name: '隐藏分析记录' })
+  expect(hide.querySelector('svg')).not.toBeNull()
+  expect(hide.textContent).toBe('')
+  fireEvent.click(hide)
+  expect(history).toHaveProperty('hidden', true)
+  const show = screen.getByRole('button', { name: '显示分析记录' })
+  expect(show.getAttribute('aria-expanded')).toBe('false')
+  fireEvent.click(show)
+  expect(history).toHaveProperty('hidden', false)
+  expect(within(history).getByRole('button', { name: '隐藏分析记录' })).toBeTruthy()
+})

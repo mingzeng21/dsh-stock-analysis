@@ -25,7 +25,7 @@ The Web client registers one stock-analysis sidebar entry, builds cards from Hos
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount it beside the Session service, stock Agents Remote, locale, and slots. Selecting an immediate card creates a fresh Session and starts analysis in one click; an input card waits for submitted conditions. Each run selects `stock-analysis` before the first turn, sends an explicit `/skill-name` prompt, and shows the streaming Conversation inside the Agents workspace. Specialist records appear in an Agents-owned history rail; selecting a record opens its result without selecting it in ordinary Conversation. The rail can be collapsed while viewing the catalog, launch form, or result.
+Mount it beside the Session service, stock Agents Remote, locale, and slots. Selecting an immediate card creates a fresh Session and starts analysis in one click; an input card waits for submitted conditions. Each run selects `stock-analysis` before the first turn, sends an explicit `/skill-name` prompt, and shows the streaming Conversation inside the Agents workspace. Specialist records appear in an Agents-owned history rail; selecting a record opens its result without selecting it in ordinary Conversation. An icon button collapses and restores the rail while viewing the catalog, launch form, or result.
 
 <a id="understand-the-implementation"></a>
 ## Understand the implementation

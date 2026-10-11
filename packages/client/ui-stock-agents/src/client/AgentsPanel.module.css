@@ -23,7 +23,7 @@
 .historyHeader { display: flex; flex: none; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px 8px; border-bottom: 0.5px solid var(--dsw-alias-border-l2); }
 .historyHeader h2 { margin: 0; font-size: 13px; font-weight: 500; line-height: 20px; }
 .historyToggle, .back, .historyRerun { padding: 6px 10px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; color: inherit; background: transparent; cursor: pointer; }
-.historyToggle { flex: none; font: inherit; font-size: 12px; }
+.historyToggle { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; }
 .historyToggle:hover, .historyToggle:focus-visible, .back:hover, .back:focus-visible, .historyRerun:hover, .historyRerun:focus-visible { background: var(--dsw-alias-interactive-bg-hover); }
 .historyEmpty { margin: 0; padding: 16px 14px; color: var(--dsw-alias-label-secondary); font-size: 13px; }
 .historyList { flex: 1; min-height: 0; overflow: auto; margin: 0; padding: 8px 12px; list-style: none; }

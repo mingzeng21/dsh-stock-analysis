@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import type {} from '@deepseek-ai/dsh-api-stock-agents-controller/types'
+import { IconPanelLeftOutlineRegular, Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { ConversationSlotProps } from '../contract/slots.ts'
 import { conversationPhase } from '../contract/snapshot.ts'
 import { ConversationWidthControls } from './ConversationWidthControls.tsx'
@@ -16,6 +18,7 @@ export function ConversationMainPanel(props: ConversationSlotProps) {
     sessionId, useSession, useSessions, useWorkspaces, useConversation,
     renderSlot, renderFactorySlot, openHistory, startSession, stockResearchHome, t,
   } = props
+  const [historyVisible, setHistoryVisible] = useState(true)
   const session = useSession(s => s)
   const conversation = useConversation(s => s)
   const archived = useWorkspaces(s => s.archivedSessionIds)
@@ -55,8 +58,20 @@ export function ConversationMainPanel(props: ConversationSlotProps) {
   const phase = settling ? 'settling' : hero ? 'hero' : 'active'
 
   const dateFormat = new Intl.DateTimeFormat(document.documentElement.lang || 'zh-CN', { month: 'long', day: 'numeric' })
+  const toggleLabel = t(historyVisible ? 'history.hide' : 'history.show')
+  const historyToggle = <Tooltip label={toggleLabel} portal>
+    <button
+      type="button"
+      className={css.historyToggle}
+      aria-label={toggleLabel}
+      aria-expanded={historyVisible}
+      aria-controls="conversation-history"
+      onClick={() => { setHistoryVisible(visible => !visible) }}
+    ><IconPanelLeftOutlineRegular size={16} /></button>
+  </Tooltip>
   const content = (
     <div className={css.root} data-phase={phase}>
+      {stockResearchHome && !historyVisible && <div className={css.historyReopen}>{historyToggle}</div>}
       {renderSlot('conversation.header', {})}
       {renderFactorySlot('conversation.content', {
         variant: 'main',
@@ -71,11 +86,14 @@ export function ConversationMainPanel(props: ConversationSlotProps) {
   )
   if (!stockResearchHome) return content
   return (
-    <div className={css.home}>
-      <aside className={css.historyRail} aria-label={t('history.title')}>
+    <div className={css.home} data-history-visible={historyVisible}>
+      <aside id="conversation-history" className={css.historyRail} aria-label={t('history.title')} hidden={!historyVisible}>
         <div className={css.historyHeader}>
           <h2>{t('history.title')}</h2>
-          <button type="button" onClick={startSession}>{t('history.new')}</button>
+          <div className={css.historyActions}>
+            <button type="button" onClick={startSession}>{t('history.new')}</button>
+            {historyToggle}
+          </div>
         </div>
         {history.length === 0
           ? <p className={css.historyEmpty}>{t('history.empty')}</p>

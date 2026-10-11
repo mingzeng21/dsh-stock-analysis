@@ -4,6 +4,7 @@ import type { StockAgentCard } from '@deepseek-ai/dsh-api-stock-agents-controlle
 import type { SessionListState, SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { IconPanelLeftOutlineRegular, Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRenderSlots, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import css from './AgentsPanel.module.css'
 
@@ -98,13 +99,16 @@ export function AgentsPanel({
     void start(selected, query.trim()).then(showReference)
       .catch(() => { setError('failed') }).finally(() => { setBusy(false) })
   }
-  const historyToggle = <button
-    type="button"
-    className={css.historyToggle}
-    aria-expanded={historyVisible}
-    aria-controls="stock-agent-history"
-    onClick={() => { setHistoryVisible(visible => !visible) }}
-  >{historyVisible ? t('panel.historyHide') : t('panel.historyShow')}</button>
+  const historyToggle = <Tooltip label={historyVisible ? t('panel.historyHide') : t('panel.historyShow')} portal>
+    <button
+      type="button"
+      className={css.historyToggle}
+      aria-label={historyVisible ? t('panel.historyHide') : t('panel.historyShow')}
+      aria-expanded={historyVisible}
+      aria-controls="stock-agent-history"
+      onClick={() => { setHistoryVisible(visible => !visible) }}
+    ><IconPanelLeftOutlineRegular size={16} /></button>
+  </Tooltip>
   const historyRail = <aside
     id="stock-agent-history"
     className={css.historyRail}

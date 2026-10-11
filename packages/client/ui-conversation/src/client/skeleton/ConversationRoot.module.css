@@ -19,6 +19,8 @@
   font-family: var(--dsw-font-family);
 }
 
+.historyRail[hidden] { display: none; }
+
 .historyHeader {
   display: flex;
   flex: none;
@@ -30,8 +32,14 @@
 }
 
 .historyHeader h2 { margin: 0; font-size: 13px; font-weight: 500; line-height: 20px; }
-.historyHeader button { flex: none; padding: 6px 10px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; color: inherit; background: transparent; font: inherit; font-size: 12px; cursor: pointer; }
-.historyHeader button:hover, .historyHeader button:focus-visible { background: var(--dsw-alias-interactive-bg-hover); }
+.historyActions { display: flex; align-items: center; gap: 6px; }
+.historyActions > button { flex: none; padding: 6px 10px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; color: inherit; background: transparent; font: inherit; font-size: 12px; cursor: pointer; }
+.historyActions > button:hover, .historyActions > button:focus-visible { background: var(--dsw-alias-interactive-bg-hover); }
+.historyToggle { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; color: inherit; background: transparent; cursor: pointer; }
+.historyToggle:hover, .historyToggle:focus-visible { background: var(--dsw-alias-interactive-bg-hover); }
+.historyReopen { position: absolute; top: 10px; left: 12px; z-index: 2; }
+.home[data-history-visible='false'] .header { padding-left: 56px; }
+:global([data-platform='darwin']) .historyReopen { top: calc(10px + var(--dsh-frame-top-clearance, 0px)); }
 .historyList { flex: 1; min-height: 0; overflow: auto; margin: 0; padding: 8px 12px; list-style: none; }
 .historyList li { padding: 8px 0; border-bottom: 1px solid var(--dsw-alias-border-l2); }
 .historyList button { display: grid; gap: 5px; width: 100%; min-width: 0; padding: 6px 8px; border: 0; border-radius: 7px; color: inherit; background: transparent; text-align: left; cursor: pointer; }

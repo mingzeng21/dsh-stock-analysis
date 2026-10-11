@@ -429,6 +429,22 @@ describe('ConversationRoot resident composer', () => {
     expect(b.view.queryByRole('button', { name: '添加文件或调用指令' })).toBeNull()
   })
 
+  it('collapses and restores Conversation history while keeping the new conversation action', () => {
+    const b = mount(sessionSnapshotOf({ blank: true }), undefined, undefined, { stockResearchHome: true })
+    const history = b.view.getByRole('complementary', { name: '历史对话' })
+    const hide = within(history).getByRole('button', { name: '隐藏历史对话' })
+    expect(hide.querySelector('svg')).not.toBeNull()
+    expect(hide.textContent).toBe('')
+    fireEvent.click(hide)
+    expect(history).toHaveProperty('hidden', true)
+    const show = b.view.getByRole('button', { name: '显示历史对话' })
+    expect(show.getAttribute('aria-expanded')).toBe('false')
+    fireEvent.click(show)
+    expect(history).toHaveProperty('hidden', false)
+    fireEvent.click(within(history).getByRole('button', { name: '新对话' }))
+    expect(b.startSession).toHaveBeenCalledOnce()
+  })
+
   it.each([{ stockAgentRecord: true }, { archived: true }])('omits specialist or archived records from ordinary history', (filter) => {
     const b = mount(sessionSnapshotOf(), undefined, undefined, { stockResearchHome: true, ...filter })
     const history = b.view.getByRole('complementary', { name: '历史对话' })
