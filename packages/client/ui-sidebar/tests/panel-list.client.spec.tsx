@@ -77,7 +77,10 @@ async function bench(collapsed = false, stockResearchHome = false) {
     sidebar: { kind: 'single', scope: 'root' },
     main: { kind: 'keyed', scope: 'root' },
   }, Frame)
-  const sidebar = await runtime.mount({ inject: [...inject], apply: (ctx) => { apply(ctx, { stockResearchHome }) } })
+  const sidebar = await runtime.mount({ inject: [...inject], apply: (ctx) => {
+    if (stockResearchHome) apply(ctx)
+    else apply(ctx, { stockResearchHome: false })
+  } })
   const view = runtime.renderRoot()
   return { runtime, locale, layout, sidebar, view }
 }

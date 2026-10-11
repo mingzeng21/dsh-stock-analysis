@@ -59,8 +59,13 @@ function clientBuildValue(name: string): string | undefined {
 it('boots the built plugin graph and renders a fixture session end to end', async () => {
   mountAssembledApp()
 
-  // The sidebar renders from the boot graph: every inject layer activated.
-  const tree = await screen.findByRole('tree', { name: 'Sessions' }, { timeout: 10_000 })
+  // The shipped browser bundle opens the stock research home with its own history rail.
+  const history = await screen.findByRole('complementary', { name: 'Conversation history' }, { timeout: 10_000 })
+  expect(screen.queryByRole('tree', { name: 'Sessions' })).toBeNull()
+  expect(screen.queryByRole('button', { name: 'New Session' })).toBeNull()
+  const navigation = screen.getByRole('navigation', { name: 'Global panels' })
+  expect(within(navigation).getAllByRole('button').map(button => button.getAttribute('aria-label')))
+    .toEqual(['Conversation', 'Agents', 'Watchlist'])
   if (clientBuildValue('DSH_CLIENT_BUILD_PROFILE') === 'official') {
     expect(document.querySelector('svg[viewBox="26 0 156 24"]')).not.toBeNull()
     expect(screen.queryByText('DSH Local Build')).toBeNull()
@@ -75,26 +80,8 @@ it('boots the built plugin graph and renders a fixture session end to end', asyn
     screen.getByText('DSH Local Build')
     screen.getByText(buildVersion)
   }
-  // The compact layout dropped group session counts; the fixture workspace
-  // group row renders immediately with its sessions beneath it.
-  const fixtureGroup = (await within(tree).findAllByText('fixture'))
-    .map(el => el.closest<HTMLElement>('[role="treeitem"]'))
-    .find(el => el?.getAttribute('aria-expanded') !== null)
-  if (fixtureGroup === undefined) throw new Error('fixture Workspace group missing')
-
-  // The resident fixture has both a question and an approval; composer routing
-  // exposes the question first, and the assembled workspace plugin mirrors that
-  // actionable wait instead of the underlying running state.
-  const waitingTitle = await within(tree).findByText('Fixture 历史会话')
-  const waitingRow = waitingTitle.closest<HTMLElement>('[role="treeitem"]')
-  if (waitingRow === null) throw new Error('fixture Session title must belong to a tree row')
-  expect(waitingRow.querySelector('[data-state="warning"]')).not.toBeNull()
-  expect(waitingRow.querySelector('[data-state="ongoing"]')).toBeNull()
-  within(waitingRow).getByText('Waiting for answer')
-  within(waitingRow).getByText('Answer')
-
-  // Opening a session reaches chat content through the RemoteMock transport.
-  fireEvent.click(waitingTitle)
+  // Opening a listed Session reaches chat content through the RemoteMock transport.
+  fireEvent.click(await within(history).findByRole('button', { name: /Fixture 历史会话/ }))
   await waitFor(() => {
     expect(document.querySelector('[data-sample="bash"]')).not.toBeNull()
   }, { timeout: 10_000 })
@@ -105,10 +92,6 @@ it('boots the built plugin graph and renders a fixture session end to end', asyn
     fireEvent.click(await screen.findByRole('button', { name: 'Skip' }))
   }
   const allowOnce = await screen.findByRole('button', { name: 'Allow once' })
-  await waitFor(() => {
-    within(waitingRow).getByText('Waiting for approval')
-    within(waitingRow).getByText('Approval')
-  })
   fireEvent.click(allowOnce)
 
   // The fixture mirrors all three token-meter projections, so the assembled
@@ -175,11 +158,10 @@ it('boots the built plugin graph and renders a fixture session end to end', asyn
 it('boots without ui-chat and does not select another conversation view implicitly', async () => {
   mountAssembledApp({ exclude: ['@deepseek-ai/dsh-client-ui-chat'] })
 
-  const tree = await screen.findByRole('tree', { name: 'Sessions' }, { timeout: 10_000 })
+  const history = await screen.findByRole('complementary', { name: 'Conversation history' }, { timeout: 10_000 })
   const boot = Reflect.get(window, '__DSH_BOOT__') as { entries: Array<{ id: string }> } | undefined
   expect(boot?.entries.some(entry => entry.id === '@deepseek-ai/dsh-client-ui-chat')).toBe(false)
-  const sessionTitle = await within(tree).findByText('Fixture 历史会话')
-  fireEvent.click(sessionTitle)
+  fireEvent.click(await within(history).findByRole('button', { name: /Fixture 历史会话/ }))
   await waitFor(() => {
     expect(document.querySelector('[data-slot="conversation.session"]')).not.toBeNull()
   }, { timeout: 10_000 })

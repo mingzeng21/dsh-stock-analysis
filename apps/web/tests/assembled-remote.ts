@@ -152,6 +152,7 @@ export function createAssembledRemote(options: AssembledRemoteOptions = {}): Ass
       'credentials/describe': structuredClone(fixture.credentialsDescribe),
       'session/modelCatalog': structuredClone(fixture.modelCatalog),
       'agentPresets/list': structuredClone(fixture.agentPresets),
+      'stockAgents/list': ok([]),
       'commands/list': structuredClone(fixture.commands),
       'settings/openSettingsDocument': ok({ opened: true }),
       'subagents/list': ok({ entries: [], parentAvailable: true }),

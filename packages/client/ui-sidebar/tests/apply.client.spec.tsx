@@ -80,7 +80,8 @@ describe('ui-sidebar apply', () => {
     expect(leading[0]!.locale).toBe('sidebar')
     expect(leading[0]!.inject).toBe(b.slots.entries('sidebar')[0]!.inject)
     const injected = (b.slots.entries('sidebar')[0]!.inject as () => SidebarRootInjected)()
-    expect(Object.keys(injected)).toEqual(['startSession', 'toggleSidebar', 'selectPanel', 'hooks'])
+    expect(Object.keys(injected)).toEqual(['startSession', 'toggleSidebar', 'selectPanel', 'stockResearchHome', 'hooks'])
+    expect(injected.stockResearchHome).toBe(true)
     expect(injected.hooks.panels.getSnapshot()).toEqual([])
     expect(b.slots.entries('main')).toEqual([])
     // Both arms delegate to the Workspace UI's shared New Session action.
@@ -112,7 +113,7 @@ describe('ui-sidebar apply', () => {
 
   it('projects plugin-owned panel entries and removes them with their owner', async () => {
     const b = await bench()
-    const sidebar = b.ctx.plugin({ inject: [...inject], apply })
+    const sidebar = b.ctx.plugin({ inject: [...inject], apply: (ctx) => { apply(ctx, { stockResearchHome: false }) } })
     await sidebar.await()
     const injected = (b.slots.entries('sidebar')[0]!.inject as () => SidebarRootInjected)()
     const panel = b.ctx.plugin({

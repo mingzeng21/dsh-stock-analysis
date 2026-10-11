@@ -64,14 +64,11 @@ export const inject = [
 export interface Config {
   /** Maximum generic-file uploads allowed to run concurrently in browser Workers. */
   maxConcurrentFileUploads?: number
-  /** Show the stock research home and its conversation history rail. */
-  stockResearchHome?: boolean
 }
 
 /** Validated Conversation runtime configuration. */
 export const Config: z<Config> = z.object({
   maxConcurrentFileUploads: z.natural().min(1).default(2),
-  stockResearchHome: z.boolean().default(false),
 })
 
 // Stable no-session sources keep the renderer's observable-hook cache and
@@ -165,6 +162,7 @@ function concreteConversation(ctx: Context): ConversationController {
  * @param ctx - Client root context.
  */
 export function apply(ctx: Context, config: Config = Config({})): void {
+  const stockResearchHome = true
   const sessions = ctx.sessions
   const slots = ctx.slots
   // Schemastery's field default is materialized before Cordis calls apply.
@@ -200,7 +198,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
     name: 'sidebar.panellist',
     id: CONVERSATION_MAIN_KEY,
     order: 0,
-    label: () => t(config.stockResearchHome ? 'panel.nav.research' : 'panel.nav'),
+    label: () => t('panel.nav.research'),
   }, ConversationPanelIcon))
 
   const viewTabs = (): ViewTab[] => {
@@ -334,7 +332,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
     inject: () => ({
       openHistory: (sessionId: SessionId) => { workspaceNavigation.openSession(sessionId) },
       startSession: () => { workspaceNavigation.startSession() },
-      stockResearchHome: config.stockResearchHome,
+      stockResearchHome,
     }),
   }, ConversationRoot)
 

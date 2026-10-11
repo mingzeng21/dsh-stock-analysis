@@ -5374,10 +5374,6 @@ importers:
         version: 18.3.1
 
   packages/client/ui-sidebar:
-    dependencies:
-      '@deepseek-ai/schemastery':
-        specifier: workspace:~
-        version: link:../../../vendor/schemastery
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: workspace:~
