@@ -1,77 +1,45 @@
-# DeepSeek Harness
+# DSH Stock Research
 
 English | [中文](README.zh.md)
 
-DeepSeek Harness (`dsh`) is an open-source agent harness developed by [DeepSeek AI](https://deepseek.com).
+DSH Stock Research is an A-share research agent for people who want to investigate companies, sectors, and market developments through a conversation. It combines market data, company information, and research workflows in one interface. Users can start with a question; they do not need to assemble an agent or choose a workspace.
 
-It is built on an **everything-is-a-plugin** architecture and powered by [Cordis](https://github.com/cordiverse/cordis), whose design is described in [_A Programming Paradigm for Spatiotemporal Composability_](https://arxiv.org/abs/2608.25512).
+This project is a fork of [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). Its general conversation and session infrastructure remains the foundation, while the shipped Web experience is focused on stock research.
 
-Documentation: [https://deepseek-harness.github.io/deepseek-harness/](https://deepseek-harness.github.io/deepseek-harness/)
+## What you can do
 
-## Developer preview
+- **Conversation:** Ask research questions and return to previous conversations in a collapsible history panel. New conversations use the fixed **股票分析** preset.
+- **Agents:** Start focused research workflows from cards and review their results in a separate analysis history.
+- **Watchlist:** Save A-share stocks and inspect quotes, price charts, and related announcements, reports, and news. Ask follow-up questions about a selected stock.
 
-DeepSeek Harness is in _developer preview_ and iterating rapidly. **THERE WILL BE COMPATIBILITY-BREAKING CHANGES.**
+The stock preset includes a basic research persona and stock and Web tools. It does not yet enforce a detailed research method or task-specific tool limits. Responses are research material, not personalized trading or position advice; check the source and time of any market data before relying on it.
 
-Review the [safety notice](SAFETY.md) before running the project.
+<a id="run"></a>
 
-## Run
+<a id="run-from-source"></a>
 
-### Run from `npm`
+## Run from source
 
-Install `Node.js`, then run:
-
-```sh
-npx @deepseek-ai/dsh web
-```
-
-The command starts the Web UI at `http://127.0.0.1:3080` by default and opens it in the default browser for a local launch. An SSH launch only prints the host URL because the SSH client or editor owns the local forwarded address. Pass `--no-open` to run the server without opening a browser. See [Web UI guide](docs/user/guide/index.md).
-
-### Run from source
-
-To run from a repository checkout:
+Install Node.js `^22.19.0` or `>=24.0.0` and pnpm `11.7.0`, then run:
 
 ```sh
-git clone https://github.com/deepseek-ai/deepseek-harness.git
-cd deepseek-harness
+git clone https://github.com/mingzeng21/dsh-stock-analysis.git
+cd dsh-stock-analysis
 pnpm install
 pnpm run build
 pnpm dsh web
 ```
 
-`pnpm run build` prepares the repository artifacts. `pnpm dsh web` uses those built artifacts without rebuilding.
+Open the complete URL printed by `pnpm dsh web`. On a local launch, the browser normally opens automatically. In **Settings → Models**, save a [DeepSeek API key](https://platform.deepseek.com/) before starting a conversation.
 
-## Community and support
+Stock data is provided through the configured Hithink Finance and iWenCai services. To use their live data, supply `HITHINK_FINANCE_API_KEY` and `IWENCAI_API_KEY` in the process environment before launching the app. Without a required provider key or access to a particular capability, the corresponding data request can fail; the model key alone does not provide market data.
 
-- Submit feedback or bug reports through [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions).
-- Add the [`dsh-plugin`](https://github.com/topics/dsh-plugin) topic to your plugin repository for discoverability.
-- Join <a href="https://discord.gg/4MrtZUhpxg">DeepSeek Harness Discord community</a>.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+New research sessions use a writable application data directory by default, so the user does not need to select a workspace. Existing workspaces retain their recorded paths.
 
 ## Development
 
-Start with the [development guide](docs/development.md) and [architecture documentation](docs/architecture.md).
-
-`pnpm run dev:web` builds, serves, and rebuilds client bundles on source edits in one terminal, and `make help` lists the matching Make targets for Web and Desktop; the guide's application commands section owns the full table.
-
-For agents, follow [AGENTS.md](AGENTS.md).
-
-## Citation
-
-```bibtex
-@misc{deepseek-harness2026,
-  title={DeepSeek Harness: Everything is a Plugin},
-  author={DeepSeek-AI},
-  year={2026},
-  publisher={GitHub},
-  howpublished={\url{https://github.com/deepseek-ai/deepseek-harness}},
-}
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md), the [development guide](docs/development.md), and [architecture](docs/architecture.md). Repository agents follow [AGENTS.md](AGENTS.md). The stock Web composition lives in [web-app](packages/bundle/web-app/README.md); its market-data integration is described in the [stock subsystem](docs/subsystems/stock.md).
 
 ## License
 
-[MIT](LICENSE)
-
-Third-party dependencies and their licenses are disclosed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE). Third-party licenses are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
