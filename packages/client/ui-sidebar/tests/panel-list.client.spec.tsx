@@ -21,6 +21,8 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 
 const ALPHA = 'sidebar-test-alpha' as MainPanelId
 const BETA = 'sidebar-test-beta' as MainPanelId
+const STOCK_AGENTS = 'stock-agents' as MainPanelId
+const WATCHLIST = 'watchlist' as MainPanelId
 const runtimes = new Set<SlotTestRuntime>()
 
 afterEach(async () => {
@@ -129,7 +131,7 @@ describe('sidebar global panels', () => {
         name: 'sidebar.panellist', id: 'conversation', label: 'conversation', order: 0,
       }, () => <span />))
     } })
-    for (const id of ['stock-agents', 'watchlist'] as const) await mountPanel(runtime, { id, heading: id, label: id })
+    for (const id of [STOCK_AGENTS, WATCHLIST]) await mountPanel(runtime, { id, heading: id, label: id })
     const navigation = await view.findByRole('navigation', { name: 'Global panels' })
     expect(within(navigation).getAllByRole('button').map(button => button.getAttribute('aria-label')))
       .toEqual(['conversation', 'stock-agents', 'watchlist'])
