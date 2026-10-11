@@ -13,6 +13,8 @@ export interface AgentPreset {
 export interface Config {
   /** Deployment default when the caller omits a preset. */
   default: string
+  /** Ignore an earlier user-selected default for new Sessions. */
+  fixedDefault?: boolean
   /** User-selected default; edited through Settings. */
   selectedDefault: Volatile<string | undefined>
 }

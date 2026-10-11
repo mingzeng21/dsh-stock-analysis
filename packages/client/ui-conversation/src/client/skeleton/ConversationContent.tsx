@@ -145,10 +145,11 @@ export function ConversationContent(props: ConversationContentProps) {
   const blocked = !inert && composerBlock !== undefined
   const inputBar = renderSlot('conversation.composer.bar', {
     variant: hero ? 'hero' : 'composer',
+    ...(hero && props.stockResearchHome ? { stockResearchHome: true } : {}),
     ...(inert
       ? {
         disabled: true,
-        placeholder: t('placeholder.workspace'),
+        placeholder: t(props.stockResearchHome ? 'placeholder.setup' : 'placeholder.workspace'),
         workspacePickerOpen: pickerOpen,
         onRequestWorkspace: () => { setPickerOpen(true) },
       }
@@ -157,13 +158,13 @@ export function ConversationContent(props: ConversationContentProps) {
         // block keeps the model seat live because choosing a model is how the
         // user clears it.
         ? { blocked: composerBlock, placeholder: composerBlock.reason }
-        : hero ? { placeholder: t('placeholder.hero') } : {}),
+        : hero ? { placeholder: t(props.stockResearchHome ? 'placeholder.hero.research' : 'placeholder.hero') } : {}),
   })
 
   const composerBar = (
     <div className={clsx(css.composerStack, hero && css.composerHero)}>
-      {hero && <HeroShell t={t} renderSlot={renderSlot} />}
-      {hero && heroWorkspaceRow}
+      {hero && <HeroShell t={t} renderSlot={renderSlot} stockResearchHome={props.stockResearchHome === true} />}
+      {hero && !props.stockResearchHome && heroWorkspaceRow}
       {zone !== undefined && renderSlot('conversation.input.dock', zone)}
       {inputBar}
     </div>

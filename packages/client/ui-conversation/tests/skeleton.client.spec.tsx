@@ -2,7 +2,7 @@
 import type { GlobalStandardProps, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createContext, useContext, type ReactNode } from 'react'
-import { act, cleanup, fireEvent, render } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, within } from '@testing-library/react'
 import type { Context } from '@deepseek-ai/cordis'
 import type { SessionListState, SessionSnapshot } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { WorkspaceSnapshot, WorkspaceView } from '@deepseek-ai/dsh-api-workspace-controller/client'
@@ -140,6 +140,9 @@ function mount(
     composerBlock?: { reason: string }
     /** Mutable view ledger used by registration-order regressions. */
     viewTabs?: ViewTab[]
+    stockResearchHome?: boolean
+    stockAgentRecord?: boolean
+    archived?: boolean
   } = {},
 ) {
   const sessionId = 'sessionId' in options ? options.sessionId : SID
@@ -154,6 +157,7 @@ function mount(
     id: SID, displayTitle: 'Child', parentId: options.nestedSubagent === true ? parent : root,
     cwd: '/projects/one', running: false, retainedBy: { mainView: 1 }, blank: options.summaryBlank ?? false, updatedAt: 3,
     ...(options.summaryOrigin === undefined ? {} : { origin: options.summaryOrigin }),
+    ...(options.stockAgentRecord === true ? { projectionValues: { stockAgent: { name: 'screening', query: '' } } } : {}),
   }
   const listed = options.omitSummaryRow !== true
   const sessions = createSnapshotStore<SessionListState>({
@@ -167,7 +171,10 @@ function mount(
     },
     phase: 'ready', projectionsBySession: {},
   })
-  const workspaces = createSnapshotStore<WorkspaceSnapshot>(workspaceState(workspaceRows))
+  const workspaces = createSnapshotStore<WorkspaceSnapshot>({
+    ...workspaceState(workspaceRows),
+    archivedSessionIds: options.archived === true ? [SID] : [],
+  })
   const session = createSnapshotStore<SessionSnapshot>(snapshot)
   const useSession = bindSnapshotSelector(session)
   const conversation = createSnapshotStore<ConversationSnapshot>(EMPTY_CONVERSATION_SNAPSHOT)
@@ -370,11 +377,16 @@ function mount(
     useInput,
     inputActions,
   }
-  const props: ConversationSlotProps = { ...runtimeProps, renderSlot, renderFactorySlot }
+  const openHistory = vi.fn()
+  const startSession = vi.fn()
+  const props: ConversationSlotProps = {
+    ...runtimeProps, renderSlot, renderFactorySlot,
+    openHistory, startSession, stockResearchHome: options.stockResearchHome, t,
+  }
   const view = render(<ConversationMainPanel {...props} />)
   return {
     view, store, wiring, sink, retargetWorkspace, session, conversation, slotCalls, lineageOwners, seatOwners, open,
-    pickerOwner: () => pickerOwner,
+    pickerOwner: () => pickerOwner, openHistory, startSession,
     rerender: () => { view.rerender(<ConversationMainPanel {...props} />) },
   }
 }
@@ -395,9 +407,33 @@ describe('Hero chrome', () => {
     expect(brandMarkOwner.className).toBeTypeOf('string')
     expect(renderSlot.mock.calls[0]?.[2]?.fallback).toBeTruthy()
   })
+
+  it('renders the stock research headline and subtitle only in research mode', () => {
+    const view = render(<HeroShell t={makeTranslate(zh, commonZh)} renderSlot={() => null} stockResearchHome />)
+    expect(view.getByText('今天想研究什么？')).toBeTruthy()
+    expect(view.getByText(/从 A 股市场的海量信息中/)).toBeTruthy()
+  })
 })
 
 describe('ConversationRoot resident composer', () => {
+  it('shows history inside the stock research Conversation page', () => {
+    const b = mount(sessionSnapshotOf({ blank: true }), undefined, undefined, { stockResearchHome: true })
+    const history = b.view.getByRole('complementary', { name: '历史对话' })
+    expect(within(history).getByRole('button', { name: '新对话' })).toBeTruthy()
+    fireEvent.click(within(history).getByRole('button', { name: /Child/ }))
+    expect(b.openHistory).toHaveBeenCalledWith(SID)
+    fireEvent.click(within(history).getByRole('button', { name: '新对话' }))
+    expect(b.startSession).toHaveBeenCalledOnce()
+    expect(b.view.queryByRole('button', { name: '选择工作区' })).toBeNull()
+    expect(b.view.getByRole('button', { name: '开始研究' })).toBeTruthy()
+    expect(b.view.queryByRole('button', { name: '添加文件或调用指令' })).toBeNull()
+  })
+
+  it.each([{ stockAgentRecord: true }, { archived: true }])('omits specialist or archived records from ordinary history', (filter) => {
+    const b = mount(sessionSnapshotOf(), undefined, undefined, { stockResearchHome: true, ...filter })
+    const history = b.view.getByRole('complementary', { name: '历史对话' })
+    expect(within(history).queryByRole('button', { name: /Child/ })).toBeNull()
+  })
   it('keeps global header navigation without selecting a Session', () => {
     const b = mount(sessionSnapshotOf(), [], undefined, { sessionId: undefined })
     expect(b.view.container.querySelector('header')).not.toBeNull()
@@ -581,7 +617,7 @@ describe('ConversationRoot resident composer', () => {
     expect(conversationPhase(failed, EMPTY_CONVERSATION_SNAPSHOT)).toBe('engaging')
     const b = mount(failed, undefined, undefined, { summaryBlank: true })
     expect(b.view.container.querySelector('[data-phase]')?.getAttribute('data-phase')).toBe('active')
-    expect(b.view.queryByText('探索未至之境')).toBeNull()
+    expect(b.view.queryByText('今天想研究什么？')).toBeNull()
   })
 
   it('settling phase: a summary that does not prove the session blank hides the composer while it opens', () => {

@@ -14,6 +14,8 @@ import type { SidebarPanelMetadata, SidebarRootInjected } from './contract/slots
 import { HeaderLeadingControls } from './HeaderLeadingControls.tsx'
 import { SidebarRoot } from './SidebarRoot.tsx'
 import { en, zh, type SidebarKey } from './locales.ts'
+import { Config } from '../config.ts'
+export { Config }
 
 export type {
   SidebarBrandMarkOwnerProps, SidebarBrandNameOwnerProps, SidebarFooterActionOwnerProps,
@@ -42,12 +44,14 @@ export const inject = ['slots', 'layout', 'uiWorkspace', 'locale', 'shortcuts']
 /** Registers the sidebar shell and its service callbacks.
  * @param ctx - Client root context.
  */
-export function apply(ctx: ClientContext): void {
+export function apply(ctx: ClientContext, config: Config = Config({})): void {
   const workspaceNavigation = ctx.get('uiWorkspace') as unknown as WorkspaceNavigation
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'ui-sidebar: dictionaries')
   const panels = createSnapshotStore<readonly SidebarPanelMetadata[]>([])
   const syncPanels = (): void => {
-    const next = ctx.slots.entriesOfSlot('sidebar.panellist').map(({ options }) => {
+    const next = ctx.slots.entriesOfSlot('sidebar.panellist').filter(({ options }) =>
+      !config.stockResearchHome || options.id === 'conversation' || options.id === 'stock-agents' || options.id === 'watchlist',
+    ).map(({ options }) => {
       // The list registration requires an id; StoredEntry erases the slot kind.
       const id = options.id as MainPanelId
       return { id, order: options.order ?? 0, label: resolveSlotLabel(options.label) ?? id }
@@ -71,6 +75,7 @@ export function apply(ctx: ClientContext): void {
       if (id === 'plugins' || id === 'schedules') ctx.get('productAnalytics')?.track('sidebar_menu_click', { menu_name: id === 'plugins' ? 'plugin' : 'cron' })
       ctx.layout.selectPanel(id)
     },
+    stockResearchHome: config.stockResearchHome,
     hooks: { panels, shortcuts: ctx.shortcuts.catalog },
   })
   ctx.slots.inject('sidebar', () => ctx.slots.register({

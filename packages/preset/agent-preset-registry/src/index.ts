@@ -52,6 +52,7 @@ export class AgentPresetRegistry extends TypertRemoteService {
   static inject = ['loader', 'sessionProjections']
   static Config = z.object({
     default: z.string().required(),
+    fixedDefault: z.boolean().default(false),
     selectedDefault: z.string().volatile(),
   })
   private readonly owner: Context
@@ -71,7 +72,9 @@ export class AgentPresetRegistry extends TypertRemoteService {
   }
 
   /** Default preset for a subsequently created session. */
-  get defaultId(): string { return this.config.selectedDefault.get() ?? this.config.default }
+  get defaultId(): string {
+    return this.config.fixedDefault ? this.config.default : (this.config.selectedDefault.get() ?? this.config.default)
+  }
 
   /** Register and eagerly load a definition; activation failure remains visible in the roster.
    * @param definition Parsed configuration supplied by the declaring plugin.

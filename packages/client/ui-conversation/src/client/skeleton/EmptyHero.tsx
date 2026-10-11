@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import type { ReactNode, RefObject } from 'react'
+import clsx from 'clsx'
 import {
   FISH_LOGO_PATH, FISH_LOGO_VIEWBOX, IconChevronDownOutlineRegular, IconFolderCloseRegular, IconFolderOpenRegular,
 } from '@deepseek-ai/dsh-client-ui-primitives'
@@ -67,6 +68,8 @@ export interface HeroShellProps {
   t: HeroTranslate
   /** Authorized renderer for the hero brand-mark slot. */
   renderSlot: ConversationContentProps['renderSlot']
+  /** Show the stock research homepage copy and chrome. */
+  stockResearchHome?: boolean
   /** Overlay content after the stack (modals). */
   children?: ReactNode
 }
@@ -129,10 +132,10 @@ function HeroFish({ hovering }: { hovering: boolean }) {
  * @param props - see {@link HeroShellProps}.
  * @returns the centered hero element tree.
  */
-export function HeroShell({ t, renderSlot, children }: HeroShellProps) {
+export function HeroShell({ t, renderSlot, stockResearchHome = false, children }: HeroShellProps) {
   const [hovering, setHovering] = useState(false)
   return (
-    <div className={css.root}>
+    <div className={clsx(css.root, stockResearchHome && css.research)}>
       <div className={css.stack}>
         <div className={css.headline}>
           {/* figma 34:10412: fish 34×25 leading the headline, gap 10. */}
@@ -151,12 +154,12 @@ export function HeroShell({ t, renderSlot, children }: HeroShellProps) {
           </span>
           <span className={css.titleGroup}>
             {/* Own element: keeps the headline text addressable apart from the badge. */}
-            <span>{t('hero.headline')}</span>
+            <span>{t(stockResearchHome ? 'hero.headline.research' : 'hero.headline')}</span>
             <span className={css.previewBadge}>{t('hero.preview')}</span>
           </span>
         </div>
         <div className={css.body}>
-          {/* The composer remains mounted outside this component. */}
+          {stockResearchHome && <p>{t('hero.subtitle.research')}</p>}
         </div>
       </div>
       {children}

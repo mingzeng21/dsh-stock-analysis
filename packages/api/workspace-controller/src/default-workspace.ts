@@ -1,5 +1,5 @@
 /**
- * Fixed first-use Workspace naming, shared by the Host that creates the
+ * Documents-fallback Workspace naming, shared by the Host that creates the
  * directory and by browser consumers that label the resulting row. A pure fold
  * with no imports, so client bundles inline it instead of requesting a
  * module-table row this package does not publish.
@@ -7,7 +7,7 @@
  */
 
 /**
- * Leaf directory name of the first-use Workspace under
+ * Leaf directory name of the Documents-fallback Workspace under
  * `<Documents>/deepseek-harness`. Language-neutral, so one installation keeps
  * one on-disk path across language switches. The registry derives the initial
  * title from this same segment, which is the title

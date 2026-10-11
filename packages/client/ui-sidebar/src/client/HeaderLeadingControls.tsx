@@ -15,15 +15,15 @@ export type HeaderLeadingControlsProps =
   & PropsLocale<'sidebar'>
 
 /**
- * Sidebar-open and New Session controls in the frame's window-chrome seat.
+ * Sidebar-open and optional New Session controls in the frame's window-chrome seat.
  * On macOS desktop a collapsed sidebar hides entirely (no rail), taking both
  * controls off screen; this occupant puts them back beside the traffic
  * lights. The frame mounts the seat only in that state and owns its
- * placement, so the occupant renders unconditionally.
+ * placement; stock research mode keeps only the sidebar-open action.
  * @param props - Injected sidebar actions plus the sidebar locale seat.
- * @returns the two window-chrome controls.
+ * @returns the window-chrome controls.
  */
-export function HeaderLeadingControls({ toggleSidebar, startSession, useShortcuts, t }: HeaderLeadingControlsProps) {
+export function HeaderLeadingControls({ toggleSidebar, startSession, stockResearchHome, useShortcuts, t }: HeaderLeadingControlsProps) {
   const shortcut = useShortcuts(rows => rows.find(row => row.id === 'sidebar.left.toggle'))
   const newShortcut = useShortcuts(rows => rows.find(row => row.id === 'session.new'))
   return (
@@ -39,7 +39,7 @@ export function HeaderLeadingControls({ toggleSidebar, startSession, useShortcut
           <IconPanelLeftOutlineRegular size={16} />
         </button>
       </Tooltip>
-      <Tooltip label={t('session.new.label')} shortcutKeys={newShortcut?.keys} delayMs={500}>
+      {!stockResearchHome && <Tooltip label={t('session.new.label')} shortcutKeys={newShortcut?.keys} delayMs={500}>
         <button
           type="button"
           className={css.iconButton}
@@ -49,7 +49,7 @@ export function HeaderLeadingControls({ toggleSidebar, startSession, useShortcut
         >
           <IconNewChatOutlineRegular size={16} />
         </button>
-      </Tooltip>
+      </Tooltip>}
     </div>
   )
 }

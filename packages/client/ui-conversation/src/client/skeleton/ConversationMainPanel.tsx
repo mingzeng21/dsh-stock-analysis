@@ -1,3 +1,4 @@
+import type {} from '@deepseek-ai/dsh-api-stock-agents-controller/types'
 import type { ConversationSlotProps } from '../contract/slots.ts'
 import { conversationPhase } from '../contract/snapshot.ts'
 import { ConversationWidthControls } from './ConversationWidthControls.tsx'
@@ -6,14 +7,25 @@ import css from './ConversationRoot.module.css'
 const CONTENT_SLOTS = { widthControls: ConversationWidthControls }
 
 /**
- * Render the existing main Conversation frame around the extracted content.
+ * Render the main Conversation frame and optional stock research history rail.
  * @param props - the original `main.conversation` Slot props.
- * @returns the unchanged root, Header, content, and width-control subtree.
+ * @returns the Conversation page.
  */
 export function ConversationMainPanel(props: ConversationSlotProps) {
-  const { sessionId, useSession, useSessions, useConversation, renderSlot, renderFactorySlot } = props
+  const {
+    sessionId, useSession, useSessions, useWorkspaces, useConversation,
+    renderSlot, renderFactorySlot, openHistory, startSession, stockResearchHome, t,
+  } = props
   const session = useSession(s => s)
   const conversation = useConversation(s => s)
+  const archived = useWorkspaces(s => s.archivedSessionIds)
+  const history = useSessions(list => list.ids
+    .flatMap((id) => {
+      const row = list.byId[id]
+      return row === undefined || row.blank || row.origin === 'subagent'
+        || row.projectionValues?.stockAgent != null || archived.includes(id) ? [] : [row]
+    })
+    .sort((a, b) => b.updatedAt - a.updatedAt))
   const shellPhase = session === undefined || conversation === undefined
     ? 'blank'
     : conversationPhase(session, conversation)
@@ -42,16 +54,39 @@ export function ConversationMainPanel(props: ConversationSlotProps) {
     || (shellPhase === 'blank' && (openState === 'open' || summaryBlank === true))
   const phase = settling ? 'settling' : hero ? 'hero' : 'active'
 
-  return (
+  const dateFormat = new Intl.DateTimeFormat(document.documentElement.lang || 'zh-CN', { month: 'long', day: 'numeric' })
+  const content = (
     <div className={css.root} data-phase={phase}>
       {renderSlot('conversation.header', {})}
       {renderFactorySlot('conversation.content', {
         variant: 'main',
         phase,
         hero,
+        stockResearchHome,
       }, {
         slots: CONTENT_SLOTS,
       })}
+      {stockResearchHome && hero && <p className={css.researchDisclaimer}>{t('hero.disclaimer')}</p>}
+    </div>
+  )
+  if (!stockResearchHome) return content
+  return (
+    <div className={css.home}>
+      <aside className={css.historyRail} aria-label={t('history.title')}>
+        <div className={css.historyHeader}>
+          <h2>{t('history.title')}</h2>
+          <button type="button" onClick={startSession}>{t('history.new')}</button>
+        </div>
+        {history.length === 0
+          ? <p className={css.historyEmpty}>{t('history.empty')}</p>
+          : <ul className={css.historyList}>{history.map(row => <li key={row.id}>
+            <button type="button" aria-current={row.id === sessionId ? 'page' : undefined} onClick={() => { openHistory(row.id) }}>
+              <span className={css.historyTitle}>{row.displayTitle}</span>
+              <time dateTime={new Date(row.updatedAt).toISOString()}>{dateFormat.format(row.updatedAt)}</time>
+            </button>
+          </li>)}</ul>}
+      </aside>
+      {content}
     </div>
   )
 }

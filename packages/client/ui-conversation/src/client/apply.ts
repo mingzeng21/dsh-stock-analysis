@@ -64,11 +64,14 @@ export const inject = [
 export interface Config {
   /** Maximum generic-file uploads allowed to run concurrently in browser Workers. */
   maxConcurrentFileUploads?: number
+  /** Show the stock research home and its conversation history rail. */
+  stockResearchHome?: boolean
 }
 
 /** Validated Conversation runtime configuration. */
 export const Config: z<Config> = z.object({
   maxConcurrentFileUploads: z.natural().min(1).default(2),
+  stockResearchHome: z.boolean().default(false),
 })
 
 // Stable no-session sources keep the renderer's observable-hook cache and
@@ -113,6 +116,7 @@ function hostPathBridge(): HostPathBridge | undefined {
 
 interface WorkspaceNavigation {
   openSession(sessionId: SessionId): void
+  startSession(): void
   openWorkspace(
     workspaceId: Parameters<ConversationInjected['selectWorkspace']>[0],
     beforeOpen: (sessionId: SessionId) => void,
@@ -196,7 +200,7 @@ export function apply(ctx: Context, config: Config = Config({})): void {
     name: 'sidebar.panellist',
     id: CONVERSATION_MAIN_KEY,
     order: 0,
-    label: () => t('panel.nav'),
+    label: () => t(config.stockResearchHome ? 'panel.nav.research' : 'panel.nav'),
   }, ConversationPanelIcon))
 
   const viewTabs = (): ViewTab[] => {
@@ -323,9 +327,15 @@ export function apply(ctx: Context, config: Config = Config({})): void {
 
   const registerConversationRoot = () => slots.register({
     name: 'main.conversation',
+    locale: NS,
     children: {
       'conversation.header': { kind: 'single', scope: 'session-maybe' },
     },
+    inject: () => ({
+      openHistory: (sessionId: SessionId) => { workspaceNavigation.openSession(sessionId) },
+      startSession: () => { workspaceNavigation.startSession() },
+      stockResearchHome: config.stockResearchHome,
+    }),
   }, ConversationRoot)
 
   const registerConversationContent = () => slots.registerFactory({

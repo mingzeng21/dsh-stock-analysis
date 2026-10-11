@@ -146,6 +146,8 @@
     # Workspace commands and reconnect-safe projection over Typert Remote.
     - id: workspace-controller
       name: '@deepseek-ai/dsh-api-workspace-controller'
+      config:
+        firstUseDirectory: !!js dshHomePath('workspaces', 'stock-analysis')
 
     # Browser-facing market-data reads over the `stock` capability seam: the
     # four narrow reads a view needs, with the vendor's row fields resolved
@@ -276,6 +278,8 @@
 
     - id: ui-sidebar
       name: '@deepseek-ai/dsh-client-ui-sidebar'
+      config:
+        stockResearchHome: true
 
     # The right Sidebar: one docking surface per session over ui-dockkit.
     - id: ui-sidebar-right
@@ -323,6 +327,8 @@
 
     - id: ui-conversation
       name: '@deepseek-ai/dsh-client-ui-conversation'
+      config:
+        stockResearchHome: true
 
     - id: ui-approval
       name: '@deepseek-ai/dsh-client-ui-approval'
@@ -415,6 +421,7 @@
     # sessions created later. Absent a roster it renders nothing.
     - id: ui-agent-preset
       name: '@deepseek-ai/dsh-client-ui-agent-preset'
+      disabled: true
 
     - id: ui-settings-session-log
       name: '@deepseek-ai/dsh-client-ui-settings-session-log'
@@ -585,7 +592,8 @@
     - id: agent-preset-registry
       name: '@deepseek-ai/dsh-agent-preset-registry'
       config:
-        default: standard
+        default: stock-analysis
+        fixedDefault: true
 
     # ── stock market data ───────────────────────────────────────────────────
 

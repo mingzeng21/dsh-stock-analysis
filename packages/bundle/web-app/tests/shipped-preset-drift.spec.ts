@@ -8,6 +8,7 @@ import * as yaml from 'js-yaml'
 import { describe, expect, it } from 'vitest'
 
 const PRESETS = join(dirname(fileURLToPath(import.meta.url)), '..', 'presets')
+const BUNDLE = join(PRESETS, '..')
 
 /** One plugin row in a preset declaration. */
 interface PluginRow {
@@ -51,6 +52,12 @@ function byId(preset: string): Map<string, PluginRow> {
 }
 
 describe('shipped stock-analysis preset', () => {
+  it('loads only stock-analysis in the Web bundle', () => {
+    const manifest = JSON.parse(readFileSync(join(BUNDLE, 'package.json'), 'utf8')) as {
+      dsh: { bundle: { patch: string[] } }
+    }
+    expect(manifest.dsh.bundle.patch).toEqual(['./cordis.patch.yml', './presets/stock-analysis.patch.yml'])
+  })
   it('retains shared standard infrastructure while excluding coding tools', () => {
     const standard = byId('standard')
     const stockAnalysis = byId('stock-analysis')

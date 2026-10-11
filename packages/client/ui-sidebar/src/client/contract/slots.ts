@@ -115,6 +115,8 @@ export interface SidebarFooterActionOwnerProps {
  * factory). The renderer binds the panel metadata source to usePanels.
  */
 export type SidebarRootInjected = {
+  /** Simplify the sidebar for the stock research Web bundle. */
+  stockResearchHome?: boolean
   /**
    * Start a New Session: with a workspace, reuse-or-create its blank session
    * and open it; without one, inherit the current Session Workspace, then the

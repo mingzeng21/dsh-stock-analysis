@@ -360,6 +360,8 @@ export interface ConversationSessionHeaderInjected {
 export interface ComposerBarOwnerProps {
   /** Hero uses centered placement; composer uses the active bottom placement. */
   variant: 'hero' | 'composer'
+  /** Present the stock research homepage input without general agent controls. */
+  stockResearchHome?: boolean
   /** A feature-owned reason that makes message input inert while leaving model selection live. */
   blocked?: { readonly reason: string }
   /** Lock all message actions while preserving the resident composer surface. */
@@ -454,12 +456,22 @@ export type ConversationSlotProps =
   PropsRuntime<'main.conversation'>
   & PropsRenderSlots<'conversation.header'>
   & PropsRenderFactories
+  & PropsLocale<'conversation'>
+  & InjectFace<ConversationHomeInjected>
+
+/** Navigation actions for the Conversation history rail. */
+export interface ConversationHomeInjected {
+  openHistory: (sessionId: SessionId) => void
+  startSession: () => void
+  stockResearchHome?: boolean | undefined
+}
 
 /** Inputs shared by main and embedded Conversation content occurrences. */
 export interface ConversationContentInputProps {
   variant: 'main' | 'embedded'
   phase: 'settling' | 'hero' | 'active'
   hero: boolean
+  stockResearchHome?: boolean | undefined
 }
 
 /** Values passed from shared content to its occurrence-selected width controls. */

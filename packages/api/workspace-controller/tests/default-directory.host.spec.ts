@@ -41,6 +41,11 @@ describe('system Documents directory', () => {
     expect(() => validateDocumentsDirectory(path, 'win32')).toThrow('fully qualified')
   })
 
+  it('names a configured first-use directory in validation errors', () => {
+    expect(() => validateDocumentsDirectory('relative', 'linux', 'First-use Workspace directory'))
+      .toThrow('First-use Workspace directory must be fully qualified')
+  })
+
   it('accepts redirected UNC Documents directories', () => {
     expect(validateDocumentsDirectory('\\\\server\\share\\Documents', 'win32')).toBe('\\\\server\\share\\Documents')
     expect(() => validateDocumentsDirectory('relative', 'linux')).toThrow('fully qualified')

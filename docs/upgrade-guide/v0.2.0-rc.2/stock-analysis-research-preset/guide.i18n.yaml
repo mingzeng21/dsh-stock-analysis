@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.2.0-rc.2/stock-analysis-research-preset/guide.md
 /:
-  en: e9e83d6efded5ddb
-  zh: 527b8f5b0a2b14e0
-/stock-analysis-becomes-a-research-preset:
-  en: 4813b8757036a10b
-  zh: e1d02089fb438e30
-/stock-analysis-becomes-a-research-preset/change:
-  en: e02dd4db65d9af69
-  zh: c852bea1fcbe8ade
-/stock-analysis-becomes-a-research-preset/migration:
-  en: cb477161e97f1e9c
-  zh: ca4b9c65be02bb10
+  en: ec712d3128657aa7
+  zh: 1745c4bfb898bc42
+/web-uses-only-the-stock-analysis-research-preset:
+  en: 869781181c971172
+  zh: 644764d57f448ec3
+/web-uses-only-the-stock-analysis-research-preset/change:
+  en: fbe480156af66296
+  zh: b7ebf862ce062865
+/web-uses-only-the-stock-analysis-research-preset/migration:
+  en: 6388f6f7c17ed966
+  zh: 1dcd499c566a1f95

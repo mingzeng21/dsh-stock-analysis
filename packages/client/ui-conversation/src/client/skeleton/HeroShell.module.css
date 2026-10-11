@@ -1,6 +1,4 @@
-/* NEW SESSION hero (figma Input_Bottom 75:8208): fish + title, workspace chip
-   above the shared InputBar card. The input itself is InputBar — only stack
-   geometry and the chip live here. */
+/* The hero sits above the shared InputBar card. */
 
 .root {
   display: flex;
@@ -127,6 +125,24 @@
   gap: 12px;
   min-width: 0;
   overflow: visible;
+}
+
+.body p {
+  margin: 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 16px;
+  line-height: 24px;
+  text-align: center;
+}
+
+.research .headline {
+  font-size: clamp(28px, 4vw, 52px);
+  line-height: 1.2;
+}
+
+.research .previewBadge,
+.research .fishHitbox {
+  display: none;
 }
 
 .body > * {

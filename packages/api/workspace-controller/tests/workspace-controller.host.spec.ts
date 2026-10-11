@@ -50,7 +50,7 @@ function deferred<T>(): Deferred<T> {
   return { promise, resolve }
 }
 
-async function harness(options: { systemDocuments?: boolean } = {}) {
+async function harness(options: { systemDocuments?: boolean; useApplicationData?: boolean } = {}) {
   const root = realpathSync.native(mkdtempSync(join(tmpdir(), 'dsh-workspace-controller-')))
   tempDirs.push(root)
   const ctx = new Context()
@@ -68,7 +68,9 @@ async function harness(options: { systemDocuments?: boolean } = {}) {
     lookups: { configure: () => dispose },
     contexts: { configureHost: () => dispose },
   } as never)
-  const controller = new WorkspaceController(ctx, options.systemDocuments === true ? {} : { documentsDirectory: root })
+  const controller = new WorkspaceController(ctx, options.useApplicationData === true
+    ? { firstUseDirectory: join(root, 'workspaces', 'stock-analysis') }
+    : options.systemDocuments === true ? {} : { documentsDirectory: root })
   return { controller, ctx, root, storageDomain }
 }
 
@@ -449,6 +451,20 @@ describe('WorkspaceController follow', () => {
 })
 
 describe('first-use Remote', () => {
+  it('creates the default Workspace at an explicitly configured application data path', async () => {
+    const { controller, ctx, root } = await harness({ useApplicationData: true })
+    const result = await controller.initializeDefault(new AbortController().signal)
+    expect(result!.workspace.path).toBe(join(root, 'workspaces', 'stock-analysis'))
+    expect(existsSync(result!.workspace.path)).toBe(true)
+    expect(ctx.sessions.list()).toEqual([])
+  })
+
+  it('keeps an existing Workspace path when the first-use directory changes', async () => {
+    const { controller, ctx, root } = await harness({ useApplicationData: true })
+    await ctx.workspaceRegistry.initializeDefault(async () => root)
+    const result = await controller.initializeDefault(AbortSignal.abort())
+    expect(result!.workspace.path).toBe(root)
+  })
   it('reuses an initialized Workspace without looking up system Documents', async () => {
     const { controller, ctx, root } = await harness({ systemDocuments: true })
     const workspace = await ctx.workspaceRegistry.initializeDefault(async () => root)

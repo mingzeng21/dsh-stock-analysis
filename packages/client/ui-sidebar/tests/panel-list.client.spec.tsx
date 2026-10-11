@@ -32,7 +32,7 @@ afterEach(async () => {
   }
 })
 
-async function bench(collapsed = false) {
+async function bench(collapsed = false, stockResearchHome = false) {
   const runtime = await SlotTestRuntime.create()
   runtimes.add(runtime)
   const locale = new LocaleRuntime(runtime.ctx)
@@ -75,7 +75,7 @@ async function bench(collapsed = false) {
     sidebar: { kind: 'single', scope: 'root' },
     main: { kind: 'keyed', scope: 'root' },
   }, Frame)
-  const sidebar = await runtime.mount({ inject: [...inject], apply })
+  const sidebar = await runtime.mount({ inject: [...inject], apply: (ctx) => { apply(ctx, { stockResearchHome }) } })
   const view = runtime.renderRoot()
   return { runtime, locale, layout, sidebar, view }
 }
@@ -121,6 +121,20 @@ async function mountPanels(runtime: SlotTestRuntime, locale: LocaleRuntime, beta
 }
 
 describe('sidebar global panels', () => {
+  it('shows only the three product panels in stock research mode', async () => {
+    const { runtime, locale, view } = await bench(false, true)
+    await mountPanels(runtime, locale)
+    await runtime.mount({ inject: ['slots'], apply(ctx: Context) {
+      ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
+        name: 'sidebar.panellist', id: 'conversation', label: 'conversation', order: 0,
+      }, () => <span />))
+    } })
+    for (const id of ['stock-agents', 'watchlist'] as const) await mountPanel(runtime, { id, heading: id, label: id })
+    const navigation = await view.findByRole('navigation', { name: 'Global panels' })
+    expect(within(navigation).getAllByRole('button').map(button => button.getAttribute('aria-label')))
+      .toEqual(['conversation', 'stock-agents', 'watchlist'])
+    expect(view.queryByRole('button', { name: 'New Session' })).toBeNull()
+  })
   it('adds late registrations, removes each plugin contribution, and leaves no empty panel-list DOM', async () => {
     const { runtime, locale, view } = await bench()
     expect(runtime.slots.entries('sidebar.panellist')).toEqual([])

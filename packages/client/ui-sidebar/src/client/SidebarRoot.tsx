@@ -105,6 +105,7 @@ export function SidebarRoot({
   usePanelInfo,
   t,
   renderSlot,
+  stockResearchHome = false,
 }: SidebarRootComponentProps) {
   const panels = usePanels(snapshot => snapshot)
   const shortcut = useShortcuts(rows => rows.find(row => row.id === 'sidebar.left.toggle'))
@@ -247,7 +248,7 @@ export function SidebarRoot({
               </span>
             </span>
           )
-          return darwinDesktop
+          return darwinDesktop || stockResearchHome
             ? <span className={clsx(css.brand, css.wide)}>{identity}</span>
             : (
               <button
@@ -265,7 +266,7 @@ export function SidebarRoot({
       </div>
 
       {/* The label fades before the hover/focus shortcut, including on translucent backgrounds. */}
-      <Tooltip label={t('session.new.label')} shortcutKeys={newShortcut?.keys} delayMs={500} side={captionTooltipSide} disabled={wide}>
+      {!stockResearchHome && <Tooltip label={t('session.new.label')} shortcutKeys={newShortcut?.keys} delayMs={500} side={captionTooltipSide} disabled={wide}>
         <button
           type="button"
           className={css.newSession}
@@ -283,7 +284,7 @@ export function SidebarRoot({
             <ShortcutKeys keys={newShortcut.keys} />
           </span>}
         </button>
-      </Tooltip>
+      </Tooltip>}
 
       {panels.length > 0 && (
         <nav className={css.panelList} aria-label={t('panels.label')}>
@@ -303,22 +304,22 @@ export function SidebarRoot({
 
       {/* The browsing region fills the column between the controls and the
           foot in both states; its rail icon column rides the same slot. */}
-      <div className={css.regionArea}>
+      {!stockResearchHome && <div className={css.regionArea}>
         {renderSlot('sidebar.workspaces', {
           wide,
           expandSidebar: () => { if (collapsed) toggleSidebar() },
         })}
-      </div>
+      </div>}
 
       {/* Footer actions stack above Settings in both sidebar widths. */}
-      <div className={css.footArea}>
+      {!stockResearchHome && <div className={css.footArea}>
         <div className={css.footerActions}>
           {renderSlot('sidebar.footer.action', { wide })}
         </div>
         <div className={css.settingsArea}>
           {renderSlot('sidebar.settings', { wide })}
         </div>
-      </div>
+      </div>}
     </div>
   )
 }

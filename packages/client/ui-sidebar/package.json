@@ -47,6 +47,9 @@
   "peerDependencies": {
     "@deepseek-ai/cordis": "workspace:~"
   },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "workspace:~"
+  },
   "devDependencies": {
     "@deepseek-ai/dsh-api-workspace-controller": "workspace:*",
     "@deepseek-ai/dsh-client-locale": "workspace:*",
