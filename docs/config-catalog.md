@@ -148,6 +148,8 @@ export type Config = PresetDefinition
 export interface Config {
   /** Deployment default when the caller omits a preset. */
   default: string
+  /** Ignore an earlier user-selected default for new Sessions. */
+  fixedDefault?: boolean
   /** User-selected default; edited through Settings. */
   selectedDefault: Volatile<string | undefined>
 }
@@ -348,6 +350,8 @@ export interface Config {
 export interface Config {
   /** Override the system Documents directory with a fully qualified path. */
   documentsDirectory?: string
+  /** Use this fully qualified directory directly for first-use Workspace creation. */
+  firstUseDirectory?: string
   /** Maximum duration of the operating system's Documents lookup. */
   documentsLookupTimeoutMs?: number
 }

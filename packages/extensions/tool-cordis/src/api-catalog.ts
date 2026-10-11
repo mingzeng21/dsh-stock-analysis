@@ -3688,7 +3688,7 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
       },
       {
         signature: '@Remote(\'initializeDefault\') async initializeDefault(signal: AbortSignal): Promise<WorkspaceValue | undefined>',
-        description: 'Initialize or reuse the default Workspace during first-use startup. The directory name is fixed, so the Host never renames or relocates an existing default; its initial title is that same name, which browser consumers label in the reader\'s language.',
+        description: 'Initialize or reuse the default Workspace during first-use startup. The Host uses the configured direct directory or its Documents fallback. An existing default keeps its recorded path and title.',
         parameters: [{ name: 'signal', description: 'caller lifetime; cancels native directory lookup.' }],
         returns: 'the durable Workspace, or undefined when first-use initialization is ineligible; creates no Session or message.',
       },
