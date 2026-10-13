@@ -97,6 +97,7 @@ const SENTENCE_MODEL_EXPERIENCE: Readonly<Record<string, SentenceContract>> = {
   'packages/util/http-proxy': { kind: 'none', reason: 'Transport policy only: it changes how bytes reach the network and registers no prompt, schema, or result text.' },
   'packages/client/hmr': { kind: 'none', reason: 'Browser-side UI plugin layer; registers nothing model-facing.' },
   'packages/client/ui-watchlist': { kind: 'none', reason: 'Browser-side global panel over the watchlist and stock Remotes; it registers no prompt, tool, or session event.' },
+  'packages/client/ui-stock-mentions': { kind: 'none', reason: 'Browser-side prose annotations and a quote tab; it registers nothing model-facing.' },
   'packages/client/modules': { kind: 'none', reason: 'Browser-side module-loading kernel machinery; registers nothing model-facing.' },
   'packages/test-support/client-runtime': { kind: 'none', reason: 'Browser-side test infrastructure (jsdom bench); registers nothing model-facing.' },
   'packages/experimental/webworker-runtime': { kind: 'none', reason: 'Browser-side host runtime and Node-compatibility layer; the plugins it boots own every model-facing registration.' },

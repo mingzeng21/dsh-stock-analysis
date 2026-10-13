@@ -1,0 +1,7 @@
+version: 1
+scenario: stock-mentions
+profile: web
+composition: web-default
+recording: authored
+header:
+  class: web-default

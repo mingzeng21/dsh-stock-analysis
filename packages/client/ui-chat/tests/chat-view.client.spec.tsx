@@ -455,6 +455,7 @@ function makeHarness(
     forkAt,
     // Absent-service default; mention tests override with a real resolver.
     fileMentions: () => undefined,
+    textAnnotations: () => undefined,
     t,
   }
   const set = (next: HarnessUpdate): void => {

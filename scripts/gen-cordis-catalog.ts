@@ -185,6 +185,7 @@ export const SERVICE_WALK_EXEMPTIONS: Record<string, string> = {
   settingsSchema: 'client-side schema introspection service — packages/client/ui-settings/README.md owns the API',
   configForms: 'client-side shared entry forms — packages/client/ui-settings/README.md owns the API',
   chatFileMentions: 'client-side slot-contract accessor (ChatFileMentions) — packages/client/ui-chat/README.md owns the API',
+  chatTextAnnotations: 'client-side settled prose annotation accessor (ChatTextAnnotations) — packages/client/ui-chat/README.md owns the API',
   shortcuts: 'client-side interface-typed keyboard service — packages/client/shortcuts/README.md owns the API',
   userQuestionPanels: 'client-side slot-contract accessor (UserQuestionPanels) — packages/client/ui-tool/README.md owns the API',
   commandUi: 'client-side interface-typed browser service — packages/client/ui-commands/README.md owns the API',

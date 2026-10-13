@@ -304,6 +304,8 @@
       "@deepseek-ai/dsh-client-ui-trajectory": ["./packages/client/ui-trajectory/src"],
       "@deepseek-ai/dsh-client-ui-workspace": ["./packages/client/ui-workspace/src"],
       "@deepseek-ai/dsh-client-ui-watchlist": ["./packages/client/ui-watchlist/src"],
+      "@deepseek-ai/dsh-client-ui-stock-mentions": ["./packages/client/ui-stock-mentions/src"],
+      "@deepseek-ai/dsh-client-ui-stock-mentions/client": ["./packages/client/ui-stock-mentions/src/client/index.ts"],
       "@deepseek-ai/dsh-client-ui-stock-agents": ["./packages/client/ui-stock-agents/src"],
       "@deepseek-ai/dsh-client-ui-theme": ["./packages/client/ui-theme/src"],
       "@deepseek-ai/dsh-client-ui-theme/brand-font.css": ["./packages/client/ui-theme/src/styles/brand-font.css"],

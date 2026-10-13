@@ -328,6 +328,23 @@
   text-underline-offset: 3px;
 }
 
+.textAnnotation {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--dsw-alias-link);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.textAnnotation:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
 .compact {
   max-width: 100%;
   font-size: var(--dsh-content-font-size-secondary, 13px);

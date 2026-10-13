@@ -11,7 +11,7 @@ import type {
   PropsStore, SlotHookFactory, SnapshotSelectorHook,
 } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
-import type { MarkdownFileMentions } from '@deepseek-ai/dsh-client-ui-primitives'
+import type { MarkdownFileMentions, MarkdownTextAnnotations } from '@deepseek-ai/dsh-client-ui-primitives'
 import type {} from '@deepseek-ai/dsh-client-ui-layout/client'
 import type { createChatStore } from '../stores.ts'
 import type { ChatPresentationPolicy } from '../presentation-policy.ts'
@@ -118,10 +118,31 @@ export interface ChatFileMentions {
   forClosing(owner: TurnTailOwnerProps, sessionId: SessionId): MarkdownFileMentions | undefined
 }
 
+/** Settled assistant prose annotation provider. */
+export interface ChatTextAnnotations {
+  /** Return the displayed Session's live annotation resolver.
+   * @param sessionId - the displayed Session.
+   * @returns its live resolver.
+   */
+  forSession(sessionId: SessionId): ChatTextAnnotationSource
+}
+
+/** Live annotations for one Session; request never changes stored Markdown. */
+export interface ChatTextAnnotationSource extends MarkdownTextAnnotations {
+  /** @param markdown - one settled assistant text block to resolve. */
+  request(markdown: string): void
+  /** @param listener - notified when a candidate resolves. @returns the disposer. */
+  subscribe(listener: () => void): () => void
+  /** @returns the current revision for React subscriptions. */
+  getSnapshot(): number
+}
+
 declare module '@deepseek-ai/cordis' {
   interface Context {
     /** Optional prose file-mention provider. */
     chatFileMentions: ChatFileMentions
+    /** Optional settled assistant prose annotation provider. */
+    chatTextAnnotations: ChatTextAnnotations
   }
 }
 
@@ -175,6 +196,7 @@ export interface ChatNodeOwnerProps {
   loadImage: MessageImageLoader
   renderMessageImages: RenderMessageImages
   fileMentions: (owner: TurnTailOwnerProps) => MarkdownFileMentions | undefined
+  textAnnotations: () => ChatTextAnnotationSource | undefined
   /** Turn-process state when this Node belongs to a projected Turn. */
   turnProcess?: TurnProcessOwnerProps | undefined
 }
@@ -257,6 +279,7 @@ export interface ChatViewInjected {
   }
   forkAt: (seq: number) => void
   fileMentions: (owner: TurnTailOwnerProps) => MarkdownFileMentions | undefined
+  textAnnotations: () => ChatTextAnnotationSource | undefined
 }
 
 /** Full Chat view props. */

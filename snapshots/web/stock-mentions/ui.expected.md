@@ -1,0 +1,73 @@
+- button "Collapse sidebar"
+- navigation "Global panels":
+  - button "Conversation"
+  - button "Agents"
+  - button "Watchlist"
+- complementary "Conversation history":
+  - heading "Conversation history" [level=2]
+  - button "New conversation"
+  - button "Hide conversation history" [expanded]
+  - list:
+    - listitem:
+      - button "证券原文行情 January 15":
+        - text: 证券原文行情
+        - time: January 15
+- banner:
+  - navigation "Session hierarchy": 证券原文行情
+  - button "More actions"
+  - button "Open right sidebar"
+  - tablist:
+    - tab "Chat" [selected]
+    - tab "Trajectory"
+- text: 介绍贵州茅台 600519.SH 的业务。 {{clock}}
+- button "Copy"
+- status: Completed
+- button "Completed in {{duration}}" [disabled]
+- paragraph:
+  - button "View quote for 贵州茅台 (600519.SH)": 贵州茅台
+  - text: （
+  - button "View quote for 贵州茅台 (600519.SH)": 600519.SH
+  - text: ）主营白酒业务。
+  - link "资料":
+    - /url: https://example.com/600519.SH
+  - text: 和
+  - code: 600519.SH
+  - text: 不应成为行情入口。
+- button "Copy"
+- button "Good response"
+- button "Bad response"
+- button "Branch into a new conversation"
+- text: {{clock}}
+- textbox "Message or run a task, / commands, @ files or sessions"
+- button "Add files or run commands"
+- 'button "Access mode, current: Workspace Write"': Workspace Write
+- button "Select model, current DeepSeek-V4-Flash": DeepSeek-V4-Flash
+- button "Send message" [disabled]
+- button "1 turns 1 steps"
+- dialog "贵州茅台 Stock quote":
+  - region "Stock quote":
+    - strong: 贵州茅台
+    - text: 600519.SH SSE
+    - button "Close quote": ×
+    - region "Quote":
+      - text: Last
+      - strong: "1252.57"
+      - text: "-4.55 -0.36%"
+      - term: High
+      - definition: "1259.95"
+      - term: Low
+      - definition: "1250.80"
+      - term: Open
+      - definition: "1259.00"
+      - term: Prev
+      - definition: "1257.12"
+      - text: Turnover 3,135,910,000 Volume 2,501,689
+    - tablist "Stock quote":
+      - tab "Recent daily prices" [selected]
+      - tab "Related news"
+    - tabpanel:
+      - region "Recent daily prices":
+        - strong: Recent daily prices
+        - img "Recent daily prices": 1265.00 1240.00 9/16/2026 9/17/2026
+    - button "Refresh"
+    - text: "Data time: 1/15/2026, {{clock}}"

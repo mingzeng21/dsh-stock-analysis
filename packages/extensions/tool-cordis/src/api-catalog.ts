@@ -7357,7 +7357,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'StockAgentCard',
-    declaration: 'export interface StockAgentCard {\n    readonly name: string;\n    readonly title: Readonly<Record<\'zh\' | \'en\', string>>;\n    readonly summary: Readonly<Record<\'zh\' | \'en\', string>>;\n    readonly launch: \'query\' | \'immediate\';\n    readonly examples?: Readonly<Record<\'zh\' | \'en\', readonly string[]>>;\n    readonly prompt?: Readonly<Record<\'zh\' | \'en\', string>>;\n}',
+    declaration: 'export interface StockAgentCard {\n    readonly name: string;\n    readonly title: Readonly<Record<\'zh\' | \'en\', string>>;\n    readonly summary: Readonly<Record<\'zh\' | \'en\', string>>;\n    readonly launch: \'query\' | \'immediate\';\n    readonly queryInput?: Readonly<{\n        label: Readonly<Record<\'zh\' | \'en\', string>>;\n        kind: \'text\' | \'textarea\';\n    }>;\n    readonly examples?: Readonly<Record<\'zh\' | \'en\', readonly string[]>>;\n    readonly prompt?: Readonly<Record<\'zh\' | \'en\', string>>;\n}',
   },
   {
     name: 'StockAvailability',

@@ -193,6 +193,8 @@ export interface MarkdownRenderContext {
   readonly fileMentions: MarkdownFileMentions | undefined
   /** Local-path image vocabulary; absent wherever no rewriting owner exists. */
   readonly pathImages: MarkdownPathImages | undefined
+  /** Settled prose annotations supplied by the document owner. */
+  readonly textAnnotations?: MarkdownTextAnnotations | undefined
   /** Inside an anchor's children: interactive mentions must not nest there. */
   readonly inLink?: boolean
   /** Reference targets visible to this pass. */
@@ -201,6 +203,20 @@ export interface MarkdownRenderContext {
   readonly footnoteOrder: string[]
   /** References rendered per identifier; drives the section's back-reference count. */
   readonly footnoteCounts: Map<string, number>
+}
+
+/** An interactive range in one rendered Markdown text node. */
+export interface MarkdownTextAnnotation {
+  readonly start: number
+  readonly end: number
+  readonly label: string
+  readonly title: string
+  readonly onActivate: () => void
+}
+
+/** Resolve ranges against rendered text, not offsets in escaped Markdown source. */
+export interface MarkdownTextAnnotations {
+  resolve(text: string): readonly MarkdownTextAnnotation[]
 }
 
 /**
@@ -270,10 +286,30 @@ function renderChildren(
   return nodes.map((node, index) => renderNode(node, index, context))
 }
 
+function renderAnnotatedText(value: string, annotations: MarkdownTextAnnotations): ReactNode {
+  const matches = [...annotations.resolve(value)].sort((a, b) => a.start - b.start || b.end - a.end)
+  if (matches.length === 0) return value
+  const parts: ReactNode[] = []
+  let cursor = 0
+  for (const match of matches) {
+    if (!Number.isInteger(match.start) || !Number.isInteger(match.end)
+      || match.start < cursor || match.end > value.length || match.end <= match.start) continue
+    if (match.start > cursor) parts.push(value.slice(cursor, match.start))
+    parts.push(<button key={match.start} type="button" className={css.textAnnotation}
+      aria-label={match.label} title={match.title} onClick={match.onActivate}>
+      {value.slice(match.start, match.end)}
+    </button>)
+    cursor = match.end
+  }
+  if (cursor < value.length) parts.push(value.slice(cursor))
+  return parts.length === 0 ? value : parts
+}
+
 function renderNode(node: Md.RootContent, key: Key, context: MarkdownRenderContext): ReactNode {
   switch (node.type) {
     case 'text':
-      return node.value
+      return context.streaming || context.inLink === true || context.textAnnotations === undefined
+        ? node.value : renderAnnotatedText(node.value, context.textAnnotations)
     case 'paragraph':
       return <p key={key}>{renderChildren(node.children, context)}</p>
     case 'heading':
