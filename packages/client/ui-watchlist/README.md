@@ -41,6 +41,8 @@ The panel reads the list and its quote batch when it mounts, which is what retur
 
 The quote readiness stamp shows the local date and time. On desktop, drag the divider between the instrument list and detail to resize the list; the chosen width survives switching panels. The focused divider also supports Left and Right arrow keys, Home, and End. At narrow browser widths, the instrument list stacks above the detail and the panel scrolls vertically.
 
+The rail shows the list count and highlights the selected instrument. The detail groups the selected quote and its four price metrics into separate cards; documents and the analysis composer remain in the same scrollable detail view. All surfaces use the client theme in light and dark mode.
+
 Every read is published with a phase, and a failed one carries the Remote failure code. A newer read supersedes an older one: a read that is no longer current publishes nothing, so a slow first read can never replace a fast second one.
 
 ### Adding an instrument

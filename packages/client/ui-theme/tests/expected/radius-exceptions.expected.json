@@ -67,7 +67,6 @@
   "ui-watchlist/src/client/WatchlistPanel.module.css": [
     ".iconButton: border-radius: 6px",
     ".addInput: border-radius: 6px",
-    ".candidate: border-radius: 6px",
-    ".start, .send: border-radius: 6px"
+    ".candidate: border-radius: 6px"
   ]
 }

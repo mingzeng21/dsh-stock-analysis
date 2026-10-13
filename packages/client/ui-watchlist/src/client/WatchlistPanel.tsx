@@ -462,6 +462,7 @@ export function WatchlistPanel({
       <nav ref={railRef} id="watchlist-rail" className={css.rail} aria-label={t('list.aria')}>
         <header className={css.railHead}>
           <h2 className={css.railTitle}>{t('list.title')}</h2>
+          <span className={css.railCount} aria-hidden="true">{entries.length}</span>
           <Tooltip label={t('list.refresh')} delayMs={400}>
             <button
               type="button"
@@ -582,17 +583,19 @@ export function WatchlistPanel({
             onScroll={(event) => { scrollPosition.current = event.currentTarget.scrollTop }}
           >
             <header className={css.quoteHead}>
-              <span className={css.quoteName}>{selectedEntry.name}</span>
-              <span className={css.quoteCode}>{selectedEntry.thscode}</span>
+              <div className={css.quoteIdentity}>
+                <span className={css.quoteName}>{selectedEntry.name}</span>
+                <span className={css.quoteCode}>{selectedEntry.thscode}</span>
+              </div>
               {selectedQuote !== undefined && (
-                <>
+                <div className={css.quotePrice}>
                   <span className={clsx(css.quoteLast, directionOf(selectedQuote))}>
                     {selectedQuote.last.toFixed(2)}
                   </span>
                   <span className={clsx(css.quoteChange, directionOf(selectedQuote))}>
                     {changeText(selectedQuote, t)}
                   </span>
-                </>
+                </div>
               )}
               <button type="button" className={css.analysisJump} onClick={focusAnalysis}>
                 {t('analysis.jump')}
