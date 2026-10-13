@@ -15,6 +15,12 @@
       "path": "../../api/stock-controller/tsconfig.client.json"
     },
     {
+      "path": "../../api/watchlist-controller/tsconfig.client.json"
+    },
+    {
+      "path": "../store"
+    },
+    {
       "path": "../../core/session"
     },
     {

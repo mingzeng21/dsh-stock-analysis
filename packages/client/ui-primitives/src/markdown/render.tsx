@@ -212,6 +212,8 @@ export interface MarkdownTextAnnotation {
   readonly label: string
   readonly title: string
   readonly onActivate: () => void
+  /** Optional action rendered beside the annotated prose, outside its button. */
+  readonly after?: ReactNode
 }
 
 /** Resolve ranges against rendered text, not offsets in escaped Markdown source. */
@@ -295,10 +297,14 @@ function renderAnnotatedText(value: string, annotations: MarkdownTextAnnotations
     if (!Number.isInteger(match.start) || !Number.isInteger(match.end)
       || match.start < cursor || match.end > value.length || match.end <= match.start) continue
     if (match.start > cursor) parts.push(value.slice(cursor, match.start))
-    parts.push(<button key={match.start} type="button" className={css.textAnnotation}
+    const mention = <button type="button" className={css.textAnnotation}
       aria-label={match.label} title={match.title} onClick={match.onActivate}>
       {value.slice(match.start, match.end)}
-    </button>)
+    </button>
+    parts.push(match.after === undefined ? <Fragment key={match.start}>{mention}</Fragment>
+      : <span key={match.start} className={css.textAnnotationGroup}>
+        {mention}<span className={css.textAnnotationAfter}>{match.after}</span>
+      </span>)
     cursor = match.end
   }
   if (cursor < value.length) parts.push(value.slice(cursor))

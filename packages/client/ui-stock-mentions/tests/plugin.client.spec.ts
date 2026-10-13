@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { Context } from '@deepseek-ai/cordis'
 import type { IStockClient } from '@deepseek-ai/dsh-api-stock-controller/client'
+import type { IWatchlist } from '@deepseek-ai/dsh-api-watchlist-controller/client'
+import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { describe, expect, it, vi } from 'vitest'
 import { apply, inject } from '../src/client/index.ts'
@@ -11,6 +13,15 @@ describe('stock mention browser plugin', () => {
     const ctx = new Context()
     let overlay: StockQuoteOverlay | undefined
     ctx.provide('stockClient', { searchSymbols: async () => [{ thscode: '600519.SH', ticker: '600519', name: '贵州茅台' }] } as Pick<IStockClient, 'searchSymbols'> as IStockClient)
+    const entries = createSnapshotStore<readonly []>([])
+    const watchlist: IWatchlist = {
+      entries,
+      refresh: async () => [],
+      add: async () => [],
+      remove: async () => [],
+      reorder: async () => [],
+    }
+    ctx.provide('watchlist', watchlist)
     ctx.provide('layout', {} as never)
     ctx.provide('slots', {
       inject: (_name: string, register: () => () => void) => register(),

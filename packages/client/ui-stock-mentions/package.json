@@ -29,6 +29,7 @@
     "client": {
       "inject": [
         "@deepseek-ai/dsh-api-stock-controller",
+        "@deepseek-ai/dsh-api-watchlist-controller",
         "@deepseek-ai/dsh-client-locale",
         "@deepseek-ai/dsh-client-ui-chat",
         "@deepseek-ai/dsh-client-ui-layout",
@@ -48,6 +49,8 @@
   "devDependencies": {
     "@deepseek-ai/cordis": "workspace:~",
     "@deepseek-ai/dsh-api-stock-controller": "workspace:*",
+    "@deepseek-ai/dsh-api-watchlist-controller": "workspace:*",
+    "@deepseek-ai/dsh-client-store": "workspace:*",
     "@deepseek-ai/dsh-client-locale": "workspace:*",
     "@deepseek-ai/dsh-client-ui-chat": "workspace:*",
     "@deepseek-ai/dsh-client-ui-layout": "workspace:*",

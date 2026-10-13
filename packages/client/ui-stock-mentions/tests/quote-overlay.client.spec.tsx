@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { IStockClient } from '@deepseek-ai/dsh-api-stock-controller/client'
+import type { IWatchlist } from '@deepseek-ai/dsh-api-watchlist-controller/client'
+import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import { describe, expect, it, vi } from 'vitest'
 import { QuoteOverlay } from '../src/client/QuotePanel.tsx'
 import { StockQuoteOverlay } from '../src/client/overlay.ts'
+import { WatchlistQuickAdd } from '../src/client/watchlist.ts'
 
 const stock: Pick<IStockClient, 'quotes' | 'candles' | 'searchSymbols' | 'documents'> = {
   quotes: vi.fn(async () => ({ quotes: [{
@@ -26,10 +29,22 @@ const copy: Record<string, string> = {
   loading: '行情加载中', failed: '行情暂时无法加载', empty: '暂无数据', asOf: '数据时间',
 }
 
+const entries = createSnapshotStore<readonly []>([])
+const watchlist: IWatchlist = {
+  entries,
+  refresh: async () => [],
+  add: async () => [],
+  remove: async () => [],
+  reorder: async () => [],
+}
+const add = new WatchlistQuickAdd(watchlist, () => {})
+const toast = createSnapshotStore(null)
+
 describe('global stock quote panel', () => {
   it('shows the same quote and tabs, and Escape closes the panel', async () => {
     const overlay = new StockQuoteOverlay()
     const view = render(<QuoteOverlay overlay={overlay} stock={stock} nameOf={() => '贵州茅台'}
+      watchlist={watchlist} add={add} toast={toast} dismissToast={() => {}}
       t={(key: string) => copy[key] ?? key} />)
     expect(screen.queryByRole('dialog')).toBeNull()
     overlay.open({ thscode: '600519.SH', ticker: '600519', name: '贵州茅台' })

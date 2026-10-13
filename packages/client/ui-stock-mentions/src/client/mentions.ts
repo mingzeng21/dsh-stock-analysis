@@ -3,6 +3,7 @@ import type { IStockClient, InstrumentMatch } from '@deepseek-ai/dsh-api-stock-c
 import type { ChatTextAnnotations, ChatTextAnnotationSource } from '@deepseek-ai/dsh-client-ui-chat/client'
 import type { MarkdownTextAnnotation } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import type { ReactNode } from 'react'
 
 const CODE = /(?<![0-9a-z])(\d{6}(?:\.(?:SH|SZ))?)(?![0-9a-z])/giu
 const HAN = /[\p{Script=Han}]{2,}/gu
@@ -70,7 +71,8 @@ export class StockMentions implements ChatTextAnnotations {
   private disposed = false
 
   constructor(private readonly stock: IStockClient, private readonly open: (hit: InstrumentMatch) => void,
-    private readonly label: (hit: InstrumentMatch) => string) {}
+    private readonly label: (hit: InstrumentMatch) => string,
+    private readonly action?: (hit: InstrumentMatch) => ReactNode) {}
 
   /** Read the last confirmed name for a quote tab.
    * @param code - complete thscode.
@@ -113,7 +115,8 @@ export class StockMentions implements ChatTextAnnotations {
         const end = start + candidate.length
         if (!/^\d/u.test(candidate) || (!/[0-9a-z]/iu.test(text[start - 1] ?? '') && !/[0-9a-z]/iu.test(text[end] ?? ''))) {
           found.push({ start, end, label: this.label(hit), title: `${hit.name} · ${hit.thscode}`,
-            onActivate: () => { if (!this.disposed) this.open(hit) } })
+            onActivate: () => { if (!this.disposed) this.open(hit) },
+            ...this.action === undefined ? {} : { after: this.action(hit) } })
         }
         start = end
       }

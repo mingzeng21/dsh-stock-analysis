@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Click a recognized A-share name or code where it appears in a completed assistant answer to inspect its quote at the right edge. Only a unique exact match from the configured stock search service becomes interactive. The panel shows the latest quote, recent daily candlesticks, and related news.
+Click a recognized A-share name or code where it appears in a completed assistant answer to inspect its quote at the right edge, or use the adjacent action to add it to the watchlist in one click. Only a unique exact match from the configured stock search service becomes interactive. The panel shows the latest quote, recent daily candlesticks, related news, and the same watchlist action.
 
 ## Table of Contents
 
@@ -25,7 +25,7 @@ Click a recognized A-share name or code where it appears in a completed assistan
 <a id="use-this-package"></a>
 ## Use this package
 
-The Web composition mounts this plugin beside Chat, the stock client, and the root shell overlay. It has no plugin configuration. A name or code remains ordinary text while the answer streams, when search fails, or when search does not return one exact instrument. The fixed right-edge quote panel can open from Conversation and global pages such as Agents.
+The Web composition mounts this plugin beside Chat, the stock and watchlist clients, and the root shell overlay. It has no plugin configuration. A name or code remains ordinary text while the answer streams, when search fails, or when search does not return one exact instrument. The fixed right-edge quote panel can open from Conversation and global pages such as Agents. The adjacent add action stays visible beside each recognized name or code. Existing entries show their membership; the Host list is authoritative for additions, and transient results appear in a toast.
 
 -----
 
@@ -35,7 +35,7 @@ The Web composition mounts this plugin beside Chat, the stock client, and the ro
 <details>
 <summary>Implementation internals — click to expand</summary>
 
-Chat reads this plugin's optional annotation service after a text block settles. The service bounds candidate extraction and resolves candidates through `stockClient`; the Markdown renderer adds buttons only to prose text nodes. Clicking a button opens one fixed right-edge panel across all main pages. The panel reads quote, daily candlestick, and news data through `stockClient` without retaining market data in the Session log.
+Chat reads this plugin's optional annotation service after a text block settles. The service bounds candidate extraction and resolves candidates through `stockClient`; the Markdown renderer adds buttons only to prose text nodes. Clicking a name opens one fixed right-edge panel across all main pages. The adjacent button and the panel header share one watchlist action, read membership from `watchlist.entries`, and publish Host additions through `watchlist.add`. The panel reads quote, daily candlestick, and news data through `stockClient` without retaining market data in the Session log.
 
 </details>
 

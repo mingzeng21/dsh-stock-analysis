@@ -345,6 +345,9 @@
   outline-offset: 2px;
 }
 
+.textAnnotationGroup { display: inline-flex; align-items: baseline; gap: 2px; white-space: nowrap; }
+.textAnnotationAfter { display: inline-flex; align-self: center; }
+
 .compact {
   max-width: 100%;
   font-size: var(--dsh-content-font-size-secondary, 13px);

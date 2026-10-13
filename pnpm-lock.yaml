@@ -5952,9 +5952,15 @@ importers:
       '@deepseek-ai/dsh-api-stock-controller':
         specifier: workspace:*
         version: link:../../api/stock-controller
+      '@deepseek-ai/dsh-api-watchlist-controller':
+        specifier: workspace:*
+        version: link:../../api/watchlist-controller
       '@deepseek-ai/dsh-client-locale':
         specifier: workspace:*
         version: link:../locale
+      '@deepseek-ai/dsh-client-store':
+        specifier: workspace:*
+        version: link:../store
       '@deepseek-ai/dsh-client-ui-chat':
         specifier: workspace:*
         version: link:../ui-chat

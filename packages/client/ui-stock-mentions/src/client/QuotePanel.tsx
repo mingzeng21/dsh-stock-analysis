@@ -3,12 +3,20 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'reac
 import type { IStockClient, Quote, Candle, DocumentRow } from '@deepseek-ai/dsh-api-stock-controller/client'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { StockQuoteOverlay } from './overlay.ts'
+import type { IWatchlist } from '@deepseek-ai/dsh-api-watchlist-controller/client'
+import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
+import { QuickAddButton, StockAddToast, type StockToastNotice } from './QuickAdd.tsx'
+import type { WatchlistQuickAdd } from './watchlist.ts'
 import css from './QuotePanel.module.css'
 
 type QuoteData = { quote: Quote; name: string; asOf?: number; candles: readonly Candle[]; news: readonly DocumentRow[] }
 type SharedProps = PropsLocale<'stockMentions'> & {
   stock: IStockClient
   nameOf: (code: string) => string | undefined
+  watchlist: IWatchlist
+  add: WatchlistQuickAdd
+  toast: ObservableSnapshot<StockToastNotice | null>
+  dismissToast: (seq: number) => void
 }
 type Tab = 'day' | 'news'
 
@@ -32,12 +40,12 @@ export function QuoteOverlay({ overlay, ...shared }: SharedProps & { overlay: St
     const frame = requestAnimationFrame(() => panel.current?.focus())
     return () => { cancelAnimationFrame(frame); previous?.focus() }
   }, [selection?.thscode])
-  if (selection === null) return null
-  return <aside ref={panel} role="dialog" aria-modal="false" tabIndex={-1}
-    aria-label={`${selection.name} ${shared.t('title')}`} className={css.overlay}
-    onKeyDown={(event) => { if (event.key === 'Escape') overlay.close() }}>
-    <QuoteView code={selection.thscode} {...shared} onClose={() => { overlay.close() }} />
-  </aside>
+  return <><StockAddToast notice={shared.toast} dismiss={shared.dismissToast} />
+    {selection !== null && <aside ref={panel} role="dialog" aria-modal="false" tabIndex={-1}
+      aria-label={`${selection.name} ${shared.t('title')}`} className={css.overlay}
+      onKeyDown={(event) => { if (event.key === 'Escape') overlay.close() }}>
+      <QuoteView selection={selection} {...shared} onClose={() => { overlay.close() }} />
+    </aside>}</>
 }
 
 function DailyChart({ candles, label }: { candles: readonly Candle[]; label: string }) {
@@ -73,7 +81,11 @@ function DailyChart({ candles, label }: { candles: readonly Candle[]; label: str
 }
 
 /** Fetch and display the selected quote, daily candles, and related news. */
-function QuoteView({ code, stock, nameOf, t, onClose }: SharedProps & { code: string; onClose?: () => void }) {
+function QuoteView({ selection, stock, nameOf, t, watchlist, add, onClose }: SharedProps & {
+  selection: { thscode: string; name: string; ticker: string }
+  onClose?: () => void
+}) {
+  const code = selection.thscode
   const [revision, retry] = useState(0)
   const [tab, setTab] = useState<Tab>('day')
   const [data, setData] = useState<QuoteData | undefined>()
@@ -110,7 +122,10 @@ function QuoteView({ code, stock, nameOf, t, onClose }: SharedProps & { code: st
         <strong className={css.headerName}>{visibleData?.name ?? nameOf(code) ?? code}</strong>
         <div className={css.headerMeta}><span>{code}</span><span className={css.marketTag}>{code.endsWith('.SH') ? t('marketSH') : t('marketSZ')}</span></div>
       </div>
-      {onClose !== undefined && <button type="button" className={css.closeButton} aria-label={t('close')} onClick={onClose}>×</button>}
+      <div className={css.headerActions}>
+        <QuickAddButton hit={selection} watchlist={watchlist} add={add} t={t} />
+        {onClose !== undefined && <button type="button" className={css.closeButton} aria-label={t('close')} onClick={onClose}>×</button>}
+      </div>
     </header>
     {quote !== undefined && <section className={css.quoteSummary} aria-label={t('quote')}>
       <div className={css.currentBlock}>
