@@ -42,7 +42,7 @@ seam 有意在其行上保留 vendor 自己的字段名，因为其 94 个能力
 |---|---|
 | `Candle.time` | `date_ms` |
 | `Candle.open` / `high` / `low` / `close` | `open_price` / `high_price` / `low_price` / `close_price` |
-| `Candle.volume` | `volume` |
+| `Candle.volume` / `turnover` | `volume` / `turnover` |
 | `Quote.last` / `change` / `changePct` | `last_price` / `price_change` / `price_change_ratio_pct` |
 | `Quote.open` / `high` / `low` / `prevClose` | `open_price` / `high_price` / `low_price` / `prev_price` |
 | `Quote.volume` / `turnover` | `volume` / `turnover` |

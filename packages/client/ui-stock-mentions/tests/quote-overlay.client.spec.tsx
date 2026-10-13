@@ -14,8 +14,8 @@ const stock: Pick<IStockClient, 'quotes' | 'candles' | 'searchSymbols' | 'docume
     open: 1259, high: 1259.95, low: 1250.8, prevClose: 1257.12, volume: 2_501_689, turnover: 3_135_910_000,
   }] })),
   candles: vi.fn(async () => ({ thscode: '600519.SH', interval: '1d' as const, truncated: false, candles: [
-    { time: 1789516800000, open: 1250, high: 1260, low: 1240, close: 1252, volume: 10 },
-    { time: 1789603200000, open: 1252, high: 1265, low: 1250, close: 1258, volume: 12 },
+    { time: 1789516800000, open: 1250, high: 1260, low: 1240, close: 1252, volume: 10, turnover: 12_520 },
+    { time: 1789603200000, open: 1252, high: 1265, low: 1250, close: 1258, volume: 12, turnover: 15_096 },
   ] })),
   searchSymbols: vi.fn(async () => [{ thscode: '600519.SH', ticker: '600519', name: '贵州茅台' }]),
   documents: vi.fn(async () => [{ kind: 'news' as const, title: '公司公告', publishedAt: 1789603200000,

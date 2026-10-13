@@ -415,6 +415,28 @@ describe('WatchlistPanelIcon', () => {
 })
 
 describe('WatchlistPanel chart', () => {
+  it('shows calculated history metrics and the recent-bar table beside the retained document and analysis panes', () => {
+    const bars = Array.from({ length: 60 }, (_, index) => {
+      const close = index === 59 ? 90 : 100
+      return {
+        time: Date.UTC(2026, 0, index + 1), open: close, high: close + 1, low: close - 1,
+        close, volume: 100, turnover: 200_000_000,
+      }
+    })
+    mount({
+      selection: '600519.SH',
+      candles: { phase: 'ready', thscode: '600519.SH', interval: '1d', bars, truncated: false },
+    })
+    const summary = screen.getByRole('region', { name: zh['summary.aria'] })
+    expect(within(summary).getByText('最近收盘')).toBeDefined()
+    expect(within(summary).getByText('区间收益')).toBeDefined()
+    expect(within(summary).getAllByText('-10.00%')).toHaveLength(2)
+    expect(within(summary).getByText('2.00 亿')).toBeDefined()
+    expect(within(screen.getByRole('region', { name: zh['recent.title'] })).getAllByRole('row')).toHaveLength(9)
+    expect(screen.getByRole('region', { name: zh['analysis.aria'] })).toBeDefined()
+    expect(screen.getByRole('region', { name: zh['documents.aria'] })).toBeDefined()
+  })
+
   it('reads the series for the selected instrument and the current period', () => {
     const { loadCandles } = mount({ selection: '600519.SH', interval: '1w' })
     expect(loadCandles).toHaveBeenCalledTimes(1)
@@ -428,7 +450,7 @@ describe('WatchlistPanel chart', () => {
 
   it('offers one period control per period, marking the selected one', () => {
     mount({ selection: '600519.SH', interval: '1w' })
-    const group = screen.getByRole('group', { name: zh['chart.aria'] })
+    const group = screen.getByRole('group', { name: zh['chart.periods'] })
     expect(within(group).getByRole('button', { name: zh['chart.period.1w'] })).toBeDefined()
     expect(within(group).getAllByRole('button')).toHaveLength(3)
   })
@@ -438,6 +460,14 @@ describe('WatchlistPanel chart', () => {
     loadCandles.mockClear()
     fireEvent.click(screen.getByRole('button', { name: zh['chart.period.1mo'] }))
     expect(view.getSnapshot().interval).toBe('1mo')
+  })
+
+  it('stores a chart range preset without requesting another series', () => {
+    const { view, loadCandles } = mount({ selection: '600519.SH' })
+    loadCandles.mockClear()
+    fireEvent.click(screen.getByRole('button', { name: zh['chart.range.30'] }))
+    expect(view.getSnapshot().chartRange).toBe(30)
+    expect(loadCandles).not.toHaveBeenCalled()
   })
 
   it('says the series is loading while the first read is in flight', () => {
@@ -458,9 +488,10 @@ describe('WatchlistPanel chart', () => {
       selection: '600519.SH',
       candles: {
         phase: 'ready',
+        thscode: '600519.SH',
         interval: '1d',
         truncated: false,
-        bars: [{ time: 1, open: 1, high: 2, low: 0.5, close: 1.5, volume: 10 }],
+        bars: [{ time: 1, open: 1, high: 2, low: 0.5, close: 1.5, volume: 10, turnover: 100 }],
       },
     })
     expect(document.querySelector('canvas')).not.toBeNull()
@@ -474,8 +505,8 @@ describe('WatchlistPanel chart', () => {
     })
     loadCandles.mockClear()
     expect(screen.getByText('操作失败：stock/no-data')).toBeDefined()
-    const group = screen.getByRole('group', { name: zh['chart.aria'] })
-    fireEvent.click(within(group.parentElement as HTMLElement).getByRole('button', { name: zh['quotes.retry'] }))
+    const chart = screen.getByRole('region', { name: zh['chart.aria'] })
+    fireEvent.click(within(chart).getByRole('button', { name: zh['quotes.retry'] }))
     expect(loadCandles).toHaveBeenCalledTimes(1)
     expect(loadCandles.mock.calls[0]?.slice(0, 2)).toEqual(['600519.SH', '1d'])
   })
@@ -485,9 +516,10 @@ describe('WatchlistPanel chart', () => {
       selection: '600519.SH',
       candles: {
         phase: 'ready',
+        thscode: '600519.SH',
         interval: '1d',
         truncated: true,
-        bars: [{ time: 1, open: 1, high: 2, low: 0.5, close: 1.5, volume: 10 }],
+        bars: [{ time: 1, open: 1, high: 2, low: 0.5, close: 1.5, volume: 10, turnover: 100 }],
       },
     })
     expect(screen.getByText(zh['chart.truncated'])).toBeDefined()
@@ -584,7 +616,7 @@ describe('WatchlistPanel analysis without a quote', () => {
   it('keeps the chart and the documents while the quote batch is still out', () => {
     mount({ selection: '000001.SZ', quotes: { phase: 'idle', byCode: {} } })
     expect(screen.getByText(zh['quotes.loading'])).toBeDefined()
-    expect(screen.getByRole('group', { name: zh['chart.aria'] })).toBeDefined()
+    expect(screen.getByRole('region', { name: zh['chart.aria'] })).toBeDefined()
     expect(screen.getByRole('group', { name: zh['documents.aria'] })).toBeDefined()
   })
 

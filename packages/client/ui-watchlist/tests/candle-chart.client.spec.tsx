@@ -18,11 +18,13 @@ const COLORS: ChartColors = {
   rise: '#c9302c',
   fall: '#2d9d78',
   crosshair: '#76808f',
+  ma20: '#2463d1',
+  ma60: '#7b7b7b',
 }
 
 /** One bar, overridable per test. */
 function bar(time: number, close = 10): ChartBar {
-  return { time, open: close, high: close + 1, low: close - 1, close, volume: 100 }
+  return { time, open: close, high: close + 1, low: close - 1, close, volume: 100, turnover: 1000 }
 }
 
 beforeEach(() => { installCanvas() })
@@ -46,6 +48,8 @@ describe('resolveChartColors', () => {
     element.style.setProperty('--dsw-alias-state-error-primary', '#c9302c')
     element.style.setProperty('--dsw-alias-state-success-primary', '#2d9d78')
     element.style.setProperty('--dsw-alias-label-dimmed', '#76808f')
+    element.style.setProperty('--dsw-alias-label-primary-bluish', '#2463d1')
+    element.style.setProperty('--dsw-alias-label-secondary', '#7b7b7b')
     expect(resolveChartColors(element)).toEqual({
       background: '#101010',
       grid: '#222222',
@@ -53,12 +57,14 @@ describe('resolveChartColors', () => {
       rise: '#c9302c',
       fall: '#2d9d78',
       crosshair: '#76808f',
+      ma20: '#2463d1',
+      ma60: '#7b7b7b',
     })
   })
 
   it('leaves a role empty when the document defines no such token', () => {
     expect(resolveChartColors(host())).toEqual({
-      background: '', grid: '', text: '', rise: '', fall: '', crosshair: '',
+      background: '', grid: '', text: '', rise: '', fall: '', crosshair: '', ma20: '', ma60: '',
     })
   })
 })
@@ -91,6 +97,8 @@ describe('createCandleChart', () => {
     // Replacing the series is what the library's loader answers from, so the
     // drawn series is readable back through the chart it built.
     handle.setBars([bar(1, 10), bar(2, 11)])
+    handle.setRange(30)
+    handle.setRange('all')
     expect(element.querySelector('canvas')).not.toBeNull()
 
     handle.setColors({ ...COLORS, rise: '#ff0000' })
@@ -108,29 +116,29 @@ describe('createCandleChart', () => {
 
 describe('CandleChart', () => {
   it('builds one chart for its lifetime and draws the series it is given', () => {
-    const view = render(<CandleChart bars={[bar(1)]} themeRevision={0} />)
+    const view = render(<CandleChart bars={[bar(1)]} range={90} themeRevision={0} />)
     const canvas = view.container.querySelector('canvas')
     expect(canvas).not.toBeNull()
-    view.rerender(<CandleChart bars={[bar(1), bar(2)]} themeRevision={0} />)
+    view.rerender(<CandleChart bars={[bar(1), bar(2)]} range={90} themeRevision={0} />)
     expect(view.container.querySelector('canvas')).toBe(canvas)
   })
 
   it('repaints on a new theme revision without rebuilding the chart', () => {
-    const view = render(<CandleChart bars={[]} themeRevision={0} />)
+    const view = render(<CandleChart bars={[]} range={90} themeRevision={0} />)
     const canvas = view.container.querySelector('canvas')
-    view.rerender(<CandleChart bars={[]} themeRevision={1} />)
+    view.rerender(<CandleChart bars={[]} range={90} themeRevision={1} />)
     expect(view.container.querySelector('canvas')).toBe(canvas)
   })
 
   it('releases the canvas when it unmounts', () => {
-    const view = render(<CandleChart bars={[]} themeRevision={0} />)
+    const view = render(<CandleChart bars={[]} range={90} themeRevision={0} />)
     expect(view.container.querySelector('canvas')).not.toBeNull()
     view.unmount()
     expect(view.container.querySelector('canvas')).toBeNull()
   })
 
   it('paints with the palette the mounted document defines', () => {
-    const view = render(<CandleChart bars={[bar(1)]} themeRevision={0} />)
+    const view = render(<CandleChart bars={[bar(1)]} range={90} themeRevision={0} />)
     const hostElement = view.container.firstElementChild as HTMLElement
     hostElement.style.setProperty('--dsw-alias-bg-base', '#000000')
     expect(resolveChartColors(hostElement).background).toBe('#000000')

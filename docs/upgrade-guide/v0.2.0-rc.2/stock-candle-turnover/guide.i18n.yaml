@@ -1,0 +1,16 @@
+# Bilingual-pair consistency record for guide.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.2.0-rc.2/stock-candle-turnover/guide.md
+/:
+  en: c009867645a34cda
+  zh: 242a205e1595c40f
+/supply-turnover-on-stock-candles:
+  en: 3cc60b538521aea5
+  zh: f7deb648c3e07eb9
+/supply-turnover-on-stock-candles/change:
+  en: 853dbe7a9582c0d1
+  zh: fab423f1b67b3852
+/supply-turnover-on-stock-candles/migration:
+  en: 93a127b3e9f956f6
+  zh: dd44981981556d57

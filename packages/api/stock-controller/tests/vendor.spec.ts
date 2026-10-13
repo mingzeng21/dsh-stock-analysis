@@ -92,6 +92,7 @@ describe('quote and candle projection', () => {
       low_price: 1392.78877,
       close_price: 1411.96877,
       volume: 4497058,
+      turnover: 6320190000,
     }, INSTRUMENT)).toEqual({
       time: 1755792000000,
       open: 1396.89877,
@@ -99,7 +100,19 @@ describe('quote and candle projection', () => {
       low: 1392.78877,
       close: 1411.96877,
       volume: 4497058,
+      turnover: 6320190000,
     })
+  })
+
+  it('rejects a historical row without turnover instead of reporting a zero', () => {
+    expect(() => toCandle({
+      date_ms: 1755792000000,
+      open_price: 1396,
+      high_price: 1412,
+      low_price: 1392,
+      close_price: 1411,
+      volume: 4497058,
+    }, INSTRUMENT)).toThrow(/turnover/)
   })
 })
 

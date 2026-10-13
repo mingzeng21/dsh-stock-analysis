@@ -61,7 +61,7 @@ export function chartStyles(colors: ChartColors): DeepPartial<Styles> {
       },
     },
     indicator: {
-      lines: [{ color: colors.text }],
+      lines: [{ color: colors.ma20 }, { color: colors.ma60 }],
       bars: [{ upColor: colors.rise, downColor: colors.fall, noChangeColor: colors.text }],
       tooltip: {
         title: { color: colors.text },

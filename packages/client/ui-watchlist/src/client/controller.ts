@@ -44,9 +44,11 @@ export type ListSnapshot =
 
 /** What a candle read carries whatever its phase. */
 interface CandlesFacts {
+  /** Instrument the retained bars belong to; absent until one read succeeds. */
+  readonly thscode?: string
   /** Window the bars cover, as the period switch named it. */
   readonly interval: CandleInterval
-  /** Bars in ascending time order; the last successful read's while one is in flight. */
+  /** Bars in ascending time order; retained during a refresh of the same instrument and period. */
   readonly bars: readonly ChartBar[]
   /** True when the vendor returned more bars than the seam's row bound allowed. */
   readonly truncated: boolean
@@ -211,8 +213,8 @@ export class WatchlistSurface {
 
   /**
    * Read one instrument's candle series for a period. Never rejects: a failure
-   * is published as a phase and a code, and the last successful series stays
-   * published while a newer read is in flight.
+   * is published as a phase and a code. A refresh of the same instrument and
+   * period retains its bars; changing either clears them before the read.
    * @param thscode - instrument to read.
    * @param interval - period to read.
    * @param now - current time in milliseconds, injected by the caller so the window is decided at the entry point.
@@ -221,19 +223,27 @@ export class WatchlistSurface {
   async loadCandles(thscode: string, interval: CandleInterval, now: number): Promise<void> {
     const token = ++this.candleGeneration
     const current = this.candleStore.getSnapshot()
-    this.candleStore.set({ ...current, phase: 'loading', interval, bars: current.bars })
+    const retain = current.thscode === thscode && current.interval === interval
+    const pending: CandlesFacts = {
+      interval,
+      bars: retain ? current.bars : [],
+      truncated: retain && current.truncated,
+      ...retain ? { thscode } : {},
+    }
+    this.candleStore.set({ ...pending, phase: 'loading' })
     const window = candleWindow(interval, now)
     let series
     try {
       series = await this.stock.candles({
         thscode,
         interval,
+        adjust: 'forward',
         start: window.start,
         end: window.end,
       })
     } catch (error: unknown) {
       if (token !== this.candleGeneration) return
-      this.candleStore.set({ ...current, phase: 'failed', interval, failure: failureCode(error) })
+      this.candleStore.set({ ...pending, phase: 'failed', failure: failureCode(error) })
       return
     }
     if (token !== this.candleGeneration) return
@@ -247,7 +257,9 @@ export class WatchlistSurface {
         low: candle.low,
         close: candle.close,
         volume: candle.volume,
+        turnover: candle.turnover,
       })),
+      thscode,
       truncated: series.truncated,
     })
   }

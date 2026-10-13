@@ -49,7 +49,7 @@
   flex: 1;
   margin: 0;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 20px;
   color: var(--dsw-alias-label-primary);
 }
@@ -305,7 +305,7 @@
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  padding: 20px 24px;
+  padding: 24px;
   overflow: hidden;
 }
 
@@ -326,9 +326,16 @@
 
 .quoteHead {
   display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quoteIdentity {
+  display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
+  min-width: 0;
 }
 
 .analysisJump {
@@ -348,9 +355,10 @@
 }
 
 .quoteName {
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 28px;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 30px;
 }
 
 .quoteCode {
@@ -359,24 +367,109 @@
 }
 
 .quoteLast {
-  margin-left: auto;
   font-size: 24px;
-  font-weight: 600;
+  font-weight: 500;
+  line-height: 30px;
   font-variant-numeric: tabular-nums;
 }
 
 .quoteChange {
   font-size: 14px;
+  line-height: 20px;
   font-variant-numeric: tabular-nums;
+}
+
+.sourceLine,
+.disclaimer {
+  margin: 6px 0 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.summaryCard {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  padding: 14px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-md);
+  background: var(--dsw-alias-bg-base);
+}
+
+.summaryLabel,
+.summaryNote {
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.summaryValue {
+  overflow: hidden;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summaryNote {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.snapshot,
+.chartSection,
+.recent {
+  margin-top: 16px;
+  padding: 16px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-md);
+}
+
+.snapshotHead,
+.chartHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.snapshotPrice {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.sectionNote {
+  margin: 3px 0 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  line-height: 16px;
 }
 
 .metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 12px 20px;
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 0.5px solid var(--dsw-alias-border-l2);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 20px;
+  margin-top: 14px;
 }
 
 .metric {
@@ -398,7 +491,7 @@
 }
 
 .asOf {
-  margin: 16px 0 0;
+  margin: 14px 0 0;
   color: var(--dsw-alias-label-secondary);
   font-size: 12px;
   line-height: 18px;
@@ -408,10 +501,18 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 20px;
+}
+
+.chartControls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px 12px;
 }
 
 .chartNote {
+  margin: 8px 0 0;
   color: var(--dsw-alias-label-tertiary);
   font-size: 11px;
 }
@@ -421,14 +522,58 @@
   display: flex;
   flex-direction: column;
   flex: none;
-  height: 280px;
-  margin-top: 12px;
+  height: 360px;
+  margin-top: 14px;
 }
 
 .chartEmpty {
   margin: auto;
   color: var(--dsw-alias-label-dimmed);
   font-size: 13px;
+}
+
+.recentTableScroll {
+  overflow-x: auto;
+  margin-top: 10px;
+  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
+  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+}
+
+.recentTable {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  font-size: 12px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.recentTable th,
+.recentTable td {
+  padding: 8px 6px;
+  border-bottom: 0.5px solid var(--dsw-alias-border-l2);
+  white-space: nowrap;
+}
+
+.recentTable th {
+  color: var(--dsw-alias-label-secondary);
+  font-weight: 500;
+}
+
+.recentTable th:first-child,
+.recentTable td:first-child {
+  padding-left: 0;
+  text-align: left;
+}
+
+.recentTable th:last-child,
+.recentTable td:last-child {
+  padding-right: 0;
+}
+
+.disclaimer {
+  margin-top: 12px;
 }
 
 .documents {
@@ -604,6 +749,21 @@ a.documentTitle:focus-visible {
   color: var(--dsw-alias-label-secondary);
 }
 
+@media (max-width: 1100px) {
+  .summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chartHead {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .chartControls {
+    justify-content: flex-start;
+  }
+}
+
 @media (max-width: 720px) {
   .panel {
     display: flex;
@@ -634,44 +794,35 @@ a.documentTitle:focus-visible {
   }
 
   .quoteHead {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      'name code'
-      'price change'
-      'jump jump';
-    gap: 4px 8px;
-  }
-
-  .quoteName {
-    grid-area: name;
-  }
-
-  .quoteCode {
-    grid-area: code;
-  }
-
-  .quoteLast {
-    grid-area: price;
-    margin-left: 0;
-  }
-
-  .quoteChange {
-    grid-area: change;
+    flex-wrap: wrap;
   }
 
   .analysisJump {
-    grid-area: jump;
-    justify-self: start;
     margin-left: 0;
   }
 
+  .summary,
   .metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .chartHead {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .chartControls {
+    justify-content: flex-start;
+  }
+
+  .snapshot,
+  .chartSection,
+  .recent {
+    padding: 12px;
+  }
+
   .chartArea {
-    height: 280px;
+    height: 320px;
     direction: rtl;
     overflow-x: auto;
   }

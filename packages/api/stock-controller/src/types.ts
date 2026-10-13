@@ -85,6 +85,8 @@ export interface Candle {
   readonly close: number
   /** Traded volume in shares. */
   readonly volume: number
+  /** Traded turnover in the instrument's currency. */
+  readonly turnover: number
 }
 
 /** One instrument's candle series for the requested window. */

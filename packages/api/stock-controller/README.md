@@ -42,7 +42,7 @@ The seam keeps the vendor's own field names on its rows, because its 94 capabili
 |---|---|
 | `Candle.time` | `date_ms` |
 | `Candle.open` / `high` / `low` / `close` | `open_price` / `high_price` / `low_price` / `close_price` |
-| `Candle.volume` | `volume` |
+| `Candle.volume` / `turnover` | `volume` / `turnover` |
 | `Quote.last` / `change` / `changePct` | `last_price` / `price_change` / `price_change_ratio_pct` |
 | `Quote.open` / `high` / `low` / `prevClose` | `open_price` / `high_price` / `low_price` / `prev_price` |
 | `Quote.volume` / `turnover` | `volume` / `turnover` |

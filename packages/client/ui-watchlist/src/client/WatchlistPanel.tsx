@@ -1,6 +1,6 @@
 /**
  * The watchlist global panel: the durable instrument list on the left, the
- * selected instrument's quote on the right.
+ * selected instrument's market overview and analysis on the right.
  *
  * Everything it renders arrives through the four props shares — the declared
  * view store for the selection, the inject face's hooks for the durable list
@@ -29,6 +29,7 @@ import type {
   AddOutcome, CandlesSnapshot, DocumentsSnapshot, ListSnapshot, QuotesSnapshot, SearchOutcome,
 } from './controller.ts'
 import { CandleChart } from './CandleChart.tsx'
+import { priceOverview, tradingDate } from './overview.ts'
 import type { createWatchlistStore } from './store.ts'
 import css from './WatchlistPanel.module.css'
 
@@ -111,10 +112,37 @@ function changeText(quote: Quote, t: WatchlistPanelProps['t']): string {
   return quote.changePct >= 0 ? t('value.pctUp', { value }) : t('value.pct', { value })
 }
 
+/** Format a calculated percentage with the same sign convention as a quote. */
+function percentText(value: number, t: WatchlistPanelProps['t']): string {
+  const rounded = value.toFixed(2)
+  return value > 0 ? t('value.pctUp', { value: rounded }) : t('value.pct', { value: rounded })
+}
+
+/** Compact currency units keep the snapshot and historical amounts comparable. */
+function amountText(value: number, t: WatchlistPanelProps['t']): string {
+  if (Math.abs(value) >= 100_000_000) return t('value.amountYi', { value: (value / 100_000_000).toFixed(2) })
+  if (Math.abs(value) >= 10_000) return t('value.amountWan', { value: (value / 10_000).toFixed(2) })
+  return value.toFixed(0)
+}
+
+/** The vendor quotes shares; one A-share lot is 100 shares. */
+function volumeText(shares: number, t: WatchlistPanelProps['t']): string {
+  const lots = shares / 100
+  return lots >= 10_000
+    ? t('value.volumeWanLots', { value: (lots / 10_000).toFixed(2) })
+    : t('value.volumeLots', { value: lots.toFixed(0) })
+}
+
 /** Direction class of one instrument's change. */
 function directionOf(quote: Quote | undefined): string | undefined {
   if (quote === undefined || quote.changePct === 0) return css.flat
   return quote.changePct > 0 ? css.up : css.down
+}
+
+/** Rise and fall colors use the A-share convention. */
+function directionOfPercent(value: number | undefined): string | undefined {
+  if (value === undefined) return undefined
+  return value > 0 ? css.up : value < 0 ? css.down : css.flat
 }
 
 /** One metric cell of the quote detail. */
@@ -123,6 +151,22 @@ function Metric({ label, value }: { label: string; value: string }) {
     <div className={css.metric}>
       <span className={css.metricLabel}>{label}</span>
       <span className={css.metricValue}>{value}</span>
+    </div>
+  )
+}
+
+/** One summary card with its calculation basis below the value. */
+function SummaryCard({ label, value, note, direction }: {
+  label: string
+  value: string
+  note: string
+  direction?: string | undefined
+}) {
+  return (
+    <div className={css.summaryCard}>
+      <span className={css.summaryLabel}>{label}</span>
+      <span className={clsx(css.summaryValue, direction)}>{value}</span>
+      <span className={css.summaryNote}>{note}</span>
     </div>
   )
 }
@@ -288,6 +332,7 @@ export function WatchlistPanel({
 }: WatchlistPanelProps) {
   const selected = useStore(state => state.selected)
   const interval = useStore(state => state.interval)
+  const chartRange = useStore(state => state.chartRange)
   const documentKind = useStore(state => state.documentKind)
   const railWidth = useStore(state => state.railWidth)
   const analysisSession = useStore(state => state.analysisSession)
@@ -408,6 +453,11 @@ export function WatchlistPanel({
 
   const selectedQuote = selected === null ? undefined : quotes.byCode[selected]
   const quoteTime = quotes.asOf === undefined ? undefined : new Date(quotes.asOf)
+  const currentBars = useMemo(
+    () => candles.thscode === selected && candles.interval === interval ? candles.bars : [],
+    [candles, selected, interval],
+  )
+  const overview = useMemo(() => priceOverview(currentBars), [currentBars])
 
   const ask = (event: FormEvent, entry: WatchlistEntry): void => {
     event.preventDefault()
@@ -582,24 +632,41 @@ export function WatchlistPanel({
             onScroll={(event) => { scrollPosition.current = event.currentTarget.scrollTop }}
           >
             <header className={css.quoteHead}>
-              <span className={css.quoteName}>{selectedEntry.name}</span>
-              <span className={css.quoteCode}>{selectedEntry.thscode}</span>
-              {selectedQuote !== undefined && (
-                <>
-                  <span className={clsx(css.quoteLast, directionOf(selectedQuote))}>
-                    {selectedQuote.last.toFixed(2)}
-                  </span>
-                  <span className={clsx(css.quoteChange, directionOf(selectedQuote))}>
-                    {changeText(selectedQuote, t)}
-                  </span>
-                </>
-              )}
+              <div className={css.quoteIdentity}>
+                <h2 className={css.quoteName}>{selectedEntry.name}</h2>
+                <span className={css.quoteCode}>{selectedEntry.thscode}</span>
+              </div>
               <button type="button" className={css.analysisJump} onClick={focusAnalysis}>
                 {t('analysis.jump')}
               </button>
             </header>
-            {/* The chart and the documents need only the instrument, so a quote
-                the vendor did not answer for costs the metrics and nothing else. */}
+            <p className={css.sourceLine}>{t('source.marketData')} · {t('chart.adjust.forward')}</p>
+            <section className={css.summary} aria-label={t('summary.aria')}>
+              <SummaryCard
+                label={t('summary.latestClose')}
+                value={overview.latest?.close.toFixed(2) ?? '—'}
+                note={overview.latest === undefined ? t('summary.unavailable') : tradingDate(overview.latest.time)}
+              />
+              <SummaryCard
+                label={t('summary.periodReturn')}
+                value={overview.returnPct === undefined ? '—' : percentText(overview.returnPct, t)}
+                note={overview.first === undefined || overview.latest === undefined
+                  ? t('summary.unavailable')
+                  : t('summary.dateRange', { start: tradingDate(overview.first.time), end: tradingDate(overview.latest.time) })}
+                direction={directionOfPercent(overview.returnPct)}
+              />
+              <SummaryCard
+                label={t(`summary.drawdown.${interval}`)}
+                value={overview.drawdown60Pct === undefined ? '—' : percentText(overview.drawdown60Pct, t)}
+                note={overview.drawdown60Pct === undefined ? t('summary.insufficient60') : t('summary.adjustedClose')}
+                direction={directionOfPercent(overview.drawdown60Pct)}
+              />
+              <SummaryCard
+                label={t(`summary.averageTurnover.${interval}`)}
+                value={overview.averageTurnover20 === undefined ? '—' : amountText(overview.averageTurnover20, t)}
+                note={overview.averageTurnover20 === undefined ? t('summary.insufficient20') : t('summary.originalAmount')}
+              />
+            </section>
             {selectedQuote === undefined ? (
               <p className={css.failure}>
                 {quotes.phase === 'failed'
@@ -612,12 +679,21 @@ export function WatchlistPanel({
                 )}
               </p>
             ) : (
-              <>
+              <section className={css.snapshot} aria-label={t('detail.snapshot')}>
+                <div className={css.snapshotHead}>
+                  <h3 className={css.sectionTitle}>{t('detail.snapshot')}</h3>
+                  <div className={css.snapshotPrice}>
+                    <span className={clsx(css.quoteLast, directionOf(selectedQuote))}>{selectedQuote.last.toFixed(2)}</span>
+                    <span className={clsx(css.quoteChange, directionOf(selectedQuote))}>{changeText(selectedQuote, t)}</span>
+                  </div>
+                </div>
                 <div className={css.metrics}>
                   <Metric label={t('detail.open')} value={selectedQuote.open.toFixed(2)} />
                   <Metric label={t('detail.high')} value={selectedQuote.high.toFixed(2)} />
                   <Metric label={t('detail.low')} value={selectedQuote.low.toFixed(2)} />
                   <Metric label={t('detail.prevClose')} value={selectedQuote.prevClose.toFixed(2)} />
+                  <Metric label={t('detail.volume')} value={volumeText(selectedQuote.volume, t)} />
+                  <Metric label={t('detail.turnover')} value={amountText(selectedQuote.turnover, t)} />
                 </div>
                 {quoteTime !== undefined && (
                   <p className={css.asOf}>
@@ -626,22 +702,33 @@ export function WatchlistPanel({
                     })}
                   </p>
                 )}
-              </>
+              </section>
             )}
-            <div className={css.chartBar} role="group" aria-label={t('chart.aria')}>
-              {CANDLE_INTERVALS.map(candidate => (
-                <Pill
-                  key={candidate}
-                  active={candidate === interval}
-                  onClick={() => { actions.setInterval(candidate) }}
-                >
-                  {t(`chart.period.${candidate}`)}
-                </Pill>
-              ))}
-              {candles.truncated && <span className={css.chartNote}>{t('chart.truncated')}</span>}
-            </div>
-            <div className={css.chartArea} aria-label={t('chart.aria')}>
-              {candles.phase === 'failed' ? (
+            <section className={css.chartSection} aria-label={t('chart.aria')}>
+              <div className={css.chartHead}>
+                <div>
+                  <h3 className={css.sectionTitle}>{t('chart.title')}</h3>
+                  <p className={css.sectionNote}>{t('chart.legend')}</p>
+                </div>
+                <div className={css.chartControls}>
+                  <div className={css.chartBar} role="group" aria-label={t('chart.periods')}>
+                    {CANDLE_INTERVALS.map(candidate => (
+                      <Pill key={candidate} active={candidate === interval} onClick={() => { actions.setInterval(candidate) }}>
+                        {t(`chart.period.${candidate}`)}
+                      </Pill>
+                    ))}
+                  </div>
+                  <div className={css.chartBar} role="group" aria-label={t('chart.ranges')}>
+                    {([30, 90, 180, 'all'] as const).map(candidate => (
+                      <Pill key={candidate} active={candidate === chartRange} onClick={() => { actions.setChartRange(candidate) }}>
+                        {t(`chart.range.${candidate}`)}
+                      </Pill>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {currentBars.length > 0 && candles.truncated && <p className={css.chartNote}>{t('chart.truncated')}</p>}
+              {candles.phase === 'failed' && currentBars.length > 0 && (
                 <p className={css.failure}>
                   {t('failure.withCode', { code: candles.failure })}
                   <button
@@ -652,12 +739,50 @@ export function WatchlistPanel({
                     {t('quotes.retry')}
                   </button>
                 </p>
-              ) : candles.bars.length === 0 ? (
-                <p className={css.chartEmpty}>{candles.phase === 'loading' ? t('chart.loading') : t('chart.empty')}</p>
-              ) : (
-                <CandleChart bars={candles.bars} themeRevision={themeRevision} />
               )}
-            </div>
+              <div className={css.chartArea}>
+                {candles.phase === 'failed' && currentBars.length === 0 ? (
+                  <p className={css.failure}>
+                    {t('failure.withCode', { code: candles.failure })}
+                    <button type="button" className={css.retry} onClick={() => { loadCandles(selectedEntry.thscode, interval, Date.now()) }}>
+                      {t('quotes.retry')}
+                    </button>
+                  </p>
+                ) : currentBars.length === 0 ? (
+                  <p className={css.chartEmpty}>{candles.phase === 'loading' ? t('chart.loading') : t('chart.empty')}</p>
+                ) : (
+                  <CandleChart bars={currentBars} range={chartRange} themeRevision={themeRevision} />
+                )}
+              </div>
+            </section>
+
+            {overview.recent.length > 0 && (
+              <section className={css.recent} aria-label={t('recent.title')}>
+                <h3 className={css.sectionTitle}>{t('recent.title')}</h3>
+                <div className={css.recentTableScroll}>
+                  <table className={css.recentTable}>
+                    <thead><tr>
+                      <th>{t('recent.date')}</th><th>{t('detail.open')}</th><th>{t('detail.high')}</th>
+                      <th>{t('detail.low')}</th><th>{t('recent.close')}</th><th>{t('recent.change')}</th>
+                      <th>{t('detail.turnover')}</th>
+                    </tr></thead>
+                    <tbody>
+                      {overview.recent.map(({ bar, changePct }) => (
+                        <tr key={bar.time}>
+                          <td>{tradingDate(bar.time)}</td><td>{bar.open.toFixed(2)}</td><td>{bar.high.toFixed(2)}</td>
+                          <td>{bar.low.toFixed(2)}</td><td>{bar.close.toFixed(2)}</td>
+                          <td className={directionOfPercent(changePct)}>
+                            {changePct === undefined ? '—' : percentText(changePct, t)}
+                          </td>
+                          <td>{amountText(bar.turnover, t)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+            <p className={css.disclaimer}>{t('source.disclaimer')}</p>
 
             <section
               ref={analysisRef}

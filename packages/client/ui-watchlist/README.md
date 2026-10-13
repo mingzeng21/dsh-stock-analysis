@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Use this package for the Web client's watchlist: one global panel that keeps a personal instrument list beside the Conversation. The left rail lists each instrument with its latest quote, adds one through symbol disambiguation, and removes one. The analysis side shows the selected instrument's quote, its candlestick chart, the reports, announcements, and news published about it, and one analysis session the reader can question. It reads the durable list through `dsh-api-watchlist-controller`, market data through `dsh-api-stock-controller`, and its analysis session through the shipped session service; it holds no transport and caches nothing.
+Use this package for the Web client's watchlist: one global panel that keeps a personal instrument list beside the Conversation. The left rail lists each instrument with its latest quote, adds one through symbol disambiguation, and removes one. The detail shows the selected instrument's quote, price summary, candlestick chart, recent bars, reports, announcements, news, and one analysis session the reader can question. It reads the durable list through `dsh-api-watchlist-controller`, market data through `dsh-api-stock-controller`, and its analysis session through the shipped session service; it holds no transport and caches nothing.
 
 ## Table of Contents
 
@@ -53,7 +53,9 @@ Adding is refused rather than silently ignored: a duplicate, an unresolved symbo
 
 The chart is one canvas, drawn by `klinecharts` and wrapped so the rest of the panel never touches the library. The wrapper receives bars and returns a canvas: it does not read Remote, does not see the panel store, and is not told which instrument it draws — the panel header names it directly above.
 
-Three periods are offered — `1d`, `1w`, `1mo` — and each asks the Host for its own history length (about one, three, and ten years). One read is issued per instrument and period, and the controller drops a response a newer read has already superseded, so switching instruments quickly never leaves the earlier series on screen. A failed read keeps the last series drawn and renders its code with a retry. When the seam capped the series, `truncated` renders as a note rather than silently shortening the chart.
+Three periods are offered — `1d`, `1w`, `1mo` — and each asks the Host for its own history length (about one, three, and ten years), with forward-adjusted prices. The reader can fit the latest 30, 90, or 180 bars, or the complete returned series, then use the chart's zoom, pan, and crosshair. The chart draws MA20, MA60, and volume below the candles. One read is issued per instrument and period, and the controller drops a response a newer read has already superseded. Retained bars are shown only for their own instrument and period; a failed refresh keeps those bars with a retry. When the seam capped the series, `truncated` renders as a note rather than silently shortening the chart.
+
+The detail derives its latest close and period return from the returned series. The maximum drawdown needs 60 bars and the average turnover needs 20; without a full window each value shows as unavailable. The last eight bars list OHLC, change from the preceding close, and turnover. The quote snapshot separately shows the latest price, open, high, low, previous close, volume, turnover, and quote readiness time, since snapshot and historical times may differ.
 
 At narrow browser widths, the chart retains a readable width and scrolls horizontally within its area.
 
@@ -108,6 +110,7 @@ The durable list itself is not copied into either. It stays in the `watchlist` C
 | [`src/client/chart/colors.ts`](src/client/chart/colors.ts) | Design tokens to concrete canvas colors |
 | [`src/client/chart/styles.ts`](src/client/chart/styles.ts) | A palette to the library's style tree, as a pure function |
 | [`src/client/CandleChart.tsx`](src/client/CandleChart.tsx) | The canvas element: build once, repaint on a theme change, replace on new bars |
+| [`src/client/overview.ts`](src/client/overview.ts) | Derive the summary and recent rows from one returned series |
 | [`src/client/PanelIcon.tsx`](src/client/PanelIcon.tsx) | The navigation row's glyph |
 | [`src/index.ts`](src/index.ts) | The Node half, which contributes no host behavior |
 | — | No runtime invariant companion is published; the panel owns one projection of another service's state and reconciles nothing independently. |
@@ -148,7 +151,6 @@ None of its own. A question extends the session's cached prefix exactly as any o
 - **Candle series are not cached either** — a period switch re-reads the series rather than reusing one already loaded for that instrument.
 - **Fixed chart periods** — `1d`, `1w`, and `1mo` are the vendor's own intervals, and no client-side aggregation exists, so a period the vendor does not publish cannot be asked for.
 - **The chart carries the charting library's bytes** — `klinecharts` is inlined into this plugin's browser bundle (about 105 KB gzip) and reaches every user whether or not the panel is opened, because the client module system has no lazy-loading path.
-- **Volume and turnover are not rendered** — the wire types carry them, and no compact number format exists yet, so a surface that shows them needs one first.
 - **No polling or push** — quotes refresh only on panel entry, on the rail control, on retry, and after a mutation; a stale price stays on screen until one of those happens.
 - **One batch per refresh** — the whole list is quoted in one call, so the Host's batch cap bounds how many instruments the panel can quote at once rather than the list's length.
 - **Rows are not reorderable yet** — the controller exposes `reorder`, and the panel has no drag affordance for it.

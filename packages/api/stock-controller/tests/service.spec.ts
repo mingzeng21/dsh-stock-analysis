@@ -105,6 +105,7 @@ function candleRow(overrides: Record<string, unknown> = {}): StockRow {
     low_price: 1392.78877,
     close_price: 1411.96877,
     volume: 4497058,
+    turnover: 6320190000,
     ...overrides,
   }
 }
@@ -247,6 +248,7 @@ describe('stockController.candles', () => {
         low: 1392.78877,
         close: 1411.96877,
         volume: 4497058,
+        turnover: 6320190000,
       }],
     })
     expect(h.calls[0]).toEqual({

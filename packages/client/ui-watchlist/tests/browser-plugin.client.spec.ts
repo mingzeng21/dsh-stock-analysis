@@ -66,7 +66,7 @@ function stockStub(): IStockClient {
       thscode,
       interval,
       truncated: false,
-      candles: [{ time: 1, open: 1, high: 2, low: 0.5, close: 1.5, volume: 10 }],
+      candles: [{ time: 1, open: 1, high: 2, low: 0.5, close: 1.5, volume: 10, turnover: 100 }],
     }),
     documents: async () => [],
   }

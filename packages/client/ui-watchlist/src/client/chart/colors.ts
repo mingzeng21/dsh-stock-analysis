@@ -24,6 +24,10 @@ export interface ChartColors {
   readonly fall: string
   /** Crosshair line and its label background. */
   readonly crosshair: string
+  /** 20-period average. */
+  readonly ma20: string
+  /** 60-period average. */
+  readonly ma60: string
 }
 
 /**
@@ -38,6 +42,8 @@ const TOKENS = {
   rise: '--dsw-alias-state-error-primary',
   fall: '--dsw-alias-state-success-primary',
   crosshair: '--dsw-alias-label-dimmed',
+  ma20: '--dsw-alias-label-primary-bluish',
+  ma60: '--dsw-alias-label-secondary',
 } as const satisfies Readonly<Record<keyof ChartColors, string>>
 
 /**
@@ -56,5 +62,7 @@ export function resolveChartColors(element: HTMLElement): ChartColors {
     rise: style.getPropertyValue(TOKENS.rise).trim(),
     fall: style.getPropertyValue(TOKENS.fall).trim(),
     crosshair: style.getPropertyValue(TOKENS.crosshair).trim(),
+    ma20: style.getPropertyValue(TOKENS.ma20).trim(),
+    ma60: style.getPropertyValue(TOKENS.ma60).trim(),
   }
 }
