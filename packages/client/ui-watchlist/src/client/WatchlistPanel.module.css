@@ -1,7 +1,7 @@
-/* The panel fills the center column: a fixed rail and a flexible analysis side. */
+/* The panel fills the center column: an adjustable rail and a flexible analysis side. */
 .panel {
   display: grid;
-  grid-template-columns: 264px minmax(0, 1fr);
+  grid-template-columns: clamp(180px, var(--watchlist-rail-width), calc(100% - 328px)) 8px minmax(0, 1fr);
   flex: 1;
   min-height: 0;
   background: var(--dsw-alias-bg-base);
@@ -13,7 +13,29 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border-right: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.divider {
+  position: relative;
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+}
+
+.divider::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 1px;
+  background: var(--dsw-alias-border-l2);
+  content: '';
+}
+
+.divider:hover::before,
+.divider:focus-visible::before {
+  width: 2px;
+  background: var(--dsw-alias-label-secondary);
 }
 
 .railHead {
@@ -305,7 +327,24 @@
 .quoteHead {
   display: flex;
   align-items: baseline;
+  flex-wrap: wrap;
   gap: 10px;
+}
+
+.analysisJump {
+  margin-left: auto;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--dsw-alias-label-primary-bluish);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.analysisJump:hover,
+.analysisJump:focus-visible {
+  text-decoration: underline;
 }
 
 .quoteName {
@@ -360,8 +399,9 @@
 
 .asOf {
   margin: 16px 0 0;
-  color: var(--dsw-alias-label-dimmed);
-  font-size: 11px;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .chartBar {
@@ -391,13 +431,10 @@
   font-size: 13px;
 }
 
-/* The lower half of the analysis side: the channel tabs and the rows under
-   them. It owns the leftover height so both halves stay on screen. */
 .documents {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  flex: none;
   margin-top: 20px;
   padding-top: 12px;
   border-top: 0.5px solid var(--dsw-alias-border-l2);
@@ -411,14 +448,9 @@
 }
 
 .documentRows {
-  flex: 1;
-  min-height: 0;
   margin: 8px 0 0;
   padding: 0;
-  overflow: auto;
   list-style: none;
-  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2);
-  --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
 }
 
 .documentRow {
@@ -460,17 +492,17 @@ a.documentTitle:focus-visible {
   line-height: 16px;
 }
 
-/* The analysis pane closes the analysis side: a fixed block under the
-   documents, threaded with the panel's one analysis session. */
 .analysis {
   display: flex;
   flex-direction: column;
   flex: none;
-  min-height: 200px;
-  max-height: 320px;
   margin-top: 20px;
   padding-top: 12px;
   border-top: 0.5px solid var(--dsw-alias-border-l2);
+}
+
+.analysisActive {
+  height: 320px;
 }
 
 .analysisBar {
@@ -484,12 +516,18 @@ a.documentTitle:focus-visible {
   flex: 1;
   margin: 0;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 20px;
   color: var(--dsw-alias-label-primary);
 }
 
-.start,
+.analysisHint {
+  margin: 8px 0 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 12px;
+  line-height: 18px;
+}
+
 .send {
   align-self: flex-start;
   padding: 4px 12px;
@@ -507,7 +545,6 @@ a.documentTitle:focus-visible {
   flex: none;
 }
 
-.start:disabled,
 .send:disabled {
   color: var(--dsw-alias-label-dimmed);
   cursor: default;
@@ -547,10 +584,104 @@ a.documentTitle:focus-visible {
   line-height: 18px;
 }
 
+.previewNote {
+  flex: none;
+  margin: 4px 0 0;
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  line-height: 16px;
+}
+
 .composer {
   display: flex;
   align-items: center;
   gap: 6px;
   flex: none;
   margin-top: 8px;
+}
+
+.composer .addInput::placeholder {
+  color: var(--dsw-alias-label-secondary);
+}
+
+@media (max-width: 720px) {
+  .panel {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .rail {
+    flex: none;
+    max-height: 220px;
+    border-right: 0;
+    border-bottom: 0.5px solid var(--dsw-alias-border-l2);
+  }
+
+  .divider {
+    display: none;
+  }
+
+  .detail {
+    flex: none;
+    padding: 16px;
+    overflow: visible;
+  }
+
+  .quote {
+    flex: none;
+    overflow: visible;
+  }
+
+  .quoteHead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'name code'
+      'price change'
+      'jump jump';
+    gap: 4px 8px;
+  }
+
+  .quoteName {
+    grid-area: name;
+  }
+
+  .quoteCode {
+    grid-area: code;
+  }
+
+  .quoteLast {
+    grid-area: price;
+    margin-left: 0;
+  }
+
+  .quoteChange {
+    grid-area: change;
+  }
+
+  .analysisJump {
+    grid-area: jump;
+    justify-self: start;
+    margin-left: 0;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chartArea {
+    height: 280px;
+    direction: rtl;
+    overflow-x: auto;
+  }
+
+  .chartArea > div {
+    direction: ltr;
+    min-width: 600px;
+  }
+
+  .chartEmpty {
+    direction: ltr;
+  }
 }

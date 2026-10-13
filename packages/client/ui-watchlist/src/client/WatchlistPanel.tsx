@@ -7,7 +7,7 @@
  * and its quote batch, and its callbacks for the reads and mutations. The
  * component owns only the add-instrument flow it alone knows about.
  */
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from 'react'
 import clsx from 'clsx'
 import type {
   CandleInterval, DocumentKind, DocumentRow, InstrumentMatch, Quote,
@@ -84,6 +84,21 @@ export type WatchlistPanelProps =
   & PropsStore<ReturnType<typeof createWatchlistStore>>
   & InjectFace<WatchlistPanelInjected>
   & PropsLocale<'watchlist'>
+
+const MIN_RAIL_WIDTH = 180
+const MAX_RAIL_WIDTH = 420
+const MIN_DETAIL_WIDTH = 320
+const DIVIDER_WIDTH = 8
+
+/** Keep the list readable while reserving room for the selected instrument. */
+function railWidthLimit(panelWidth: number): number {
+  return Math.max(MIN_RAIL_WIDTH, Math.min(MAX_RAIL_WIDTH, panelWidth - MIN_DETAIL_WIDTH - DIVIDER_WIDTH))
+}
+
+/** Clamp a requested list width to the available desktop space. */
+function clampRailWidth(width: number, panelWidth: number): number {
+  return Math.max(MIN_RAIL_WIDTH, Math.min(width, railWidthLimit(panelWidth)))
+}
 
 /** Two-digit clock component of the data-readiness stamp. */
 function pad2(value: number): string {
@@ -274,7 +289,10 @@ export function WatchlistPanel({
   const selected = useStore(state => state.selected)
   const interval = useStore(state => state.interval)
   const documentKind = useStore(state => state.documentKind)
+  const railWidth = useStore(state => state.railWidth)
   const analysisSession = useStore(state => state.analysisSession)
+  const question = useStore(state => state.analysisDraft)
+  const detailScrollTop = useStore(state => state.detailScrollTop)
   const entries = useEntries(list => list)
   const listState = useListState(state => state)
   const quotes = useQuotes(state => state)
@@ -285,11 +303,78 @@ export function WatchlistPanel({
   const themeRevision = useThemeRevision(revision => revision)
   const [adding, setAdding] = useState(false)
   const [removeFailure, setRemoveFailure] = useState<string | undefined>(undefined)
-  const [question, setQuestion] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const panelRef = useRef<HTMLElement>(null)
+  const railRef = useRef<HTMLElement>(null)
+  const quoteRef = useRef<HTMLElement>(null)
+  const analysisRef = useRef<HTMLElement>(null)
+  const questionRef = useRef<HTMLInputElement>(null)
+  const submissionRef = useRef(false)
+  const scrollPosition = useRef(detailScrollTop)
+  const resizeStart = useRef<{ pointerId: number; x: number; width: number } | null>(null)
+
+  const panelWidth = (): number => panelRef.current?.getBoundingClientRect().width || window.innerWidth
+  const visibleRailWidth = (): number => railRef.current?.getBoundingClientRect().width || railWidth
+  const resizeRail = (width: number): void => { actions.setRailWidth(clampRailWidth(width, panelWidth())) }
+
+  const onResizeKeyDown = (event: React.KeyboardEvent<HTMLDivElement>): void => {
+    const current = visibleRailWidth()
+    let next: number
+    switch (event.key) {
+      case 'ArrowLeft': next = current - 16; break
+      case 'ArrowRight': next = current + 16; break
+      case 'Home': next = MIN_RAIL_WIDTH; break
+      case 'End': next = railWidthLimit(panelWidth()); break
+      default: return
+    }
+    event.preventDefault()
+    resizeRail(next)
+  }
+
+  const onResizePointerDown = (event: React.PointerEvent<HTMLDivElement>): void => {
+    if (event.button !== 0 || resizeStart.current !== null) return
+    event.preventDefault()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    resizeStart.current = { pointerId: event.pointerId, x: event.clientX, width: visibleRailWidth() }
+  }
+
+  const onResizePointerMove = (event: React.PointerEvent<HTMLDivElement>): void => {
+    const start = resizeStart.current
+    if (start?.pointerId !== event.pointerId) return
+    resizeRail(start.width + event.clientX - start.x)
+  }
+
+  const onResizePointerUp = (event: React.PointerEvent<HTMLDivElement>): void => {
+    const start = resizeStart.current
+    if (start?.pointerId !== event.pointerId) return
+    resizeRail(start.width + event.clientX - start.x)
+    resizeStart.current = null
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+  }
+
+  const onResizePointerCancel = (event: React.PointerEvent<HTMLDivElement>): void => {
+    if (resizeStart.current?.pointerId === event.pointerId) resizeStart.current = null
+  }
+
+  const panelStyle: CSSProperties & { '--watchlist-rail-width': string } = {
+    '--watchlist-rail-width': `${railWidth}px`,
+  }
 
   // The panel unmounts when another panel or the Conversation is selected, so
   // mounting is the refresh trigger the reader expects on returning to it.
   useEffect(() => { load() }, [load])
+
+  useLayoutEffect(() => {
+    scrollPosition.current = detailScrollTop
+    const scroller = window.innerWidth <= 720
+      ? panelRef.current
+      : quoteRef.current
+    if (scroller !== null) scroller.scrollTop = detailScrollTop
+  }, [selected])
+
+  useEffect(() => () => { actions.setDetailScrollTop(scrollPosition.current) }, [actions])
 
   // One read per instrument and period; the controller drops a response that a
   // newer read has already superseded.
@@ -322,21 +407,36 @@ export function WatchlistPanel({
   }, [analysisSession, resumeAnalysis, actions])
 
   const selectedQuote = selected === null ? undefined : quotes.byCode[selected]
-
-  const startAnalysisSession = (): void => {
-    void startAnalysis().then((outcome) => {
-      if (outcome.ok) actions.setAnalysisSession(outcome.sessionId)
-    })
-  }
+  const quoteTime = quotes.asOf === undefined ? undefined : new Date(quotes.asOf)
 
   const ask = (event: FormEvent, entry: WatchlistEntry): void => {
     event.preventDefault()
     const text = question.trim()
-    if (text === '' || analysisSession === null || analysis.phase !== 'idle') return
-    const context = t('analysis.context', { name: entry.name, thscode: entry.thscode })
-    void sendAnalysis(analysisSession, `${context}\n\n${text}`).then((outcome) => {
-      if (outcome.ok) setQuestion('')
-    })
+    if (text === '' || submissionRef.current || analysis.phase === 'starting' || analysis.phase === 'sending') return
+    submissionRef.current = true
+    setSubmitting(true)
+    void (async () => {
+      try {
+        let sessionId = analysisSession
+        if (sessionId === null) {
+          const started = await startAnalysis()
+          if (!started.ok) return
+          sessionId = started.sessionId
+          actions.setAnalysisSession(sessionId)
+        }
+        const context = t('analysis.context', { name: entry.name, thscode: entry.thscode })
+        const outcome = await sendAnalysis(sessionId, `${context}\n\n${text}`)
+        if (outcome.ok && questionRef.current?.value === question) actions.setAnalysisDraft('')
+      } finally {
+        submissionRef.current = false
+        setSubmitting(false)
+      }
+    })()
+  }
+
+  const focusAnalysis = (): void => {
+    analysisRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    questionRef.current?.focus({ preventScroll: true })
   }
 
   const remove = (entry: WatchlistEntry): void => {
@@ -351,8 +451,15 @@ export function WatchlistPanel({
   }
 
   return (
-    <section className={css.panel}>
-      <nav className={css.rail} aria-label={t('list.aria')}>
+    <section
+      ref={panelRef}
+      className={css.panel}
+      style={panelStyle}
+      onScroll={(event) => {
+        if (event.target === event.currentTarget) scrollPosition.current = event.currentTarget.scrollTop
+      }}
+    >
+      <nav ref={railRef} id="watchlist-rail" className={css.rail} aria-label={t('list.aria')}>
         <header className={css.railHead}>
           <h2 className={css.railTitle}>{t('list.title')}</h2>
           <Tooltip label={t('list.refresh')} delayMs={400}>
@@ -447,11 +554,33 @@ export function WatchlistPanel({
         )}
       </nav>
 
+      <div
+        className={css.divider}
+        role="separator"
+        tabIndex={0}
+        aria-label={t('list.resize')}
+        aria-controls="watchlist-rail"
+        aria-orientation="vertical"
+        aria-valuemin={MIN_RAIL_WIDTH}
+        aria-valuemax={MAX_RAIL_WIDTH}
+        aria-valuenow={railWidth}
+        onKeyDown={onResizeKeyDown}
+        onPointerDown={onResizePointerDown}
+        onPointerMove={onResizePointerMove}
+        onPointerUp={onResizePointerUp}
+        onPointerCancel={onResizePointerCancel}
+        onLostPointerCapture={onResizePointerCancel}
+      />
+
       <div className={css.detail}>
         {selectedEntry === undefined ? (
           <p className={css.detailEmpty}>{t('detail.empty')}</p>
         ) : (
-          <article className={css.quote}>
+          <article
+            ref={quoteRef}
+            className={css.quote}
+            onScroll={(event) => { scrollPosition.current = event.currentTarget.scrollTop }}
+          >
             <header className={css.quoteHead}>
               <span className={css.quoteName}>{selectedEntry.name}</span>
               <span className={css.quoteCode}>{selectedEntry.thscode}</span>
@@ -465,6 +594,9 @@ export function WatchlistPanel({
                   </span>
                 </>
               )}
+              <button type="button" className={css.analysisJump} onClick={focusAnalysis}>
+                {t('analysis.jump')}
+              </button>
             </header>
             {/* The chart and the documents need only the instrument, so a quote
                 the vendor did not answer for costs the metrics and nothing else. */}
@@ -487,10 +619,10 @@ export function WatchlistPanel({
                   <Metric label={t('detail.low')} value={selectedQuote.low.toFixed(2)} />
                   <Metric label={t('detail.prevClose')} value={selectedQuote.prevClose.toFixed(2)} />
                 </div>
-                {quotes.asOf !== undefined && (
+                {quoteTime !== undefined && (
                   <p className={css.asOf}>
                     {t('quotes.asOf', {
-                      time: `${pad2(new Date(quotes.asOf).getHours())}:${pad2(new Date(quotes.asOf).getMinutes())}`,
+                      time: `${quoteTime.getFullYear()}-${pad2(quoteTime.getMonth() + 1)}-${pad2(quoteTime.getDate())} ${pad2(quoteTime.getHours())}:${pad2(quoteTime.getMinutes())}`,
                     })}
                   </p>
                 )}
@@ -527,6 +659,56 @@ export function WatchlistPanel({
               )}
             </div>
 
+            <section
+              ref={analysisRef}
+              className={clsx(css.analysis, analysisSession !== null && css.analysisActive)}
+              aria-label={t('analysis.aria')}
+            >
+              <header className={css.analysisBar}>
+                <h3 className={css.analysisTitle}>{t('analysis.title')}</h3>
+                {analysisSession !== null && (
+                  <button
+                    type="button"
+                    className={css.retry}
+                    onClick={() => {
+                      actions.setDetailScrollTop(scrollPosition.current)
+                      openAnalysisInConversation(analysisSession)
+                    }}
+                  >
+                    {t('analysis.openInConversation')}
+                  </button>
+                )}
+              </header>
+              {analysisSession !== null && analysisReference !== undefined && (
+                <SessionProvider session={analysisReference}>
+                  {renderSlot('watchlist.analysis', {})}
+                </SessionProvider>
+              )}
+              {analysisSession === null && <p className={css.analysisHint}>{t('analysis.intro')}</p>}
+              <form className={css.composer} onSubmit={(event) => { ask(event, selectedEntry) }}>
+                <input
+                  ref={questionRef}
+                  className={css.addInput}
+                  value={question}
+                  aria-label={t('analysis.ask')}
+                  placeholder={t('analysis.ask')}
+                  onChange={(event) => { actions.setAnalysisDraft(event.target.value) }}
+                />
+                <button
+                  type="submit"
+                  className={css.send}
+                  disabled={submitting || analysis.phase === 'starting' || analysis.phase === 'sending' || question.trim() === ''}
+                >
+                  {analysis.phase === 'sending'
+                    ? t('analysis.sending')
+                    : submitting || analysis.phase === 'starting' ? t('analysis.starting') : t('analysis.send')}
+                </button>
+              </form>
+              {analysis.phase === 'failed' && (
+                <p className={css.failure}>{t('failure.withCode', { code: analysis.failure })}</p>
+              )}
+            </section>
+
             <section className={css.documents} aria-label={t('documents.aria')}>
               <div className={css.documentBar} role="group" aria-label={t('documents.aria')}>
                 {DOCUMENT_KINDS.map(kind => (
@@ -546,60 +728,6 @@ export function WatchlistPanel({
               />
             </section>
 
-            <section className={css.analysis} aria-label={t('analysis.aria')}>
-              <header className={css.analysisBar}>
-                <h3 className={css.analysisTitle}>{t('analysis.title')}</h3>
-                {analysisSession !== null && (
-                  <button
-                    type="button"
-                    className={css.retry}
-                    onClick={() => { openAnalysisInConversation(analysisSession) }}
-                  >
-                    {t('analysis.openInConversation')}
-                  </button>
-                )}
-              </header>
-              {analysisSession === null ? (
-                <>
-                  <p className={css.note}>{t('analysis.intro')}</p>
-                  <button
-                    type="button"
-                    className={css.start}
-                    disabled={analysis.phase === 'starting'}
-                    onClick={startAnalysisSession}
-                  >
-                    {analysis.phase === 'starting' ? t('analysis.starting') : t('analysis.start')}
-                  </button>
-                </>
-              ) : (
-                <>
-                  {analysisReference !== undefined && (
-                    <SessionProvider session={analysisReference}>
-                      {renderSlot('watchlist.analysis', {})}
-                    </SessionProvider>
-                  )}
-                  <form className={css.composer} onSubmit={(event) => { ask(event, selectedEntry) }}>
-                    <input
-                      className={css.addInput}
-                      value={question}
-                      aria-label={t('analysis.ask')}
-                      placeholder={t('analysis.ask')}
-                      onChange={(event) => { setQuestion(event.target.value) }}
-                    />
-                    <button
-                      type="submit"
-                      className={css.send}
-                      disabled={analysis.phase === 'sending' || question.trim() === ''}
-                    >
-                      {t('analysis.send')}
-                    </button>
-                  </form>
-                </>
-              )}
-              {analysis.phase === 'failed' && (
-                <p className={css.failure}>{t('failure.withCode', { code: analysis.failure })}</p>
-              )}
-            </section>
           </article>
         )}
       </div>

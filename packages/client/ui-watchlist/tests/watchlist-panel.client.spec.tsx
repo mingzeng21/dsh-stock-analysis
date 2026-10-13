@@ -154,9 +154,9 @@ function mount(fixture: Fixture = {}) {
   if (fixture.analysisSession !== undefined) {
     view.actions.setAnalysisSession(fixture.analysisSession as SessionId)
   }
-  render(<WatchlistPanel {...props} />)
+  const rendered = render(<WatchlistPanel {...props} />)
   return {
-    view, entryStore, quoteStore, candleStore, documentStore, load, refreshQuotes, loadCandles, loadDocuments,
+    view, props, rendered, entryStore, quoteStore, candleStore, documentStore, load, refreshQuotes, loadCandles, loadDocuments,
     addInstrument, removeInstrument, searchInstruments,
     startAnalysis, resumeAnalysis, sendAnalysis, openAnalysisInConversation, renderSlot,
   }
@@ -235,7 +235,7 @@ describe('WatchlistPanel list', () => {
       quotes: { phase: 'ready', asOf: 1789560797000, byCode: { '600519.SH': quote(1252.57, -0.36) } },
     })
     act(() => { fireEvent.click(rowButton(/贵州茅台/)) })
-    expect(screen.getByText(/^行情时间 \d{2}:\d{2}$/)).toBeDefined()
+    expect(screen.getByText(/^行情时间 \d{4}-\d{2}-\d{2} \d{2}:\d{2}$/)).toBeDefined()
   })
 
   it('says the batch is loading while a read is in flight', () => {
@@ -253,6 +253,41 @@ describe('WatchlistPanel list', () => {
     const { refreshQuotes } = mount()
     fireEvent.click(screen.getByRole('button', { name: zh['list.refresh'] }))
     expect(refreshQuotes).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('WatchlistPanel list width', () => {
+  it('shrinks and widens the list with pointer input within the readable limits', () => {
+    const { view } = mount()
+    const divider = screen.getByRole('separator', { name: zh['list.resize'] })
+    const panel = divider.parentElement
+    if (panel === null) throw new Error('missing watchlist panel')
+    vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue({ width: 1000 } as DOMRect)
+    Object.defineProperty(divider, 'setPointerCapture', { value: vi.fn() })
+    Object.defineProperty(divider, 'hasPointerCapture', { value: () => true })
+    Object.defineProperty(divider, 'releasePointerCapture', { value: vi.fn() })
+
+    fireEvent.pointerDown(divider, { button: 0, pointerId: 1, clientX: 264 })
+    fireEvent.pointerMove(divider, { pointerId: 1, clientX: 100 })
+    expect(view.getSnapshot().railWidth).toBe(180)
+    fireEvent.pointerUp(divider, { pointerId: 1, clientX: 100 })
+
+    fireEvent.pointerDown(divider, { button: 0, pointerId: 2, clientX: 180 })
+    fireEvent.pointerMove(divider, { pointerId: 2, clientX: 600 })
+    fireEvent.pointerUp(divider, { pointerId: 2, clientX: 600 })
+    expect(view.getSnapshot().railWidth).toBe(420)
+  })
+
+  it('supports keyboard resizing and retains the chosen width after remount', () => {
+    const { view, props } = mount()
+    const divider = screen.getByRole('separator', { name: zh['list.resize'] })
+    fireEvent.keyDown(divider, { key: 'ArrowLeft' })
+    expect(view.getSnapshot().railWidth).toBe(248)
+    fireEvent.keyDown(divider, { key: 'Home' })
+    expect(view.getSnapshot().railWidth).toBe(180)
+    cleanup()
+    render(<WatchlistPanel {...props} />)
+    expect(screen.getByRole('separator', { name: zh['list.resize'] }).getAttribute('aria-valuenow')).toBe('180')
   })
 })
 
@@ -566,26 +601,71 @@ describe('WatchlistPanel analysis without a quote', () => {
 })
 
 describe('WatchlistPanel analysis', () => {
-  it('offers to start a session before one exists, and records the identity it returns', async () => {
-    const { view, startAnalysis } = mount({ selection: '600519.SH' })
+  it('creates a session on the first question and sends it once with instrument context', async () => {
+    const { view, startAnalysis, sendAnalysis } = mount({ selection: '600519.SH' })
     expect(screen.getByText(zh['analysis.intro'])).toBeDefined()
-    fireEvent.click(screen.getByRole('button', { name: zh['analysis.start'] }))
-    expect(startAnalysis).toHaveBeenCalledTimes(1)
+    const field = screen.getByRole('textbox', { name: zh['analysis.ask'] })
+    fireEvent.change(field, { target: { value: '分析估值' } })
+    fireEvent.submit(field.closest('form') as HTMLElement)
     await waitFor(() => { expect(view.getSnapshot().analysisSession).toBe(ANALYSIS) })
+    expect(startAnalysis).toHaveBeenCalledTimes(1)
+    expect(sendAnalysis).toHaveBeenCalledWith(ANALYSIS, '当前标的：贵州茅台 600519.SH\n\n分析估值')
+    await waitFor(() => { expect(view.getSnapshot().analysisDraft).toBe('') })
+  })
+
+  it('does not create a second session while the first submission is pending', async () => {
+    let finishStart: ((outcome: AnalysisOutcome) => void) | undefined
+    const { startAnalysis, sendAnalysis } = mount({
+      selection: '600519.SH',
+      startAnalysisImpl: () => new Promise((resolve) => { finishStart = resolve }),
+    })
+    const field = screen.getByRole('textbox', { name: zh['analysis.ask'] })
+    fireEvent.change(field, { target: { value: '分析估值' } })
+    fireEvent.submit(field.closest('form') as HTMLElement)
+    fireEvent.submit(field.closest('form') as HTMLElement)
+    expect(startAnalysis).toHaveBeenCalledTimes(1)
+    expect(sendAnalysis).not.toHaveBeenCalled()
+    await act(async () => { finishStart?.({ ok: true, sessionId: ANALYSIS }) })
+    expect(sendAnalysis).toHaveBeenCalledTimes(1)
+  })
+
+  it('restores the unsent draft and detail position after leaving the panel', () => {
+    const { view, props, rendered } = mount({ selection: '600519.SH' })
+    fireEvent.change(screen.getByRole('textbox', { name: zh['analysis.ask'] }), { target: { value: '比较现金流' } })
+    const detail = document.querySelector('article') as HTMLElement
+    detail.scrollTop = 246
+    fireEvent.scroll(detail)
+    rendered.unmount()
+    expect(view.getSnapshot().detailScrollTop).toBe(246)
+    render(<WatchlistPanel {...props} />)
+    expect(screen.getByRole<HTMLInputElement>('textbox', { name: zh['analysis.ask'] }).value).toBe('比较现金流')
+    expect((document.querySelector('article') as HTMLElement).scrollTop).toBe(246)
+  })
+
+  it('places the analysis after the chart, before reports, and jumps to its composer', () => {
+    const scrollIntoView = vi.fn()
+    HTMLElement.prototype.scrollIntoView = scrollIntoView
+    mount({ selection: '600519.SH' })
+    const analysis = screen.getByRole('region', { name: zh['analysis.aria'] })
+    const documents = screen.getByRole('region', { name: zh['documents.aria'] })
+    expect(analysis.compareDocumentPosition(documents) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: zh['analysis.jump'] }))
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
+    expect(document.activeElement).toBe(screen.getByRole('textbox', { name: zh['analysis.ask'] }))
   })
 
   it('renders the transcript slot and makes the recorded session current again', () => {
     const { resumeAnalysis } = mount({ selection: '600519.SH', analysisSession: ANALYSIS_RECORDED })
     expect(resumeAnalysis).toHaveBeenCalledWith(ANALYSIS_RECORDED)
     expect(screen.getByTestId('slot:watchlist.analysis')).toBeDefined()
-    expect(screen.queryByRole('button', { name: zh['analysis.start'] })).toBeNull()
+    expect(screen.getByRole('textbox', { name: zh['analysis.ask'] })).toBeDefined()
   })
 
   it('forgets a recorded session the Host no longer lists', async () => {
     const { view } = mount({ selection: '600519.SH', analysisSession: ANALYSIS_RECORDED, transcriptMissing: true })
     await waitFor(() => { expect(view.getSnapshot().analysisSession).toBeNull() })
     expect(screen.queryByTestId('slot:watchlist.analysis')).toBeNull()
-    expect(screen.getByRole('button', { name: zh['analysis.start'] })).toBeDefined()
+    expect(screen.getByRole('textbox', { name: zh['analysis.ask'] })).toBeDefined()
   })
 
   it('sends a question carrying the selected instrument and clears the draft', async () => {
@@ -624,19 +704,23 @@ describe('WatchlistPanel analysis', () => {
 })
 
 describe('WatchlistPanel analysis failures and progress', () => {
-  it('keeps the panel session-free when starting one fails', async () => {
+  it('keeps the panel session-free and the draft intact when starting fails', async () => {
     const { view, startAnalysis } = mount({
       selection: '600519.SH',
       startAnalysisImpl: async () => ({ ok: false, code: 'gateway/internal' }),
     })
-    fireEvent.click(screen.getByRole('button', { name: zh['analysis.start'] }))
+    const field = screen.getByRole('textbox', { name: zh['analysis.ask'] }) as HTMLInputElement
+    fireEvent.change(field, { target: { value: '分析估值' } })
+    fireEvent.submit(field.closest('form') as HTMLElement)
     await waitFor(() => { expect(startAnalysis).toHaveBeenCalledTimes(1) })
     expect(view.getSnapshot().analysisSession).toBeNull()
+    expect(field.value).toBe('分析估值')
   })
 
   it('says the session is being created while it is', () => {
     mount({ selection: '600519.SH', analysis: { phase: 'starting' } })
-    expect(screen.getByRole('button', { name: zh['analysis.starting'] })).toBeDefined()
+    const field = screen.getByRole('textbox', { name: zh['analysis.ask'] })
+    fireEvent.change(field, { target: { value: '分析估值' } })
     expect(screen.getByRole('button', { name: zh['analysis.starting'] }).hasAttribute('disabled')).toBe(true)
   })
 

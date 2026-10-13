@@ -39,6 +39,8 @@ The row id and the main key are the same string by construction, because selecti
 
 The panel reads the list and its quote batch when it mounts, which is what returning to the panel does: the entry unmounts whenever another panel or the Conversation is selected. The rail's refresh control re-reads the batch, and the retry control on a failed batch does the same. There is no timer and no server push, because neither the watchlist nor the stock Remote publishes a subscription.
 
+The quote readiness stamp shows the local date and time. On desktop, drag the divider between the instrument list and detail to resize the list; the chosen width survives switching panels. The focused divider also supports Left and Right arrow keys, Home, and End. At narrow browser widths, the instrument list stacks above the detail and the panel scrolls vertically.
+
 Every read is published with a phase, and a failed one carries the Remote failure code. A newer read supersedes an older one: a read that is no longer current publishes nothing, so a slow first read can never replace a fast second one.
 
 ### Adding an instrument
@@ -53,6 +55,8 @@ The chart is one canvas, drawn by `klinecharts` and wrapped so the rest of the p
 
 Three periods are offered — `1d`, `1w`, `1mo` — and each asks the Host for its own history length (about one, three, and ten years). One read is issued per instrument and period, and the controller drops a response a newer read has already superseded, so switching instruments quickly never leaves the earlier series on screen. A failed read keeps the last series drawn and renders its code with a retry. When the seam capped the series, `truncated` renders as a note rather than silently shortening the chart.
 
+At narrow browser widths, the chart retains a readable width and scrolls horizontally within its area.
+
 Colors come from the same `--dsw-*` tokens the markup around the chart uses. A canvas cannot resolve a CSS variable, so the wrapper reads them as computed values and repaints when the theme revision moves; it never re-creates the chart for a theme change.
 
 ### Documents
@@ -61,9 +65,11 @@ Three tabs — research, announcements, and news — list what the gateway publi
 
 A row shows its title, the source and publication date that let a reader judge it, and the vendor's excerpt. The title links to the original document when the vendor supplied one; a channel that carries no links renders the same row as text rather than as a broken link. When the Host cut the excerpt at its configured bound, the row says so.
 
+Document rows share the detail's single vertical scroll; the analysis composer is above the documents.
+
 ### The analysis session
 
-One session serves every instrument. It is created the first time the reader asks for it, composed from the shipped `stock-analysis` preset, and remembered by the panel store, so browsing the list never creates a session and a follow-up question keeps its thread. The panel retains that Session for its transcript without changing the main Conversation selection. The preset is selected while the session is still blank, because the Host refuses a composition swap once history exists under another one.
+One session serves every instrument. The quote header links to the analysis composer below the chart. The first submitted question creates a session, composes it from the shipped `stock-analysis` preset, and sends the question once; browsing the list creates no session. The panel retains that Session for its transcript without changing the main Conversation selection. The preset is selected while the session is still blank, because the Host refuses a composition swap once history exists under another one.
 
 The selected instrument travels in the prompt itself — the panel prefixes the question with the instrument's name and thscode from its own dictionary — so the agent answers about what the reader is looking at without a per-instrument session. The composer sends through the session's own submission echo, so the question appears immediately and retires when the durable user message arrives.
 
@@ -71,7 +77,7 @@ The transcript renders the bounded prompt and response previews the session's Ch
 
 ### Selection
 
-The selected instrument lives in a declared store, not in component state, so switching to another panel and back returns to the instrument you were reading. Removing the selected instrument clears the selection; removing a different one leaves it. The analysis session's identity lives in the same store: returning to the panel reacquires its retained reference, and a session the Host no longer lists is forgotten.
+The selected instrument, unsent question, detail scroll position, and analysis session identity live in a declared store, so switching to another panel and back restores the work in progress. Selecting a different instrument resets the detail scroll. Removing the selected instrument clears the selection; removing a different one leaves it. Returning to the panel reacquires the session reference, and a session the Host no longer lists is forgotten.
 
 -----
 
@@ -93,7 +99,7 @@ The durable list itself is not copied into either. It stays in the `watchlist` C
 |---|---|
 | [`src/client/index.ts`](src/client/index.ts) | The plugin body: dictionaries, the navigation row, and the `main` registration |
 | [`src/client/controller.ts`](src/client/controller.ts) | `WatchlistSurface`: the quote batch, read phases, supersession, and the add, remove, and search outcomes |
-| [`src/client/store.ts`](src/client/store.ts) | The panel's view store: the selected instrument, the chart period, the document channel, and the analysis session |
+| [`src/client/store.ts`](src/client/store.ts) | The panel's view store: the selected instrument, list width, chart period, document channel, and analysis session |
 | [`src/client/analysis.ts`](src/client/analysis.ts) | `AnalysisSession`: create, compose, select, resume, and prompt the one analysis session |
 | [`src/client/AnalysisTranscript.tsx`](src/client/AnalysisTranscript.tsx) | The session-scoped transcript: the turn previews the Chat target publishes |
 | [`src/client/failures.ts`](src/client/failures.ts) | The one failure-to-code rule every pane renders through |
@@ -137,7 +143,7 @@ None of its own. A question extends the session's cached prefix exactly as any o
 <a id="known-limitations-and-deferred-work"></a>
 
 - **The analysis transcript is a preview** — it renders the Chat target's bounded prompt and response previews, not the full transcript with tool rows, images, and process steps; that surface is one handoff away.
-- **The analysis pane is not resizable yet** — it is a fixed-height block under the documents. The split ratio and the collapsed state the design calls for are panel view state that is not built.
+- **The analysis pane is not resizable yet** — it is a fixed-height block above the documents. The split ratio and the collapsed state the design calls for are panel view state that is not built.
 - **Document channels are not cached** — each channel is read on selection and on tab switch; the per-instrument, per-channel cache the design calls for is not built.
 - **Candle series are not cached either** — a period switch re-reads the series rather than reusing one already loaded for that instrument.
 - **Fixed chart periods** — `1d`, `1w`, and `1mo` are the vendor's own intervals, and no client-side aggregation exists, so a period the vendor does not publish cannot be asked for.

@@ -20,15 +20,18 @@ export type AnalysisTranscriptProps = PropsRuntime<'watchlist.analysis'> & Props
  */
 export function AnalysisTranscript({ useChat, t }: AnalysisTranscriptProps) {
   const items = useChat((snapshot: ChatSnapshot): readonly TurnNavigationItem[] => snapshot.navigation.items())
-  if (items.length === 0) return <p className={css.note}>{t('analysis.empty')}</p>
+  if (items.length === 0) return <p className={css.analysisHint}>{t('analysis.empty')}</p>
   return (
-    <ol className={css.turns} aria-label={t('analysis.transcript')}>
-      {items.map(item => (
-        <li key={item.anchorKey} className={css.turn}>
-          <p className={css.turnPrompt}>{item.prompt}</p>
-          {item.response !== '' && <p className={css.turnResponse}>{item.response}</p>}
-        </li>
-      ))}
-    </ol>
+    <>
+      <ol className={css.turns} aria-label={t('analysis.transcript')}>
+        {items.map(item => (
+          <li key={item.anchorKey} className={css.turn}>
+            <p className={css.turnPrompt}>{item.prompt}</p>
+            {item.response !== '' && <p className={css.turnResponse}>{item.response}</p>}
+          </li>
+        ))}
+      </ol>
+      <p className={css.previewNote}>{t('analysis.previewNotice')}</p>
+    </>
   )
 }

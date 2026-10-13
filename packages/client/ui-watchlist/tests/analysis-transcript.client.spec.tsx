@@ -40,6 +40,7 @@ describe('AnalysisTranscript', () => {
     expect(screen.getByText(/当前标的：贵州茅台 600519\.SH/u)).toBeDefined()
     expect(screen.getByText('因为…')).toBeDefined()
     expect(screen.getByText('1550 附近')).toBeDefined()
+    expect(screen.getByText(zh['analysis.previewNotice'])).toBeDefined()
   })
 
   it('leaves the answer out while the turn has not answered yet', () => {
