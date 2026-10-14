@@ -25,7 +25,7 @@ The Web client registers one stock-analysis sidebar entry, builds specialist car
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount it beside the Session service, stock Agents Remote, stock data client, locale, and slots. Selecting an immediate specialist card creates a fresh Session and starts analysis in one click; an input card waits for the submitted query. Each run selects `stock-analysis` before the first turn, sends an explicit `/skill-name` prompt, and shows the streaming Conversation inside Agents. Selecting 龙虎榜观察 instead opens a dashboard immediately and reads the latest common trading date's three boards. Its tabs, signed amount charts, stock sorting, and seat details are interactive; refresh reads again. The history rail contains specialist Sessions and can be collapsed in every view.
+Mount it beside the Session service, stock Agents Remote, stock data client, locale, and slots. Selecting an immediate specialist card creates a fresh Session and starts analysis in one click; an input card waits for the submitted query. Each run selects `stock-analysis` before the first turn, sends an explicit `/skill-name` prompt, and shows the streaming Conversation inside Agents. Selecting 龙虎榜观察 opens a dashboard immediately and reads the latest common trading date's three boards. Selecting 热股榜监控 opens four current attention lists; selecting a stock reads its last 30 calendar days of daily ranking. Both dashboards refresh without starting a Session. The history rail contains specialist Sessions and can be collapsed in every view.
 
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
@@ -40,7 +40,7 @@ See the [stock Agents proposal](../../../.agents/notes/proposed/feature/2026-10-
 <a id="dev-note"></a>
 ## Dev Note
 
-New conversation specialists belong in `packages/bundle/web-app/skills/<name>/SKILL.md`. Native data views such as 龙虎榜观察 live in this package and use browser-facing data clients.
+New conversation specialists belong in `packages/bundle/web-app/skills/<name>/SKILL.md`. Native data views such as 龙虎榜观察 and 热股榜监控 live in this package and use browser-facing data clients.
 
 <a id="model-experience"></a>
 ## Model Experience

@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-把本包与 `dsh-stock` 及一个 provider 一起挂载。Client 调用 `remote.stock.searchSymbols(query, limit)`、`quotes(thscodes)`、`candles(request)`、`documents(request)` 或 `dragonTiger()`；没有任何方法接收 Session，因为行情数据不属于任何 Session。
+把本包与 `dsh-stock` 及一个 provider 一起挂载。Client 调用 `remote.stock.searchSymbols(query, limit)`、`quotes(thscodes)`、`candles(request)`、`documents(request)`、`dragonTiger()`、`hotRank()` 或 `hotRankHistory(thscode)`；没有任何方法接收 Session，因为行情数据不属于任何 Session。
 
 | 方法 | 返回 | 用途 |
 |---|---|---|
@@ -34,6 +34,8 @@ kind: "package-reference"
 | `candles(request)` | `CandleSeries { thscode, interval, asOf?, truncated, candles }` | 一只标的在一个窗口内的 K 线 |
 | `documents(request)` | `readonly DocumentRow[]` | 一只标的的研报、公告或新闻 |
 | `dragonTiger()` | `DragonTigerDashboard` | 最新交易日的全部、机构与游资龙虎榜 |
+| `hotRank()` | `HotRankDashboard` | 当前 24 小时及小时热股榜、飙升榜，各自保留榜单时间 |
+| `hotRankHistory(thscode)` | `HotRankHistory` | 指定 A 股近 30 个自然日的日线名次点位，包含 Top 30 以外名次 |
 
 ### 归一化
 
@@ -58,6 +60,8 @@ seam 有意在其行上保留 vendor 自己的字段名，因为其 94 个能力
 ### 龙虎榜
 
 `dragonTiger()` 先读取最新全部榜的交易日期，再按同一日期读取机构榜和游资榜。日期不一致或嵌套行格式错误时整次读取失败。响应包含股票净额、可选的涨跌幅与成交额、活跃席位、关联股票；配置的行数上限截断任一列表时会设置 `truncated`。上游榜单没有提供换手率，也没有机构和游资各自的买入额、卖出额；消费端应将这些值标为未提供。这是实时市场数据读取，不属于 Session 结果。
+
+`hotRank()` 分别读取热股和飙升的 24 小时／日榜与小时榜四类当前榜单。各榜保留自己的时间、原始热度字符串、名次、可选的名次变化和趋势方向；缺少名次变化不等于零。`hotRankHistory(thscode)` 读取指定股票近 30 个自然日的日线名次；Top 30 以外的名次有效。返回行格式错误时该次读取失败。两个方法均不保存 Session 结果。
 
 ### 周期、复权与窗口
 

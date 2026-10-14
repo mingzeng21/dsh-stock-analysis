@@ -21,7 +21,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | `@deepseek-ai/dsh-api-session-controller` | yes | Session Remote commands, cold reads, and live control transport |
 | `@deepseek-ai/dsh-api-settings-controller` | yes | Remote owner for the configuration surfaces over the settings-domain seams |
 | `@deepseek-ai/dsh-api-stock-agents-controller` | no | Browser-facing catalog and durable session identity for skill-backed stock research Agents |
-| `@deepseek-ai/dsh-api-stock-controller` | yes | Browser-facing market-data reads over the stock capability seam: symbols, quotes, candles, documents, and dragon-tiger boards on the stock Remote namespace |
+| `@deepseek-ai/dsh-api-stock-controller` | yes | Browser-facing market-data reads over the stock capability seam: symbols, quotes, candles, documents, dragon-tiger boards, and hot-rank lists on the stock Remote namespace |
 | `@deepseek-ai/dsh-api-terminal-controller` | yes | Session-owned interactive terminals with shell discovery, screen recovery and typed Remote control |
 | `@deepseek-ai/dsh-api-watchlist-controller` | yes | Durable personal instrument list over the storage-domain facility, exposed as the watchlist Remote namespace |
 | `@deepseek-ai/dsh-api-workspace-controller` | yes | Workspace Remote commands and reconnect-safe state transport |

@@ -1,7 +1,7 @@
 /** Catalog, specialist launch form, dashboard, and history rail for stock Agents. */
 import { useEffect, useRef, useState } from 'react'
 import type { StockAgentCard } from '@deepseek-ai/dsh-api-stock-agents-controller/types'
-import type { DragonTigerDashboard as DragonTigerData } from '@deepseek-ai/dsh-api-stock-controller/client'
+import type { DragonTigerDashboard as DragonTigerData, HotRankDashboard as HotRankData, HotRankHistory } from '@deepseek-ai/dsh-api-stock-controller/client'
 import type { SessionListState, SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
@@ -9,6 +9,7 @@ import { IconPanelLeftOutlineRegular, Tooltip } from '@deepseek-ai/dsh-client-ui
 import type { InjectFace, PropsLocale, PropsRenderSlots, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import css from './AgentsPanel.module.css'
 import { DragonTigerDashboard } from './DragonTigerDashboard.tsx'
+import { HotRankDashboard } from './HotRankDashboard.tsx'
 
 /** Panel data and actions supplied by the plugin. */
 export interface AgentsPanelInjected {
@@ -21,13 +22,16 @@ export interface AgentsPanelInjected {
   start: (card: StockAgentCard, query: string) => Promise<SessionReference>
   openSession: (sessionId: SessionId) => SessionReference
   loadDragonTiger: (signal: AbortSignal) => Promise<DragonTigerData>
+  loadHotRank: (signal: AbortSignal) => Promise<HotRankData>
+  loadHotRankHistory: (thscode: string, signal: AbortSignal) => Promise<HotRankHistory>
 }
 export type AgentsPanelProps = PropsRuntime<'main'> & PropsRenderSlots<'stock-agents.conversation'>
   & PropsLocale<'stockAgents'> & InjectFace<AgentsPanelInjected>
 
 /** Render stock Agent launch and dashboard views beside Session history. */
 export function AgentsPanel({
-  t, renderSlot, SessionProvider, useCatalog, useSessions, useCatalogError, loadCatalog, start, openSession, loadDragonTiger,
+  t, renderSlot, SessionProvider, useCatalog, useSessions, useCatalogError,
+  loadCatalog, start, openSession, loadDragonTiger, loadHotRank, loadHotRankHistory,
 }: AgentsPanelProps) {
   const catalog = useCatalog(value => value)
   const sessions = useSessions(value => value)
@@ -42,8 +46,9 @@ export function AgentsPanel({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [historyVisible, setHistoryVisible] = useState(true)
-  const [dashboardOpen, setDashboardOpen] = useState(false)
+  const [dashboardKind, setDashboardKind] = useState<'dragon' | 'hot' | null>(null)
   const [dashboardData, setDashboardData] = useState<DragonTigerData | null>(null)
+  const [hotRankData, setHotRankData] = useState<HotRankData | null>(null)
   const [dashboardLoading, setDashboardLoading] = useState(false)
   const [dashboardError, setDashboardError] = useState(false)
   const dashboardRequest = useRef<AbortController | null>(null)
@@ -90,12 +95,12 @@ export function AgentsPanel({
     })
   }
   const showSession = (sessionId: SessionId) => {
-    setDashboardOpen(false)
+    setDashboardKind(null)
     dashboardRequest.current?.abort()
     showReference(openSession(sessionId))
   }
   const choose = (card: StockAgentCard, initial = '') => {
-    setDashboardOpen(false)
+    setDashboardKind(null)
     dashboardRequest.current?.abort()
     clearActiveSession()
     setSelected(card)
@@ -107,27 +112,33 @@ export function AgentsPanel({
         .catch(() => { setError('failed') }).finally(() => { setBusy(false) })
     }
   }
-  const refreshDashboard = () => {
+  const refreshDashboard = (kind = dashboardKind) => {
+    if (kind === null) return
     dashboardRequest.current?.abort()
     const request = new AbortController()
     dashboardRequest.current = request
     setDashboardLoading(true)
     setDashboardError(false)
-    void loadDragonTiger(request.signal).then((value) => {
-      if (!request.signal.aborted && mounted.current) setDashboardData(value)
+    const load = kind === 'hot' ? loadHotRank : loadDragonTiger
+    void load(request.signal).then((value) => {
+      if (!request.signal.aborted && mounted.current) {
+        if (kind === 'hot') setHotRankData(value as HotRankData)
+        else setDashboardData(value as DragonTigerData)
+      }
     }).catch(() => {
       if (!request.signal.aborted && mounted.current) setDashboardError(true)
     }).finally(() => {
       if (!request.signal.aborted && mounted.current) setDashboardLoading(false)
     })
   }
-  const openDashboard = () => {
+  const openDashboard = (kind: 'dragon' | 'hot') => {
     clearActiveSession()
     setSelected(null)
     setHistoryVisible(false)
     setDashboardData(null)
-    setDashboardOpen(true)
-    refreshDashboard()
+    setHotRankData(null)
+    setDashboardKind(kind)
+    refreshDashboard(kind)
   }
   const run = () => {
     if (selected === null || busy || (selected.launch === 'query' && query.trim() === '')) return
@@ -199,16 +210,20 @@ export function AgentsPanel({
       </section>
     </main>
   }
-  if (dashboardOpen) return <main className={css.panel}>
+  if (dashboardKind !== null) return <main className={css.panel}>
     {historyRail}
     <section className={css.detail}>
-      <nav className={css.detailNav} aria-label={t('dragon.title')}>
+      <nav className={css.detailNav} aria-label={dashboardKind === 'dragon' ? t('dragon.title') : t('hot.title')}>
         {!historyVisible && historyToggle}
-        <button type="button" className={css.back} onClick={() => { dashboardRequest.current?.abort(); setDashboardOpen(false) }}>{t('panel.back')}</button>
-        <span>{t('dragon.title')}</span>
-        <button type="button" onClick={refreshDashboard} disabled={dashboardLoading}>{t('dragon.refresh')}</button>
+        <button type="button" className={css.back} onClick={() => { dashboardRequest.current?.abort(); setDashboardKind(null) }}>{t('panel.back')}</button>
+        <span>{dashboardKind === 'dragon' ? t('dragon.title') : t('hot.title')}</span>
+        <button type="button" onClick={() => { refreshDashboard() }} disabled={dashboardLoading}>{dashboardKind === 'dragon' ? t('dragon.refresh') : t('hot.refresh')}</button>
       </nav>
-      <DragonTigerDashboard data={dashboardData} loading={dashboardLoading} error={dashboardError} onRetry={refreshDashboard} t={t} />
+      {dashboardKind === 'dragon'
+        ? <DragonTigerDashboard data={dashboardData} loading={dashboardLoading} error={dashboardError}
+          onRetry={() => { refreshDashboard() }} t={t} />
+        : <HotRankDashboard data={hotRankData} loading={dashboardLoading} error={dashboardError}
+          onRetry={() => { refreshDashboard() }} loadHistory={loadHotRankHistory} t={t} />}
     </section>
   </main>
   return <main className={css.panel}>
@@ -224,8 +239,11 @@ export function AgentsPanel({
       </header>
       {selected === null ? <div className={css.cards}>
         {catalogError !== null && <p role="alert">{t('panel.catalogFailure')}</p>}
-        <button type="button" className={css.card} onClick={openDashboard}>
+        <button type="button" className={css.card} onClick={() => { openDashboard('dragon') }}>
           <strong>{t('dragon.cardTitle')}</strong><span>{t('dragon.cardSummary')}</span>
+        </button>
+        <button type="button" className={css.card} onClick={() => { openDashboard('hot') }}>
+          <strong>{t('hot.cardTitle')}</strong><span>{t('hot.cardSummary')}</span>
         </button>
         {catalog.map(card => <button type="button" className={css.card} key={card.name} onClick={() => { choose(card) }}>
           <strong>{card.title.zh}</strong><span>{card.summary.zh}</span>

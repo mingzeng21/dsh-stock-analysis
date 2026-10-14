@@ -10,6 +10,8 @@ import { WatchlistQuickAdd } from '../src/client/watchlist.ts'
 
 const stock: IStockClient = {
   dragonTiger: vi.fn(async () => { throw new Error('this spec never reads dragon-tiger boards') }),
+  hotRank: vi.fn(async () => { throw new Error('this spec never reads hot-rank lists') }),
+  hotRankHistory: vi.fn(async () => { throw new Error('this spec never reads rank history') }),
   quotes: vi.fn(async () => ({ quotes: [{
     thscode: '600519.SH', last: 1252.57, change: -4.55, changePct: -0.36,
     open: 1259, high: 1259.95, low: 1250.8, prevClose: 1257.12, volume: 2_501_689, turnover: 3_135_910_000,

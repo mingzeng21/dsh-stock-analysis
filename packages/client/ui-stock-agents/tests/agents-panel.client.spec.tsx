@@ -2,7 +2,7 @@
 /** The Agents panel keeps specialist output and history inside its own main entry. */
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import type { StockAgentCard } from '@deepseek-ai/dsh-api-stock-agents-controller/types'
-import type { DragonTigerDashboard } from '@deepseek-ai/dsh-api-stock-controller/client'
+import type { DragonTigerDashboard, HotRankDashboard } from '@deepseek-ai/dsh-api-stock-controller/client'
 import type { SessionListState, SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { LocaleSnapshot } from '@deepseek-ai/dsh-client-locale/client'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
@@ -48,6 +48,15 @@ const DASHBOARD: DragonTigerDashboard = {
   ],
 }
 
+const HOT_RANK: HotRankDashboard = { boards: [
+  { kind: 'hot', period: 'day', asOf: 1_781_000_000_000, stocks: [
+    { thscode: '600001.SH', ticker: '600001', name: '甲公司', rank: 1, heat: '1941909', rankChange: 7, rankTrend: 'up' },
+  ] },
+  { kind: 'hot', period: 'hour', stocks: [] },
+  { kind: 'surge', period: 'day', stocks: [] },
+  { kind: 'surge', period: 'hour', stocks: [] },
+] }
+
 afterEach(cleanup)
 
 function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) {
@@ -77,6 +86,10 @@ function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) 
   }
   const start = vi.fn(async () => reference)
   const loadDragonTiger = vi.fn(async () => DASHBOARD)
+  const loadHotRank = vi.fn(async () => HOT_RANK)
+  const loadHotRankHistory = vi.fn(async () => ({ thscode: '600001.SH', points: [
+    { date: '2026-10-12', rank: 12 }, { date: '2026-10-13', rank: 1 },
+  ] }))
   const openSession = vi.fn(() => reference)
   const renderSlot = vi.fn((..._args: unknown[]) => <div data-testid="conversation">流式回答与追问</div>)
   const unused = () => { throw new Error('unneeded global slot prop') }
@@ -90,6 +103,8 @@ function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) 
     loadCatalog: vi.fn(),
     start,
     loadDragonTiger,
+    loadHotRank,
+    loadHotRankHistory,
     openSession,
     renderSlot,
     usePanelInfo: unused,
@@ -99,8 +114,20 @@ function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) 
     useResource: unused,
   } as AgentsPanelProps
   render(<AgentsPanel {...props} />)
-  return { start, openSession, renderSlot, loadDragonTiger }
+  return { start, openSession, renderSlot, loadDragonTiger, loadHotRank, loadHotRankHistory }
 }
+
+it('opens hot-rank lists and daily history without starting a Session', async () => {
+  const { start, loadHotRank, loadHotRankHistory } = mount()
+  fireEvent.click(screen.getByRole('button', { name: /热股榜监控/ }))
+  await waitFor(() => { expect(screen.getByRole('button', { name: /甲公司/ })).toBeTruthy() })
+  await waitFor(() => { expect(screen.getByText('2026-10-12')).toBeTruthy() })
+  expect(start).not.toHaveBeenCalled()
+  expect(loadHotRank).toHaveBeenCalledTimes(1)
+  expect(loadHotRankHistory).toHaveBeenCalledWith('600001.SH', expect.any(AbortSignal))
+  fireEvent.click(within(screen.getByRole('navigation', { name: '热股榜视图' })).getByRole('button', { name: '热股 · 小时' }))
+  expect(screen.getByText('当前榜单没有股票')).toBeTruthy()
+})
 
 it('opens the native dragon-tiger dashboard without starting a Session', async () => {
   const { start, loadDragonTiger } = mount()

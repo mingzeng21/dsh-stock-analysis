@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-api-stock-controller",
-  "description": "Browser-facing market-data reads over the stock capability seam: symbols, quotes, candles, documents, and dragon-tiger boards on the stock Remote namespace",
+  "description": "Browser-facing market-data reads over the stock capability seam: symbols, quotes, candles, documents, dragon-tiger boards, and hot-rank lists on the stock Remote namespace",
   "version": "0.2.0-rc.2",
   "publishConfig": {
     "access": "public"

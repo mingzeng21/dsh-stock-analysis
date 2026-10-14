@@ -27,9 +27,10 @@ import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typer
 import z from '@deepseek-ai/schemastery'
 import type {
   Candle, CandleRequest, CandleSeries, DocumentKind, DocumentRow, DocumentsRequest, DragonTigerDashboard,
-  InstrumentMatch, Quote, QuoteBatch,
+  HotRankDashboard, HotRankHistory, InstrumentMatch, Quote, QuoteBatch,
 } from './types.ts'
 import { toDragonTigerBoard } from './dragon-tiger.ts'
+import { toHotRankBoard, toHotRankHistory } from './hot-rank.ts'
 import { toCandle, toDocument, toQuote, type RowContext } from './vendor.ts'
 
 export type * from './types.ts'
@@ -46,6 +47,9 @@ const SYMBOL_SEARCH_ENDPOINT = 'meta.tickers.search'
 const QUOTE_ENDPOINT = 'a-share.prices.snapshot'
 const CANDLE_ENDPOINT = 'a-share.prices.historical'
 const DRAGON_TIGER_ENDPOINT = 'a-share.special-data.dragon-tiger-list'
+const HOT_RANK_ENDPOINT = 'a-share.special-data.hot-stock-list'
+const SURGE_ENDPOINT = 'a-share.special-data.skyrocket-list'
+const HOT_RANK_TREND_ENDPOINT = 'a-share.special-data.hot-stock-rank-trend'
 const DOCUMENT_ENDPOINTS: Readonly<Record<DocumentKind, string>> = {
   report: 'iwencai.search.report',
   announcement: 'iwencai.search.announcement',
@@ -295,6 +299,46 @@ export class StockController extends TypertRemoteService {
       ...allResult.meta.asOf === undefined ? {} : { asOf: allResult.meta.asOf },
       boards: [all.board, org.board, hot.board],
     }
+  }
+
+  /**
+   * Read the current 24-hour and hourly hot-stock and rank-surge lists.
+   * @param signal - caller cancellation.
+   * @returns four separately timestamped lists.
+   */
+  @Remote
+  async hotRank(signal: AbortSignal): Promise<HotRankDashboard> {
+    const requests = [
+      { kind: 'hot', period: 'day', endpoint: HOT_RANK_ENDPOINT },
+      { kind: 'hot', period: 'hour', endpoint: HOT_RANK_ENDPOINT },
+      { kind: 'surge', period: 'day', endpoint: SURGE_ENDPOINT },
+      { kind: 'surge', period: 'hour', endpoint: SURGE_ENDPOINT },
+    ] as const
+    const boards = await Promise.all(requests.map(async ({ kind, period, endpoint }) => {
+      const result = await this.seam(() => this.ctx.stock.call(endpoint, { period }, signal), endpoint, undefined)
+      return toHotRankBoard(result, kind, period)
+    }))
+    return { boards }
+  }
+
+  /**
+   * Read the last 30 calendar days of daily ranking for one A-share.
+   * @param thscode - complete A-share identifier.
+   * @param signal - caller cancellation.
+   * @returns all returned daily rank points, including ranks outside the current Top 30.
+   */
+  @Remote
+  async hotRankHistory(thscode: string, signal: AbortSignal): Promise<HotRankHistory> {
+    const code = requireThscode(thscode)
+    const endDate = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Shanghai' })
+    const startDate = new Date(`${endDate}T00:00:00Z`)
+    startDate.setUTCDate(startDate.getUTCDate() - 29)
+    const fromDate = startDate.toISOString().slice(0, 10)
+    const result = await this.seam(
+      () => this.ctx.stock.call(HOT_RANK_TREND_ENDPOINT, { thscode: code, start_date: fromDate, end_date: endDate }, signal),
+      HOT_RANK_TREND_ENDPOINT, code,
+    )
+    return toHotRankHistory(result, code)
   }
 
   /**

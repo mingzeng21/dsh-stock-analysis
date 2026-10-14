@@ -7,7 +7,7 @@ import { Context } from '@deepseek-ai/cordis'
 import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
 import { describe, expect, it, onTestFinished } from 'vitest'
 import { apply, inject } from '../src/client/index.ts'
-import type { CandleRequest, DocumentRow, DragonTigerDashboard, InstrumentMatch, QuoteBatch } from '../src/types.ts'
+import type { CandleRequest, DocumentRow, DragonTigerDashboard, HotRankDashboard, HotRankHistory, InstrumentMatch, QuoteBatch } from '../src/types.ts'
 
 const MATCHES: readonly InstrumentMatch[] = [
   { thscode: '600519.SH', ticker: '600519', name: '贵州茅台', assetType: 'a-share', exchange: 'SH' },
@@ -39,6 +39,8 @@ const DOCUMENTS: readonly DocumentRow[] = [{
 }]
 
 const DRAGON_TIGER: DragonTigerDashboard = { tradeDate: '2026-10-12', boards: [] }
+const HOT_RANK: HotRankDashboard = { boards: [] }
+const HOT_HISTORY: HotRankHistory = { thscode: '600519.SH', points: [] }
 
 /** Arguments one call reached the fake namespace with. */
 interface Recorded {
@@ -47,6 +49,8 @@ interface Recorded {
   readonly candles: unknown[][]
   readonly documents: unknown[][]
   readonly dragonTiger: unknown[][]
+  readonly hotRank: unknown[][]
+  readonly hotRankHistory: unknown[][]
 }
 
 /** A scripted `stock` namespace: it records arguments and answers with one fixed outcome. */
@@ -64,12 +68,14 @@ function namespace(recorded: Recorded, answers: { readonly failure?: RemoteError
     },
     documents: (...args: unknown[]) => { recorded.documents.push(args); return reply(DOCUMENTS) },
     dragonTiger: (...args: unknown[]) => { recorded.dragonTiger.push(args); return reply(DRAGON_TIGER) },
+    hotRank: (...args: unknown[]) => { recorded.hotRank.push(args); return reply(HOT_RANK) },
+    hotRankHistory: (...args: unknown[]) => { recorded.hotRankHistory.push(args); return reply(HOT_HISTORY) },
   }
 }
 
 /** One booted client plugin over a scripted Remote face. */
 function boot(answers: { readonly failure?: RemoteError } = {}) {
-  const recorded: Recorded = { searchSymbols: [], quotes: [], candles: [], documents: [], dragonTiger: [] }
+  const recorded: Recorded = { searchSymbols: [], quotes: [], candles: [], documents: [], dragonTiger: [], hotRank: [], hotRankHistory: [] }
   const stock = namespace(recorded, answers)
   const ctx = new Context()
   ctx.provide('remote', { stock } as never)
@@ -96,6 +102,10 @@ describe('stock client reads', () => {
     onTestFinished(async () => { await fiber.dispose() })
     await expect(ctx.stockClient.dragonTiger()).resolves.toEqual(DRAGON_TIGER)
     expect(recorded.dragonTiger).toHaveLength(1)
+    await expect(ctx.stockClient.hotRank()).resolves.toEqual(HOT_RANK)
+    await expect(ctx.stockClient.hotRankHistory('600519.SH')).resolves.toEqual(HOT_HISTORY)
+    expect(recorded.hotRank).toHaveLength(1)
+    expect(recorded.hotRankHistory[0]?.[0]).toBe('600519.SH')
   })
 
   it('forwards a symbol search and returns the candidates', async () => {

@@ -25,7 +25,7 @@ Web 客户端注册一个股票分析侧边栏入口，从 Host 的 skill 元数
 <a id="use-this-package"></a>
 ## 使用本包
 
-与 Session 服务、股票 Agents Remote、股票数据客户端、locale 和 slots 一起挂载。点击立即启动的专属卡片会创建新 Session 并开始分析；输入类卡片会等待提交。每次运行都会在首轮前选中 `stock-analysis`、发送显式 `/skill-name` 提示词，并在 Agents 内显示流式对话。点击“龙虎榜观察”则立即打开仪表盘，读取同一最新交易日的三种榜单。标签页、正负金额图、股票排序和席位详情均可交互；刷新会重新读取。历史栏保存专属 Session，可在各视图收起。
+与 Session 服务、股票 Agents Remote、股票数据客户端、locale 和 slots 一起挂载。点击立即启动的专属卡片会创建新 Session 并开始分析；输入类卡片会等待提交。每次运行都会在首轮前选中 `stock-analysis`、发送显式 `/skill-name` 提示词，并在 Agents 内显示流式对话。点击“龙虎榜观察”会立即打开仪表盘，读取同一最新交易日的三种榜单。点击“热股榜监控”会打开四类当前热度榜单；选中股票后读取近 30 个自然日的日线排名。两个看板均可直接刷新，无须启动 Session。历史栏保存专属 Session，可在各视图收起。
 
 <a id="understand-the-implementation"></a>
 ## 理解实现
@@ -40,7 +40,7 @@ Web 客户端注册一个股票分析侧边栏入口，从 Host 的 skill 元数
 <a id="dev-note"></a>
 ## 开发备注
 
-新增对话型专属 Agent 的内容放在 `packages/bundle/web-app/skills/<name>/SKILL.md`。龙虎榜观察等原生数据视图位于本包，使用面向浏览器的数据客户端。
+新增对话型专属 Agent 的内容放在 `packages/bundle/web-app/skills/<name>/SKILL.md`。龙虎榜观察、热股榜监控等原生数据视图位于本包，使用面向浏览器的数据客户端。
 
 <a id="model-experience"></a>
 ## 模型体验

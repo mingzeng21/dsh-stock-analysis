@@ -93,6 +93,8 @@ export function apply(ctx: Context): void {
       loadCatalog,
       start,
       loadDragonTiger: signal => ctx.stockClient.dragonTiger(signal),
+      loadHotRank: signal => ctx.stockClient.hotRank(signal),
+      loadHotRankHistory: (thscode, signal) => ctx.stockClient.hotRankHistory(thscode, signal),
       openSession: (sessionId: SessionId) => ctx.sessions.retain(sessionId, { source: 'stockAgent' }),
     }),
   }, AgentsPanel))

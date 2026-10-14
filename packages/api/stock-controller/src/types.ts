@@ -122,6 +122,42 @@ export interface DragonTigerDashboard {
   readonly boards: readonly DragonTigerBoard[]
 }
 
+/** One stock on a current hot-stock or rank-surge list. */
+export interface HotRankStock {
+  readonly thscode: string
+  readonly ticker: string
+  readonly name: string
+  readonly rank: number
+  readonly heat: string
+  readonly rankChange?: number
+  readonly rankTrend: 'up' | 'down' | 'flat' | 'unknown'
+}
+
+/** One current list, with its own observation time. */
+export interface HotRankBoard {
+  readonly kind: 'hot' | 'surge'
+  readonly period: 'day' | 'hour'
+  readonly asOf?: number
+  readonly stocks: readonly HotRankStock[]
+}
+
+/** Four independent current attention lists. */
+export interface HotRankDashboard {
+  readonly boards: readonly HotRankBoard[]
+}
+
+/** One daily ranking observation for a selected stock. */
+export interface HotRankPoint {
+  readonly date: string
+  readonly rank: number
+}
+
+/** A stock's complete daily rank series within the requested window. */
+export interface HotRankHistory {
+  readonly thscode: string
+  readonly points: readonly HotRankPoint[]
+}
+
 /** One candlestick. */
 export interface Candle {
   /** Bar open time in milliseconds since the Unix epoch. */

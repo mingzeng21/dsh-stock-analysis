@@ -197,6 +197,21 @@ Host Remote reads over the stock capability seam.
 @Remote async dragonTiger(signal: AbortSignal): Promise<DragonTigerDashboard>
 
 /**
+ * Read the current 24-hour and hourly hot-stock and rank-surge lists.
+ * @param signal - caller cancellation.
+ * @returns four separately timestamped lists.
+ */
+@Remote async hotRank(signal: AbortSignal): Promise<HotRankDashboard>
+
+/**
+ * Read the last 30 calendar days of daily ranking for one A-share.
+ * @param thscode - complete A-share identifier.
+ * @param signal - caller cancellation.
+ * @returns all returned daily rank points, including ranks outside the current Top 30.
+ */
+@Remote async hotRankHistory(thscode: string, signal: AbortSignal): Promise<HotRankHistory>
+
+/**
  * Read one instrument's candle series for a window.
  * @param request - instrument, period, adjustment, and the window.
  * @param signal - caller cancellation.

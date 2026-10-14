@@ -25,7 +25,7 @@ Use this package when a browser surface needs market data. It reads symbols, quo
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount the package beside `dsh-stock` and one provider. A Client calls `remote.stock.searchSymbols(query, limit)`, `quotes(thscodes)`, `candles(request)`, `documents(request)`, or `dragonTiger()`; no method takes a Session, because market data belongs to no Session.
+Mount the package beside `dsh-stock` and one provider. A Client calls `remote.stock.searchSymbols(query, limit)`, `quotes(thscodes)`, `candles(request)`, `documents(request)`, `dragonTiger()`, `hotRank()`, or `hotRankHistory(thscode)`; no method takes a Session, because market data belongs to no Session.
 
 | Method | Returns | Purpose |
 |---|---|---|
@@ -34,6 +34,8 @@ Mount the package beside `dsh-stock` and one provider. A Client calls `remote.st
 | `candles(request)` | `CandleSeries { thscode, interval, asOf?, truncated, candles }` | One instrument's bars over a window |
 | `documents(request)` | `readonly DocumentRow[]` | One instrument's reports, announcements, or news |
 | `dragonTiger()` | `DragonTigerDashboard` | Latest trading date's all, institution, and hot-money boards |
+| `hotRank()` | `HotRankDashboard` | Current 24-hour and hourly hot-stock and rank-surge lists, with separate observation times |
+| `hotRankHistory(thscode)` | `HotRankHistory` | Selected A-share's daily rank points for the last 30 calendar days, including ranks outside Top 30 |
 
 ### Normalization
 
@@ -58,6 +60,8 @@ Because the vendor's quote rows carry no instrument name, `Quote` has none: the 
 ### Dragon-tiger boards
 
 `dragonTiger()` first reads the latest all-board date, then reads the institution and hot-money boards for that same date. A mismatched date or malformed nested row fails the read. The response carries stock net amounts, optional change percentages and trading amounts, active seats, linked stocks, and a `truncated` flag when configured row caps cut any list. The upstream list does not provide turnover rates or separate institution/hot-money buy and sell amounts; consumers must leave those values unavailable. It is a current market-data read, not a Session result.
+
+`hotRank()` reads four independent current lists: hot stocks and rank surges for 24-hour/day and hourly periods. Each list retains its own observation time, original heat string, rank, optional rank change, and trend direction; missing rank change is not zero. `hotRankHistory(thscode)` reads the selected stock's daily rank series over the last 30 calendar days; a rank beyond Top 30 is valid. A malformed returned row fails its read. Neither method stores a Session result.
 
 ### Periods, adjustments, and windows
 

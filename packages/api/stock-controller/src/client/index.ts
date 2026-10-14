@@ -19,13 +19,15 @@ import type {} from '@deepseek-ai/dsh-api-gateway/client'
 import type {} from '@deepseek-ai/dsh-api-stock-controller/remote'
 import type { RemoteResult, TypertRemoteNamespaceMap } from '@deepseek-ai/dsh-typert-protocol'
 import type {
-  CandleRequest, CandleSeries, DocumentRow, DocumentsRequest, DragonTigerDashboard, InstrumentMatch, QuoteBatch,
+  CandleRequest, CandleSeries, DocumentRow, DocumentsRequest, DragonTigerDashboard,
+  HotRankDashboard, HotRankHistory, InstrumentMatch, QuoteBatch,
 } from '../types.ts'
 
 export type {
   Candle, CandleAdjust, CandleInterval, CandleRequest, CandleSeries,
   DocumentKind, DocumentRow, DocumentsRequest,
   DragonTigerBoard, DragonTigerBoardType, DragonTigerDashboard, DragonTigerSeat, DragonTigerSeatStock, DragonTigerStock,
+  HotRankBoard, HotRankDashboard, HotRankHistory, HotRankPoint, HotRankStock,
   InstrumentMatch, Quote, QuoteBatch,
 } from '../types.ts'
 
@@ -44,6 +46,19 @@ export interface IStockClient {
    * @returns all, institution, and hot-money boards.
    */
   dragonTiger(signal?: AbortSignal): Promise<DragonTigerDashboard>
+  /**
+   * Read current hot-stock and rank-surge lists for both time periods.
+   * @param signal - caller cancellation.
+   * @returns four separately timestamped lists.
+   */
+  hotRank(signal?: AbortSignal): Promise<HotRankDashboard>
+  /**
+   * Read the last 30 calendar days of ranking for one A-share.
+   * @param thscode - complete A-share identifier.
+   * @param signal - caller cancellation.
+   * @returns daily rank points, including ranks beyond the current Top 30.
+   */
+  hotRankHistory(thscode: string, signal?: AbortSignal): Promise<HotRankHistory>
   /**
    * Resolve a name, bare code, or thscode fragment to complete instruments.
    * @param query - user-facing search text.
@@ -99,6 +114,16 @@ export class StockClient extends Service implements IStockClient {
   /** {@inheritDoc IStockClient.dragonTiger} */
   async dragonTiger(signal?: AbortSignal): Promise<DragonTigerDashboard> {
     return unwrap(await this.namespace.dragonTiger(signal))
+  }
+
+  /** {@inheritDoc IStockClient.hotRank} */
+  async hotRank(signal?: AbortSignal): Promise<HotRankDashboard> {
+    return unwrap(await this.namespace.hotRank(signal))
+  }
+
+  /** {@inheritDoc IStockClient.hotRankHistory} */
+  async hotRankHistory(thscode: string, signal?: AbortSignal): Promise<HotRankHistory> {
+    return unwrap(await this.namespace.hotRankHistory(thscode, signal))
   }
 
   /** {@inheritDoc IStockClient.searchSymbols} */

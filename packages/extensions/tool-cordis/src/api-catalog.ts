@@ -2867,6 +2867,18 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'same-date boards, with bounded nested entries and vendor counts.',
       },
       {
+        signature: '@Remote async hotRank(signal: AbortSignal): Promise<HotRankDashboard>',
+        description: 'Read the current 24-hour and hourly hot-stock and rank-surge lists.',
+        parameters: [{ name: 'signal', description: 'caller cancellation.' }],
+        returns: 'four separately timestamped lists.',
+      },
+      {
+        signature: '@Remote async hotRankHistory(thscode: string, signal: AbortSignal): Promise<HotRankHistory>',
+        description: 'Read the last 30 calendar days of daily ranking for one A-share.',
+        parameters: [{ name: 'thscode', description: 'complete A-share identifier.' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'all returned daily rank points, including ranks outside the current Top 30.',
+      },
+      {
         signature: '@Remote async candles(request: CandleRequest, signal: AbortSignal): Promise<CandleSeries>',
         description: 'Read one instrument\'s candle series for a window.',
         parameters: [{ name: 'request', description: 'instrument, period, adjustment, and the window.' }, { name: 'signal', description: 'caller cancellation.' }],
@@ -5492,6 +5504,26 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'HostConnectionRpc',
     declaration: 'export interface HostConnectionRpc {\n    handle(channel: string, handler: ConnectionRpcHandler): () => Promise<void>;\n    intercept(channel: \'/api\', matches: ConnectionRpcEndpointMatcher, handler: ConnectionRpcHandler): () => Promise<void>;\n}',
+  },
+  {
+    name: 'HotRankBoard',
+    declaration: 'export interface HotRankBoard {\n    readonly kind: \'hot\' | \'surge\';\n    readonly period: \'day\' | \'hour\';\n    readonly asOf?: number;\n    readonly stocks: readonly HotRankStock[];\n}',
+  },
+  {
+    name: 'HotRankDashboard',
+    declaration: 'export interface HotRankDashboard {\n    readonly boards: readonly HotRankBoard[];\n}',
+  },
+  {
+    name: 'HotRankHistory',
+    declaration: 'export interface HotRankHistory {\n    readonly thscode: string;\n    readonly points: readonly HotRankPoint[];\n}',
+  },
+  {
+    name: 'HotRankPoint',
+    declaration: 'export interface HotRankPoint {\n    readonly date: string;\n    readonly rank: number;\n}',
+  },
+  {
+    name: 'HotRankStock',
+    declaration: 'export interface HotRankStock {\n    readonly thscode: string;\n    readonly ticker: string;\n    readonly name: string;\n    readonly rank: number;\n    readonly heat: string;\n    readonly rankChange?: number;\n    readonly rankTrend: \'up\' | \'down\' | \'flat\' | \'unknown\';\n}',
   },
   {
     name: 'ImageAttachmentLimits',
