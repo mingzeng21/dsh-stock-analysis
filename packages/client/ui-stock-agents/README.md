@@ -30,7 +30,7 @@ Mount it beside the Session service, stock Agents Remote, stock data client, loc
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
-Specialist card metadata comes from `metadata.stockAgent` in bundled skills. The panel owns launch state, dashboard state, and temporary rail visibility; the Session log owns specialist answers and follow-ups. It reuses the `conversation.content` factory for specialist results. The dashboard uses `ctx.stockClient.dragonTiger()` and never invokes a skill or the model. Opening an Agent record does not change the ordinary Conversation selection. Removed skills leave history open but have no rerun card.
+Specialist card metadata comes from `metadata.stockAgent` in bundled skills. The panel owns launch state, dashboard state, and temporary rail visibility; the Session log owns specialist answers and follow-ups. It reuses the `conversation.content` factory for specialist results. The dashboard uses `ctx.stockClient.dragonTiger()` and never invokes a skill or the model. It shows returned-sample rise/fall counts, trading amount, stock change percentages, and available signed amounts; missing upstream fields remain unavailable. Opening an Agent record does not change the ordinary Conversation selection. Removed skills leave history open but have no rerun card.
 
 <a id="further-exploration"></a>
 ## Further Exploration

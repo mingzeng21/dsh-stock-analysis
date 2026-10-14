@@ -57,7 +57,7 @@ Because the vendor's quote rows carry no instrument name, `Quote` has none: the 
 
 ### Dragon-tiger boards
 
-`dragonTiger()` first reads the latest all-board date, then reads the institution and hot-money boards for that same date. A mismatched date or malformed nested row fails the read. The response carries stock net amounts, active seats, linked stocks, and a `truncated` flag when configured row caps cut any list. It is a current market-data read, not a Session result.
+`dragonTiger()` first reads the latest all-board date, then reads the institution and hot-money boards for that same date. A mismatched date or malformed nested row fails the read. The response carries stock net amounts, optional change percentages and trading amounts, active seats, linked stocks, and a `truncated` flag when configured row caps cut any list. The upstream list does not provide turnover rates or separate institution/hot-money buy and sell amounts; consumers must leave those values unavailable. It is a current market-data read, not a Session result.
 
 ### Periods, adjustments, and windows
 

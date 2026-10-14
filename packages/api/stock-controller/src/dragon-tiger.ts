@@ -30,6 +30,8 @@ function optionalNumber(row: StockRow, field: string, context: RowContext): numb
 }
 
 function stockOf(row: StockRow, context: RowContext): DragonTigerStock {
+  const changePct = optionalNumber(row, 'change', context)
+  const amount = optionalNumber(row, 'amount', context)
   const orgNetValue = optionalNumber(row, 'org_net_value', context)
   const hotMoneyNetValue = optionalNumber(row, 'hot_money_net_value', context)
   const buyValue = optionalNumber(row, 'buy_value', context)
@@ -39,6 +41,8 @@ function stockOf(row: StockRow, context: RowContext): DragonTigerStock {
     thscode: readString(row, 'thscode', context),
     name: readString(row, 'name', context),
     netValue: readNumber(row, 'net_value', context),
+    ...changePct === undefined ? {} : { changePct },
+    ...amount === undefined ? {} : { amount },
     ...orgNetValue === undefined ? {} : { orgNetValue },
     ...hotMoneyNetValue === undefined ? {} : { hotMoneyNetValue },
     ...buyValue === undefined ? {} : { buyValue },

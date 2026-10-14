@@ -67,7 +67,7 @@ Colors come from the same `--dsw-*` tokens the markup around the chart uses. A c
 
 Three tabs — research, announcements, and news — list what the gateway publishes about the selected instrument. One read is issued per instrument and channel, and the controller drops a response a newer read has already superseded, so switching tabs quickly never renders one channel's rows under another's label. Each channel fails on its own: a failure renders its code and a retry inside that tab without emptying the chart beside it, and the last successful channel keeps its rows while a newer read is in flight.
 
-A row shows its title, the source and publication date that let a reader judge it, and the vendor's excerpt. The title links to the original document when the vendor supplied one; a channel that carries no links renders the same row as text rather than as a broken link. When the Host cut the excerpt at its configured bound, the row says so.
+A row shows its title, publication date, and excerpt. The title links to the original document when the vendor supplied one; a channel that carries no links renders the same row as text rather than as a broken link. When the Host cut the excerpt at its configured bound, the row says so.
 
 Document rows share the detail's single vertical scroll; the analysis composer is above the documents.
 

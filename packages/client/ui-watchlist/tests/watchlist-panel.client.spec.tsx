@@ -563,13 +563,14 @@ describe('WatchlistPanel documents', () => {
     expect(screen.getByText(zh['documents.empty'])).toBeDefined()
   })
 
-  it('renders each row with its source, date, and excerpt', () => {
+  it('renders each row with its date and excerpt while hiding the provider', () => {
     mount({
       selection: '600519.SH',
       documents: { phase: 'ready', kind: 'report', rows: [documentRow('公司跟踪报告')] },
     })
     expect(screen.getByText('公司跟踪报告')).toBeDefined()
-    expect(screen.getByText(/^诚通证券 · \d{4}-\d{2}-\d{2}$/u)).toBeDefined()
+    expect(screen.getByText(/^\d{4}-\d{2}-\d{2}$/u)).toBeDefined()
+    expect(screen.queryByText('诚通证券')).toBeNull()
     expect(screen.getByText('估值与投资建议')).toBeDefined()
   })
 
@@ -589,7 +590,7 @@ describe('WatchlistPanel documents', () => {
     expect(link.getAttribute('href')).toBe('https://example.test/report')
     expect(link.getAttribute('rel')).toBe('noreferrer')
     expect(screen.queryByRole('link', { name: '无链接' })).toBeNull()
-    expect(screen.getByText(/^\d{4}-\d{2}-\d{2}$/u)).toBeDefined()
+    expect(screen.getAllByText(/^\d{4}-\d{2}-\d{2}$/u)).toHaveLength(2)
   })
 
   it('marks an excerpt the Host cut', () => {

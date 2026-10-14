@@ -40,8 +40,8 @@ const DASHBOARD: DragonTigerDashboard = {
   tradeDate: '2026-10-12',
   boards: [
     { type: 'all', stockCount: 2, recordCount: 2, truncated: false, seats: [{ name: '活跃席位', stocks: [{ thscode: '600001.SH', name: '甲公司', netValue: 30_000_000 }], truncated: false }], stocks: [
-      { thscode: '600001.SH', name: '甲公司', netValue: 120_000_000, orgNetValue: 70_000_000 },
-      { thscode: '000002.SZ', name: '乙公司', netValue: -60_000_000, hotMoneyNetValue: -40_000_000 },
+      { thscode: '600001.SH', name: '甲公司', changePct: 5.57, amount: 924_555_074.08, netValue: 120_000_000, orgNetValue: 70_000_000 },
+      { thscode: '000002.SZ', name: '乙公司', changePct: -3.74, amount: 100_000_000, netValue: -60_000_000, hotMoneyNetValue: -40_000_000 },
     ] },
     { type: 'org', stockCount: 1, recordCount: 1, truncated: false, seats: [], stocks: [{ thscode: '600001.SH', name: '甲公司', netValue: 70_000_000 }] },
     { type: 'hot_money', stockCount: 1, recordCount: 1, truncated: false, seats: [], stocks: [{ thscode: '000002.SZ', name: '乙公司', netValue: -40_000_000 }] },
@@ -108,6 +108,10 @@ it('opens the native dragon-tiger dashboard without starting a Session', async (
   await waitFor(() => { expect(screen.getByText('2026-10-12')).toBeTruthy() })
   expect(start).not.toHaveBeenCalled()
   expect(loadDragonTiger).toHaveBeenCalledTimes(1)
+  expect(screen.getByText('1 / 1')).toBeTruthy()
+  expect(screen.getByText('+5.57%')).toBeTruthy()
+  fireEvent.change(screen.getByLabelText('排序'), { target: { value: 'amount' } })
+  expect(screen.getByRole('option', { name: '成交额' }).getAttribute('value')).toBe('amount')
   fireEvent.click(within(screen.getByRole('navigation', { name: '龙虎榜类型' })).getByRole('button', { name: '机构榜' }))
   expect(screen.getByText('机构榜', { selector: 'button' }).getAttribute('aria-current')).toBe('page')
   fireEvent.click(screen.getByRole('button', { name: /甲公司/ }))

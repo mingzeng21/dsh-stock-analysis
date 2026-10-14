@@ -263,14 +263,10 @@ function documentDate(publishedAt: number, t: WatchlistPanelProps['t']): string 
 }
 
 /**
- * One document row: its title, the source and time that let a reader judge it,
- * and the vendor's excerpt. A row without a link keeps the same title shape, so
+ * One document row: its title, publication time, and excerpt. A row without a link keeps the same title shape, so
  * a channel that never carries links reads as a list rather than as broken ones.
  */
 function DocumentRowItem({ row, t }: { row: DocumentRow; t: WatchlistPanelProps['t'] }) {
-  const meta = row.source === undefined
-    ? documentDate(row.publishedAt, t)
-    : `${row.source} · ${documentDate(row.publishedAt, t)}`
   return (
     <li className={css.documentRow}>
       {row.url === undefined
@@ -286,7 +282,7 @@ function DocumentRowItem({ row, t }: { row: DocumentRow; t: WatchlistPanelProps[
             {row.title}
           </a>
         )}
-      <span className={css.documentMeta}>{meta}</span>
+      <span className={css.documentMeta}>{documentDate(row.publishedAt, t)}</span>
       {row.summary !== '' && <span className={css.documentSummary}>{row.summary}</span>}
       {row.summaryTruncated && <span className={css.documentNote}>{t('documents.truncated')}</span>}
     </li>
@@ -641,7 +637,7 @@ export function WatchlistPanel({
                 {t('analysis.jump')}
               </button>
             </header>
-            <p className={css.sourceLine}>{t('source.marketData')} · {t('chart.adjust.forward')}</p>
+            <p className={css.chartNote}>{t('chart.adjust.forward')}</p>
             <section className={css.summary} aria-label={t('summary.aria')}>
               <SummaryCard
                 label={t('summary.latestClose')}

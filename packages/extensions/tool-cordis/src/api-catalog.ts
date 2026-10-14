@@ -5279,7 +5279,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'DragonTigerStock',
-    declaration: 'export interface DragonTigerStock {\n    readonly thscode: string;\n    readonly name: string;\n    readonly netValue: number;\n    readonly orgNetValue?: number;\n    readonly hotMoneyNetValue?: number;\n    readonly buyValue?: number;\n    readonly sellValue?: number;\n    readonly rangeDays?: number;\n}',
+    declaration: 'export interface DragonTigerStock {\n    readonly thscode: string;\n    readonly name: string;\n    readonly netValue: number;\n    readonly changePct?: number;\n    readonly amount?: number;\n    readonly orgNetValue?: number;\n    readonly hotMoneyNetValue?: number;\n    readonly buyValue?: number;\n    readonly sellValue?: number;\n    readonly rangeDays?: number;\n}',
   },
   {
     name: 'DshEnvironment',

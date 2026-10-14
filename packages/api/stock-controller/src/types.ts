@@ -79,6 +79,10 @@ export interface DragonTigerStock {
   readonly thscode: string
   readonly name: string
   readonly netValue: number
+  /** Vendor `change` percentage points for the trading date, when supplied. */
+  readonly changePct?: number
+  /** Trading amount in yuan, when supplied. */
+  readonly amount?: number
   readonly orgNetValue?: number
   readonly hotMoneyNetValue?: number
   readonly buyValue?: number

@@ -30,7 +30,7 @@ Web 客户端注册一个股票分析侧边栏入口，从 Host 的 skill 元数
 <a id="understand-the-implementation"></a>
 ## 理解实现
 
-专属卡片元数据来自随包 skill 中的 `metadata.stockAgent`。面板持有启动、仪表盘和临时历史栏状态；专属回答和追问由 Session 日志持有。专属结果复用 `conversation.content` factory。仪表盘调用 `ctx.stockClient.dragonTiger()`，不调用 skill 或模型。打开 Agent 记录不会切换普通 Conversation 的当前选择。skill 移除后历史仍可打开，但不提供重新运行的卡片。
+专属卡片元数据来自随包 skill 中的 `metadata.stockAgent`。面板持有启动、仪表盘和临时历史栏状态；专属回答和追问由 Session 日志持有。专属结果复用 `conversation.content` factory。仪表盘调用 `ctx.stockClient.dragonTiger()`，不调用 skill 或模型。看板显示返回样本的涨跌家数、成交额、股票涨跌幅与已提供的带符号金额；上游缺失字段显示“未提供”。打开 Agent 记录不会切换普通 Conversation 的当前选择。skill 移除后历史仍可打开，但不提供重新运行的卡片。
 
 <a id="further-exploration"></a>
 ## 进一步探索
