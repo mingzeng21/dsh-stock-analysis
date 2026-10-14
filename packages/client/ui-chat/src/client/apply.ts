@@ -55,7 +55,7 @@ const CHAT_NODE_INJECT: ChatNodeInjected = {
 
 /** Services required by the Chat target and its presentation registrations. */
 export const inject = [
-  'slots', 'sessions', 'uiWorkspace', 'uiSession', 'uiConversation', 'locale',
+  'slots', 'sessions', 'uiWorkspace', 'uiSession', 'uiConversation', 'conversation', 'locale',
   'configForms', 'remote', 'remote.session', 'sidebarRight',
 ]
 
@@ -202,6 +202,12 @@ export function apply(ctx: Context): void {
           },
           fileMentions: (owner: TurnTailOwnerProps) => ctx.get('chatFileMentions')?.forClosing(owner, sessionId),
           textAnnotations: () => ctx.get('chatTextAnnotations')?.forSession(sessionId),
+          followUpSelection: (prompt) => {
+            const input = ctx.conversation.input.for(binding.ctx)
+            const draft = input.state.getSnapshot().draft
+            input.setDraft(draft === '' ? prompt : `${draft}\n\n${prompt}`)
+            input.focus()
+          },
           // Files open in the right Sidebar, not in a desktop application: the
           // content stays in the product, beside the conversation that produced
           // it. A relative path, or an absolute one inside the session's

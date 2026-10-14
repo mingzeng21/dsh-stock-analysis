@@ -8,6 +8,7 @@ import type { AssistantBlock } from '../contract/snapshot.ts'
 import { markdownLabels } from '../markdown-labels.ts'
 import { ReasoningRow } from './ReasoningRow.tsx'
 import { useSearchableHidden } from './searchable-hidden.ts'
+import { SelectionActions } from './SelectionActions.tsx'
 import css from './AssistantMarkdown.module.css'
 
 /**
@@ -47,6 +48,7 @@ export interface AssistantMarkdownProps {
   /** Resolved prose file mentions for this Assistant's closing turn. */
   mentions?: MarkdownFileMentions | undefined
   textAnnotations?: ChatTextAnnotationSource | undefined
+  followUpSelection?: ((prompt: string) => void) | undefined
   /** The owning view's locale seat, passed down as a plain prop. */
   t: ChatViewSlotProps['t']
 }
@@ -54,7 +56,7 @@ export interface AssistantMarkdownProps {
 /** Reasoning block as the Think variant summary row (figma 39:28304). */
 export const AssistantMarkdown = memo(function AssistantMarkdown({
   blocks, streaming, interrupted, renderMessageImages, groupPart, useDisclosure,
-  reasoningHidden = false, usePresentation, revealProcess, mentions, textAnnotations, t,
+  reasoningHidden = false, usePresentation, revealProcess, mentions, textAnnotations, followUpSelection, t,
 }: AssistantMarkdownProps) {
   // Stable per locale revision (t identity changes on switch): a fresh object
   // per render would rebuild MarkdownText's component table every chunk.
@@ -80,15 +82,16 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
     switch (block.kind) {
       case 'text':
         rendered.push(
-          <AssistantText
-            key={i}
-            text={block.text}
-            streaming={streaming}
-            labels={labels}
-            fileMentions={mentions}
-            pathImages={pathImages}
-            annotations={textAnnotations}
-          />,
+          <div key={i} data-assistant-answer>
+            <AssistantText
+              text={block.text}
+              streaming={streaming}
+              labels={labels}
+              fileMentions={mentions}
+              pathImages={pathImages}
+              annotations={textAnnotations}
+            />
+          </div>,
         )
         break
       case 'reasoning':
@@ -141,14 +144,22 @@ export const AssistantMarkdown = memo(function AssistantMarkdown({
         )
     }
   }
+  const body = <div className={css.body}>
+    {rendered}
+    {interrupted && (groupPart === undefined || groupPart === 'response'
+      || !blocks.some(block => block.kind !== 'reasoning' && block.kind !== 'tool-call'))
+      && <span className={css.stopped}>{t('message.stopped')}</span>}
+  </div>
   return (
     <div className={css.root} data-streaming={streaming || undefined}>
-      <div className={css.body}>
-        {rendered}
-        {interrupted && (groupPart === undefined || groupPart === 'response'
-          || !blocks.some(block => block.kind !== 'reasoning' && block.kind !== 'tool-call'))
-          && <span className={css.stopped}>{t('message.stopped')}</span>}
-      </div>
+      {followUpSelection === undefined || streaming
+        ? body
+        : <SelectionActions
+          explain={{ label: t('message.selection.explain'), prompt: t('message.selection.explainPrompt') }}
+          verify={{ label: t('message.selection.verify'), prompt: t('message.selection.verifyPrompt') }}
+          onFollowUp={followUpSelection}>
+          {body}
+        </SelectionActions>}
     </div>
   )
 })

@@ -197,6 +197,8 @@ export interface ChatNodeOwnerProps {
   renderMessageImages: RenderMessageImages
   fileMentions: (owner: TurnTailOwnerProps) => MarkdownFileMentions | undefined
   textAnnotations: () => ChatTextAnnotationSource | undefined
+  /** Append a selected Assistant passage and follow-up prompt to this Session's composer. */
+  followUpSelection?: ((prompt: string) => void) | undefined
   /** Turn-process state when this Node belongs to a projected Turn. */
   turnProcess?: TurnProcessOwnerProps | undefined
 }
@@ -280,6 +282,8 @@ export interface ChatViewInjected {
   forkAt: (seq: number) => void
   fileMentions: (owner: TurnTailOwnerProps) => MarkdownFileMentions | undefined
   textAnnotations: () => ChatTextAnnotationSource | undefined
+  /** Append a selected Assistant passage and follow-up prompt to this Session's composer. */
+  followUpSelection?: ((prompt: string) => void) | undefined
 }
 
 /** Full Chat view props. */

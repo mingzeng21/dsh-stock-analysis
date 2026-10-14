@@ -1,0 +1,33 @@
+.actions {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  gap: 4px;
+  box-sizing: border-box;
+  max-width: calc(100vw - 16px);
+  padding: 4px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-md);
+  background: var(--dsw-alias-bg-base);
+  box-shadow: var(--dsw-elevation-panel);
+  transform: translate(-50%, -100%);
+}
+
+.actions[data-below] { transform: translateX(-50%); }
+
+.actions button {
+  border: 0;
+  border-radius: var(--dsw-radius-sm);
+  padding: 5px 9px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+  white-space: normal;
+  cursor: pointer;
+}
+
+.actions button:hover,
+.actions button:focus-visible {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
