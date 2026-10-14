@@ -1,5 +1,5 @@
 ---
-description: "Browser-facing market-data reads over the stock capability seam: normalized symbol matches, quote batches, candle series, and research documents on the stock Remote namespace."
+description: "Browser-facing market-data reads over the stock capability seam: normalized symbol matches, quotes, candles, documents, and dragon-tiger boards."
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Use this package when a browser surface needs market data. It performs four reads a view can render — cross-market symbol disambiguation, a batched quote, one instrument's candle series, and one instrument's research documents — over the [stock capability seam](../../stock/stock/README.md), and resolves the vendor's field names, date encodings, and search vocabulary once on the Host. It registers no tool and contributes no prompt, so mounting it costs no tool-schema tokens; `dsh-tool-stock` remains the model-facing consumer of the same seam.
+Use this package when a browser surface needs market data. It reads symbols, quotes, candles, documents, and dragon-tiger boards over the [stock capability seam](../../stock/stock/README.md), resolving vendor fields on the Host. It registers no tool or prompt; `dsh-tool-stock` remains the model-facing consumer of the same seam.
 
 ## Table of Contents
 
@@ -25,7 +25,7 @@ Use this package when a browser surface needs market data. It performs four read
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount the package beside `dsh-stock` and one provider. A Client calls `remote.stock.searchSymbols(query, limit)`, `quotes(thscodes)`, `candles(request)`, or `documents(request)`; no method takes a Session, because market data belongs to no Session.
+Mount the package beside `dsh-stock` and one provider. A Client calls `remote.stock.searchSymbols(query, limit)`, `quotes(thscodes)`, `candles(request)`, `documents(request)`, or `dragonTiger()`; no method takes a Session, because market data belongs to no Session.
 
 | Method | Returns | Purpose |
 |---|---|---|
@@ -33,6 +33,7 @@ Mount the package beside `dsh-stock` and one provider. A Client calls `remote.st
 | `quotes(thscodes)` | `QuoteBatch { asOf?, quotes }` | One batched quote per named instrument |
 | `candles(request)` | `CandleSeries { thscode, interval, asOf?, truncated, candles }` | One instrument's bars over a window |
 | `documents(request)` | `readonly DocumentRow[]` | One instrument's reports, announcements, or news |
+| `dragonTiger()` | `DragonTigerDashboard` | Latest trading date's all, institution, and hot-money boards |
 
 ### Normalization
 
@@ -53,6 +54,10 @@ The seam keeps the vendor's own field names on its rows, because its 94 capabili
 A row that cannot supply a value the surface needs fails the whole read with `stock/malformed-row` naming the field; it is never dropped and never becomes a zero, because a dropped row reads as "this instrument has none" and a zero reads as a disclosed value. A numeric string is accepted for a numeric field, because the vendor is inconsistent about JSON number encoding.
 
 Because the vendor's quote rows carry no instrument name, `Quote` has none: the caller already holds the name it listed the instrument under.
+
+### Dragon-tiger boards
+
+`dragonTiger()` first reads the latest all-board date, then reads the institution and hot-money boards for that same date. A mismatched date or malformed nested row fails the read. The response carries stock net amounts, active seats, linked stocks, and a `truncated` flag when configured row caps cut any list. It is a current market-data read, not a Session result.
 
 ### Periods, adjustments, and windows
 
@@ -78,6 +83,9 @@ Announcements, reports, and news come from the 问财 gateway, whose search take
 | `maxDocuments` | `30` | Inclusive cap on rows one document search may return; a larger request is capped |
 | `maxSummaryChars` | `400` | Inclusive character cap on one document excerpt |
 | `maxSymbolMatches` | `20` | Inclusive cap on symbol-search candidates; a larger request is capped |
+| `maxDragonTigerStocks` | `200` | Stock rows per board sent to the browser |
+| `maxDragonTigerSeats` | `60` | Active seats per board sent to the browser |
+| `maxDragonTigerSeatStocks` | `30` | Linked stocks per seat sent to the browser |
 
 The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-api-stock-controller) is the exhaustive source for every accepted field and its JSDoc.
 
@@ -115,7 +123,8 @@ The browser export provides `ctx.stockClient` and requires `remote` and `remote.
 
 | File | Role |
 |---|---|
-| [`src/index.ts`](src/index.ts) | `StockController`: the `stock` service and Remote namespace, `Config`, the four reads, the seam-failure mapping, and window and cap validation |
+| [`src/index.ts`](src/index.ts) | `StockController`: the `stock` service and Remote namespace, reads, failure mapping, and caps |
+| [`src/dragon-tiger.ts`](src/dragon-tiger.ts) | Validation and projection of nested dragon-tiger lists |
 | [`src/vendor.ts`](src/vendor.ts) | Vendor-row readers and the row projections; the one place vendor field names are read |
 | [`src/types.ts`](src/types.ts) | Wire vocabulary, published as `./types` for Client packages |
 | [`src/client/index.ts`](src/client/index.ts) | Browser plugin and `ctx.stockClient` |

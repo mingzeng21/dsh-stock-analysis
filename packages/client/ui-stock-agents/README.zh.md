@@ -1,5 +1,5 @@
 ---
-description: "基于 skill 的股票 Agents 的 Web 侧边栏目录、启动表单与历史记录。"
+description: "股票 Agents 的 Web 目录、基于 skill 的对话与原生龙虎榜仪表盘。"
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-Web 客户端注册一个股票分析侧边栏入口，从 Host 的 skill 元数据构建卡片，并在 Agents 工作区的可折叠历史栏中显示持久化的专属 Session。Conversation 历史只包含普通对话；Agent 记录和结果留在 Agents。无论应用语言如何设置，Agents 自有界面文案均使用简体中文；股票 preset 要求回答使用简体中文。卡片依据 `SKILL.md` 元数据打开输入表单，或直接开始分析。
+Web 客户端注册一个股票分析侧边栏入口，从 Host 的 skill 元数据构建专属卡片，并加入原生龙虎榜仪表盘卡片。专属 Session 显示在 Agents 内的可折叠历史栏；仪表盘直接读取当前市场数据，不创建 Session。Conversation 历史只包含普通对话；Agent 记录和结果留在 Agents。无论应用语言如何设置，Agents 自有界面文案均使用简体中文。
 
 ## 目录
 
@@ -25,12 +25,12 @@ Web 客户端注册一个股票分析侧边栏入口，从 Host 的 skill 元数
 <a id="use-this-package"></a>
 ## 使用本包
 
-与 Session 服务、股票 Agents Remote、locale 和 slots 一起挂载。点击立即启动的卡片会创建新 Session 并开始分析；输入类卡片会等到用户提交内容后再启动。卡片可提供本地化输入标签与单行文本框；未提供时面板沿用选股条件标签和多行文本框。每次运行都会在首轮前选中 `stock-analysis`、发送显式 `/skill-name` 提示词，并在 Agents 工作区内显示流式对话。专属记录显示在 Agents 自有历史栏中；选择记录会打开对应结果，不会改变普通 Conversation 的当前选择。目录、启动表单或结果视图中都可以通过图标按钮收起和展开历史栏。
+与 Session 服务、股票 Agents Remote、股票数据客户端、locale 和 slots 一起挂载。点击立即启动的专属卡片会创建新 Session 并开始分析；输入类卡片会等待提交。每次运行都会在首轮前选中 `stock-analysis`、发送显式 `/skill-name` 提示词，并在 Agents 内显示流式对话。点击“龙虎榜观察”则立即打开仪表盘，读取同一最新交易日的三种榜单。标签页、正负金额图、股票排序和席位详情均可交互；刷新会重新读取。历史栏保存专属 Session，可在各视图收起。
 
 <a id="understand-the-implementation"></a>
 ## 理解实现
 
-卡片元数据来自随包 skill 中的 `metadata.stockAgent`，面板只显示其中的中文字段。面板持有启动状态和临时的记录栏显隐状态；回答和追问由 Session 日志持有。结果与追问复用 `conversation.content` factory，所选 Session 由 Agents 工作区独立绑定。打开 Agent 记录不会切换普通 Conversation 的当前选择。skill 移除后历史仍可打开，但不提供重新运行的卡片。
+专属卡片元数据来自随包 skill 中的 `metadata.stockAgent`。面板持有启动、仪表盘和临时历史栏状态；专属回答和追问由 Session 日志持有。专属结果复用 `conversation.content` factory。仪表盘调用 `ctx.stockClient.dragonTiger()`，不调用 skill 或模型。打开 Agent 记录不会切换普通 Conversation 的当前选择。skill 移除后历史仍可打开，但不提供重新运行的卡片。
 
 <a id="further-exploration"></a>
 ## 进一步探索
@@ -40,7 +40,7 @@ Web 客户端注册一个股票分析侧边栏入口，从 Host 的 skill 元数
 <a id="dev-note"></a>
 ## 开发备注
 
-新增专属 Agent 的内容放在 `packages/bundle/web-app/skills/<name>/SKILL.md`；UI 没有逐个 Agent 的分支。
+新增对话型专属 Agent 的内容放在 `packages/bundle/web-app/skills/<name>/SKILL.md`。龙虎榜观察等原生数据视图位于本包，使用面向浏览器的数据客户端。
 
 <a id="model-experience"></a>
 ## 模型体验
@@ -63,5 +63,5 @@ Web 客户端注册一个股票分析侧边栏入口，从 Host 的 skill 元数
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- 专属 Agent 结果在 Agents 内复用完整对话视图，不提供独立仪表盘。Host Remote 可用后目录才会显示卡片。
+- 对话型专属 Agent 的结果复用完整对话视图。Host Remote 可用后才会显示专属卡片；龙虎榜仪表盘需要股票 provider 提供数据。
 - 不发布运行时不变量配套模块；页面直接呈现 Host 维护的 Session 与目录状态，不另存一份持久副本。

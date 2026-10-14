@@ -1,5 +1,5 @@
 ---
-description: "面向浏览器的行情数据读取，构建在股票能力 seam 之上：在 stock Remote 命名空间上提供归一化的标的匹配、快照批量、K 线序列与研究文档。"
+description: "面向浏览器的行情数据读取：归一化的标的匹配、行情快照、K 线、研究文档和龙虎榜。"
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-当浏览器界面需要行情数据时使用本包。它在[股票能力 seam](../../stock/stock/README.zh.md)之上完成一个视图能够渲染的四项读取——跨市场标的消歧、一次批量快照、单只标的的 K 线序列、单只标的的研究文档——并在 Host 上一次性解析 vendor 的字段名、日期编码与检索词汇。它不注册任何工具，也不贡献任何 prompt，因此挂载它不消耗工具 schema token；`dsh-tool-stock` 仍是同一 seam 面向模型的 consumer。
+当浏览器界面需要行情数据时使用本包。它通过[股票能力 seam](../../stock/stock/README.zh.md)读取标的、快照、K 线、文档和龙虎榜，并在 Host 上解析 vendor 字段。本包不注册工具或 prompt；`dsh-tool-stock` 仍是同一 seam 面向模型的 consumer。
 
 ## 目录
 
@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-把本包与 `dsh-stock` 及一个 provider 一起挂载。Client 调用 `remote.stock.searchSymbols(query, limit)`、`quotes(thscodes)`、`candles(request)` 或 `documents(request)`；没有任何方法接收 Session，因为行情数据不属于任何 Session。
+把本包与 `dsh-stock` 及一个 provider 一起挂载。Client 调用 `remote.stock.searchSymbols(query, limit)`、`quotes(thscodes)`、`candles(request)`、`documents(request)` 或 `dragonTiger()`；没有任何方法接收 Session，因为行情数据不属于任何 Session。
 
 | 方法 | 返回 | 用途 |
 |---|---|---|
@@ -33,6 +33,7 @@ kind: "package-reference"
 | `quotes(thscodes)` | `QuoteBatch { asOf?, quotes }` | 为每个指定标的取一次批量快照 |
 | `candles(request)` | `CandleSeries { thscode, interval, asOf?, truncated, candles }` | 一只标的在一个窗口内的 K 线 |
 | `documents(request)` | `readonly DocumentRow[]` | 一只标的的研报、公告或新闻 |
+| `dragonTiger()` | `DragonTigerDashboard` | 最新交易日的全部、机构与游资龙虎榜 |
 
 ### 归一化
 
@@ -53,6 +54,10 @@ seam 有意在其行上保留 vendor 自己的字段名，因为其 94 个能力
 无法提供界面所需值的行会让整次读取以 `stock/malformed-row` 失败并指名字段；它永远不会被丢弃，也永远不会变成 0，因为被丢弃的行会被读成"这只标的没有"，而 0 会被读成一个已披露的数值。数值字段接受数字字符串，因为 vendor 在 JSON 数字编码上并不一致。
 
 由于 vendor 的快照行不携带标的名，`Quote` 也没有：调用方本来就持有它把这个标的列在哪个名字之下。
+
+### 龙虎榜
+
+`dragonTiger()` 先读取最新全部榜的交易日期，再按同一日期读取机构榜和游资榜。日期不一致或嵌套行格式错误时整次读取失败。响应包含股票净额、活跃席位、关联股票；配置的行数上限截断任一列表时会设置 `truncated`。这是实时市场数据读取，不属于 Session 结果。
 
 ### 周期、复权与窗口
 
@@ -78,6 +83,9 @@ seam 有意在其行上保留 vendor 自己的字段名，因为其 94 个能力
 | `maxDocuments` | `30` | 一次文档检索最多返回的行数上限（含）；更大的请求会被截断到该值 |
 | `maxSummaryChars` | `400` | 单条文档节选的字符上限（含） |
 | `maxSymbolMatches` | `20` | 标的检索候选数上限（含）；更大的请求会被截断到该值 |
+| `maxDragonTigerStocks` | `200` | 发送给浏览器的每榜股票行数上限 |
+| `maxDragonTigerSeats` | `60` | 发送给浏览器的每榜活跃席位上限 |
+| `maxDragonTigerSeatStocks` | `30` | 发送给浏览器的每个席位关联股票上限 |
 
 生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-api-stock-controller)是每个可接受字段及其 JSDoc 的完整来源。
 
@@ -115,7 +123,8 @@ seam 错误码按字符串而非类身份比较，因为 `StockError` 类属于�
 
 | 文件 | 角色 |
 |---|---|
-| [`src/index.ts`](src/index.ts) | `StockController`：`stock` 服务与 Remote 命名空间、`Config`、四项读取、seam 失败映射，以及窗口与上限校验 |
+| [`src/index.ts`](src/index.ts) | `StockController`：`stock` 服务与 Remote 命名空间、读取、失败映射及上限 |
+| [`src/dragon-tiger.ts`](src/dragon-tiger.ts) | 龙虎榜嵌套列表的校验与映射 |
 | [`src/vendor.ts`](src/vendor.ts) | vendor 行读取器与行投影；唯一读取 vendor 字段名的地方 |
 | [`src/types.ts`](src/types.ts) | 线上词汇，作为 `./types` 发布给 Client 包 |
 | [`src/client/index.ts`](src/client/index.ts) | 浏览器插件与 `ctx.stockClient` |

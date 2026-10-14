@@ -2861,6 +2861,12 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'the quotes the vendor returned, in the seam\'s order, with the batch\'s data-readiness timestamp.',
       },
       {
+        signature: '@Remote async dragonTiger(signal: AbortSignal): Promise<DragonTigerDashboard>',
+        description: 'Read all three dragon-tiger boards for the latest available trading date.',
+        parameters: [{ name: 'signal', description: 'caller cancellation.' }],
+        returns: 'same-date boards, with bounded nested entries and vendor counts.',
+      },
+      {
         signature: '@Remote async candles(request: CandleRequest, signal: AbortSignal): Promise<CandleSeries>',
         description: 'Read one instrument\'s candle series for a window.',
         parameters: [{ name: 'request', description: 'instrument, period, adjustment, and the window.' }, { name: 'signal', description: 'caller cancellation.' }],
@@ -4821,7 +4827,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'Candle',
-    declaration: 'export interface Candle {\n    readonly time: number;\n    readonly open: number;\n    readonly high: number;\n    readonly low: number;\n    readonly close: number;\n    readonly volume: number;\n}',
+    declaration: 'export interface Candle {\n    readonly time: number;\n    readonly open: number;\n    readonly high: number;\n    readonly low: number;\n    readonly close: number;\n    readonly volume: number;\n    readonly turnover: number;\n}',
   },
   {
     name: 'CandleAdjust',
@@ -5250,6 +5256,30 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'DomainTableSpec',
     declaration: 'export interface DomainTableSpec<K extends string = string, V = unknown> {\n    readonly valueSchema: ZodType<V>;\n    readonly __key?: K;\n}',
+  },
+  {
+    name: 'DragonTigerBoard',
+    declaration: 'export interface DragonTigerBoard {\n    readonly type: DragonTigerBoardType;\n    readonly stockCount: number;\n    readonly recordCount: number;\n    readonly stocks: readonly DragonTigerStock[];\n    readonly seats: readonly DragonTigerSeat[];\n    readonly truncated: boolean;\n}',
+  },
+  {
+    name: 'DragonTigerBoardType',
+    declaration: 'export type DragonTigerBoardType = \'all\' | \'org\' | \'hot_money\';',
+  },
+  {
+    name: 'DragonTigerDashboard',
+    declaration: 'export interface DragonTigerDashboard {\n    readonly tradeDate: string;\n    readonly asOf?: number;\n    readonly boards: readonly DragonTigerBoard[];\n}',
+  },
+  {
+    name: 'DragonTigerSeat',
+    declaration: 'export interface DragonTigerSeat {\n    readonly name: string;\n    readonly buying?: number;\n    readonly stocks: readonly DragonTigerSeatStock[];\n    readonly truncated: boolean;\n}',
+  },
+  {
+    name: 'DragonTigerSeatStock',
+    declaration: 'export interface DragonTigerSeatStock {\n    readonly thscode: string;\n    readonly name: string;\n    readonly netValue?: number;\n}',
+  },
+  {
+    name: 'DragonTigerStock',
+    declaration: 'export interface DragonTigerStock {\n    readonly thscode: string;\n    readonly name: string;\n    readonly netValue: number;\n    readonly orgNetValue?: number;\n    readonly hotMoneyNetValue?: number;\n    readonly buyValue?: number;\n    readonly sellValue?: number;\n    readonly rangeDays?: number;\n}',
   },
   {
     name: 'DshEnvironment',

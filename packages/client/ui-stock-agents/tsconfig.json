@@ -18,6 +18,9 @@
       "path": "../../api/stock-agents-controller/tsconfig.client.json"
     },
     {
+      "path": "../../api/stock-controller/tsconfig.client.json"
+    },
+    {
       "path": "../../core/session"
     },
     {

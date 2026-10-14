@@ -1,12 +1,14 @@
-/** Catalog, launch form, and collapsible history rail for stock Agents. */
+/** Catalog, specialist launch form, dashboard, and history rail for stock Agents. */
 import { useEffect, useRef, useState } from 'react'
 import type { StockAgentCard } from '@deepseek-ai/dsh-api-stock-agents-controller/types'
+import type { DragonTigerDashboard as DragonTigerData } from '@deepseek-ai/dsh-api-stock-controller/client'
 import type { SessionListState, SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { IconPanelLeftOutlineRegular, Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRenderSlots, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import css from './AgentsPanel.module.css'
+import { DragonTigerDashboard } from './DragonTigerDashboard.tsx'
 
 /** Panel data and actions supplied by the plugin. */
 export interface AgentsPanelInjected {
@@ -18,13 +20,14 @@ export interface AgentsPanelInjected {
   loadCatalog: () => void
   start: (card: StockAgentCard, query: string) => Promise<SessionReference>
   openSession: (sessionId: SessionId) => SessionReference
+  loadDragonTiger: (signal: AbortSignal) => Promise<DragonTigerData>
 }
 export type AgentsPanelProps = PropsRuntime<'main'> & PropsRenderSlots<'stock-agents.conversation'>
   & PropsLocale<'stockAgents'> & InjectFace<AgentsPanelInjected>
 
-/** Render stock Agent launch surfaces beside a collapsible Session history rail. */
+/** Render stock Agent launch and dashboard views beside Session history. */
 export function AgentsPanel({
-  t, renderSlot, SessionProvider, useCatalog, useSessions, useCatalogError, loadCatalog, start, openSession,
+  t, renderSlot, SessionProvider, useCatalog, useSessions, useCatalogError, loadCatalog, start, openSession, loadDragonTiger,
 }: AgentsPanelProps) {
   const catalog = useCatalog(value => value)
   const sessions = useSessions(value => value)
@@ -39,6 +42,11 @@ export function AgentsPanel({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [historyVisible, setHistoryVisible] = useState(true)
+  const [dashboardOpen, setDashboardOpen] = useState(false)
+  const [dashboardData, setDashboardData] = useState<DragonTigerData | null>(null)
+  const [dashboardLoading, setDashboardLoading] = useState(false)
+  const [dashboardError, setDashboardError] = useState(false)
+  const dashboardRequest = useRef<AbortController | null>(null)
   useEffect(() => { loadCatalog() }, [loadCatalog])
   useEffect(() => {
     mounted.current = true
@@ -47,6 +55,7 @@ export function AgentsPanel({
       for (const reference of ownedReferences.current) reference.release()
       ownedReferences.current.clear()
       activeReference.current = null
+      dashboardRequest.current?.abort()
     }
   }, [])
   useEffect(() => {
@@ -80,8 +89,14 @@ export function AgentsPanel({
       if (activeReference.current === reference) setError('failed')
     })
   }
-  const showSession = (sessionId: SessionId) => { showReference(openSession(sessionId)) }
+  const showSession = (sessionId: SessionId) => {
+    setDashboardOpen(false)
+    dashboardRequest.current?.abort()
+    showReference(openSession(sessionId))
+  }
   const choose = (card: StockAgentCard, initial = '') => {
+    setDashboardOpen(false)
+    dashboardRequest.current?.abort()
     clearActiveSession()
     setSelected(card)
     setQuery(initial)
@@ -91,6 +106,28 @@ export function AgentsPanel({
       void start(card, '').then(showReference)
         .catch(() => { setError('failed') }).finally(() => { setBusy(false) })
     }
+  }
+  const refreshDashboard = () => {
+    dashboardRequest.current?.abort()
+    const request = new AbortController()
+    dashboardRequest.current = request
+    setDashboardLoading(true)
+    setDashboardError(false)
+    void loadDragonTiger(request.signal).then((value) => {
+      if (!request.signal.aborted && mounted.current) setDashboardData(value)
+    }).catch(() => {
+      if (!request.signal.aborted && mounted.current) setDashboardError(true)
+    }).finally(() => {
+      if (!request.signal.aborted && mounted.current) setDashboardLoading(false)
+    })
+  }
+  const openDashboard = () => {
+    clearActiveSession()
+    setSelected(null)
+    setHistoryVisible(false)
+    setDashboardData(null)
+    setDashboardOpen(true)
+    refreshDashboard()
   }
   const run = () => {
     if (selected === null || busy || (selected.launch === 'query' && query.trim() === '')) return
@@ -162,6 +199,18 @@ export function AgentsPanel({
       </section>
     </main>
   }
+  if (dashboardOpen) return <main className={css.panel}>
+    {historyRail}
+    <section className={css.detail}>
+      <nav className={css.detailNav} aria-label={t('dragon.title')}>
+        {!historyVisible && historyToggle}
+        <button type="button" className={css.back} onClick={() => { dashboardRequest.current?.abort(); setDashboardOpen(false) }}>{t('panel.back')}</button>
+        <span>{t('dragon.title')}</span>
+        <button type="button" onClick={refreshDashboard} disabled={dashboardLoading}>{t('dragon.refresh')}</button>
+      </nav>
+      <DragonTigerDashboard data={dashboardData} loading={dashboardLoading} error={dashboardError} onRetry={refreshDashboard} t={t} />
+    </section>
+  </main>
   return <main className={css.panel}>
     {historyRail}
     <section className={css.content}>
@@ -175,6 +224,9 @@ export function AgentsPanel({
       </header>
       {selected === null ? <div className={css.cards}>
         {catalogError !== null && <p role="alert">{t('panel.catalogFailure')}</p>}
+        <button type="button" className={css.card} onClick={openDashboard}>
+          <strong>{t('dragon.cardTitle')}</strong><span>{t('dragon.cardSummary')}</span>
+        </button>
         {catalog.map(card => <button type="button" className={css.card} key={card.name} onClick={() => { choose(card) }}>
           <strong>{card.title.zh}</strong><span>{card.summary.zh}</span>
         </button>)}

@@ -84,6 +84,7 @@ function watchlistStub(initial: readonly WatchlistEntry[] = []): IWatchlist {
 /** A scripted market-data face whose batch answers from a set of quotes. */
 function stockStub(quotes: readonly Quote[] = [], asOf?: number): IStockClient {
   return {
+    dragonTiger: async () => { throw new Error('this spec never reads dragon-tiger boards') },
     searchSymbols: async () => [{ thscode: '600519.SH', ticker: '600519', name: '贵州茅台' }],
     quotes: async (): Promise<QuoteBatch> => ({
       quotes,

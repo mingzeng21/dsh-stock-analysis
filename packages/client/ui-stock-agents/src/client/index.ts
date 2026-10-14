@@ -1,7 +1,8 @@
-/** Browser contribution for the skill-backed stock Agents catalog. */
+/** Browser contribution for stock Agents and the dragon-tiger dashboard. */
 import type { Context } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/dsh-api-stock-agents-controller/remote'
 import type {} from '@deepseek-ai/dsh-api-stock-agents-controller/client'
+import type {} from '@deepseek-ai/dsh-api-stock-controller/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
@@ -34,7 +35,7 @@ declare module '@deepseek-ai/dsh-api-session-controller/client' {
 }
 
 const PANEL_ID = 'stock-agents' as MainPanelId
-export const inject = ['slots', 'locale', 'layout', 'sessions', 'stockAgentsClient', 'remote', 'remote.agentPresets']
+export const inject = ['slots', 'locale', 'layout', 'sessions', 'stockAgentsClient', 'stockClient', 'remote', 'remote.agentPresets']
 
 /** Register the single navigation row and its catalog/history panel. */
 export function apply(ctx: Context): void {
@@ -91,6 +92,7 @@ export function apply(ctx: Context): void {
       hooks: { catalog, sessions: ctx.sessions.list, catalogError },
       loadCatalog,
       start,
+      loadDragonTiger: signal => ctx.stockClient.dragonTiger(signal),
       openSession: (sessionId: SessionId) => ctx.sessions.retain(sessionId, { source: 'stockAgent' }),
     }),
   }, AgentsPanel))

@@ -3,8 +3,8 @@
  *
  * The stock capability seam keeps the vendor's own field names on its rows,
  * because the 94 capabilities it serves return 94 row shapes. This module is
- * the single consumer that fixes a canonical type: the four reads the
- * watchlist panel needs, with the vendor's field names and encodings resolved
+ * the single consumer that fixes a canonical type: the reads the watchlist and
+ * dashboard need, with the vendor's field names and encodings resolved
  * once on the Host so no view or store ever reads a vendor row.
  * @module @deepseek-ai/dsh-api-stock-controller/types
  */
@@ -69,6 +69,53 @@ export interface QuoteBatch {
   readonly asOf?: number
   /** Quotes in the requested order; an instrument the vendor does not know is absent. */
   readonly quotes: readonly Quote[]
+}
+
+/** The three published dragon-tiger list views. */
+export type DragonTigerBoardType = 'all' | 'org' | 'hot_money'
+
+/** One stock entry in a dragon-tiger list. Amounts are vendor yuan values. */
+export interface DragonTigerStock {
+  readonly thscode: string
+  readonly name: string
+  readonly netValue: number
+  readonly orgNetValue?: number
+  readonly hotMoneyNetValue?: number
+  readonly buyValue?: number
+  readonly sellValue?: number
+  readonly rangeDays?: number
+}
+
+/** One stock linked to a named hot-money seat. */
+export interface DragonTigerSeatStock {
+  readonly thscode: string
+  readonly name: string
+  readonly netValue?: number
+}
+
+/** One active seat and its returned stock links. */
+export interface DragonTigerSeat {
+  readonly name: string
+  readonly buying?: number
+  readonly stocks: readonly DragonTigerSeatStock[]
+  readonly truncated: boolean
+}
+
+/** One board's reported counts and bounded, browser-safe entries. */
+export interface DragonTigerBoard {
+  readonly type: DragonTigerBoardType
+  readonly stockCount: number
+  readonly recordCount: number
+  readonly stocks: readonly DragonTigerStock[]
+  readonly seats: readonly DragonTigerSeat[]
+  readonly truncated: boolean
+}
+
+/** Three boards aligned to the latest available trading date. */
+export interface DragonTigerDashboard {
+  readonly tradeDate: string
+  readonly asOf?: number
+  readonly boards: readonly DragonTigerBoard[]
 }
 
 /** One candlestick. */

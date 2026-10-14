@@ -150,7 +150,7 @@
         firstUseDirectory: !!js dshHomePath('workspaces', 'stock-analysis')
 
     # Browser-facing market-data reads over the `stock` capability seam: the
-    # four narrow reads a view needs, with the vendor's row fields resolved
+    # narrow reads browser views need, with the vendor's row fields resolved
     # once on this side. It adds no tools, so it costs no tool-schema tokens.
     - id: stock-controller
       name: '@deepseek-ai/dsh-api-stock-controller'

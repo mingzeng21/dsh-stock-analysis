@@ -2,6 +2,7 @@
 /** The Agents panel keeps specialist output and history inside its own main entry. */
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import type { StockAgentCard } from '@deepseek-ai/dsh-api-stock-agents-controller/types'
+import type { DragonTigerDashboard } from '@deepseek-ai/dsh-api-stock-controller/client'
 import type { SessionListState, SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { LocaleSnapshot } from '@deepseek-ai/dsh-client-locale/client'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
@@ -35,6 +36,18 @@ const SECTOR: StockAgentCard = {
   queryInput: { label: { zh: '输入板块名称', en: 'Enter a sector name' }, kind: 'text' },
 }
 
+const DASHBOARD: DragonTigerDashboard = {
+  tradeDate: '2026-10-12',
+  boards: [
+    { type: 'all', stockCount: 2, recordCount: 2, truncated: false, seats: [{ name: '活跃席位', stocks: [{ thscode: '600001.SH', name: '甲公司', netValue: 30_000_000 }], truncated: false }], stocks: [
+      { thscode: '600001.SH', name: '甲公司', netValue: 120_000_000, orgNetValue: 70_000_000 },
+      { thscode: '000002.SZ', name: '乙公司', netValue: -60_000_000, hotMoneyNetValue: -40_000_000 },
+    ] },
+    { type: 'org', stockCount: 1, recordCount: 1, truncated: false, seats: [], stocks: [{ thscode: '600001.SH', name: '甲公司', netValue: 70_000_000 }] },
+    { type: 'hot_money', stockCount: 1, recordCount: 1, truncated: false, seats: [], stocks: [{ thscode: '000002.SZ', name: '乙公司', netValue: -40_000_000 }] },
+  ],
+}
+
 afterEach(cleanup)
 
 function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) {
@@ -63,6 +76,7 @@ function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) 
     [Symbol.dispose]: release,
   }
   const start = vi.fn(async () => reference)
+  const loadDragonTiger = vi.fn(async () => DASHBOARD)
   const openSession = vi.fn(() => reference)
   const renderSlot = vi.fn((..._args: unknown[]) => <div data-testid="conversation">流式回答与追问</div>)
   const unused = () => { throw new Error('unneeded global slot prop') }
@@ -75,6 +89,7 @@ function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) 
     useCatalogError: bindSnapshotSelector(error),
     loadCatalog: vi.fn(),
     start,
+    loadDragonTiger,
     openSession,
     renderSlot,
     usePanelInfo: unused,
@@ -84,8 +99,22 @@ function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) 
     useResource: unused,
   } as AgentsPanelProps
   render(<AgentsPanel {...props} />)
-  return { start, openSession, renderSlot }
+  return { start, openSession, renderSlot, loadDragonTiger }
 }
+
+it('opens the native dragon-tiger dashboard without starting a Session', async () => {
+  const { start, loadDragonTiger } = mount()
+  fireEvent.click(screen.getByRole('button', { name: /龙虎榜观察/ }))
+  await waitFor(() => { expect(screen.getByText('2026-10-12')).toBeTruthy() })
+  expect(start).not.toHaveBeenCalled()
+  expect(loadDragonTiger).toHaveBeenCalledTimes(1)
+  fireEvent.click(within(screen.getByRole('navigation', { name: '龙虎榜类型' })).getByRole('button', { name: '机构榜' }))
+  expect(screen.getByText('机构榜', { selector: 'button' }).getAttribute('aria-current')).toBe('page')
+  fireEvent.click(screen.getByRole('button', { name: /甲公司/ }))
+  expect(screen.getByRole('region', { name: '记录详情' })).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: '返回Agents' }))
+  expect(screen.getByRole('button', { name: /龙虎榜观察/ })).toBeTruthy()
+})
 
 it('renders a newly launched Agent in the Agents panel and returns to its catalog', async () => {
   const { start, renderSlot } = mount()

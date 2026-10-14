@@ -7,7 +7,7 @@ import { Context } from '@deepseek-ai/cordis'
 import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
 import { describe, expect, it, onTestFinished } from 'vitest'
 import { apply, inject } from '../src/client/index.ts'
-import type { CandleRequest, DocumentRow, InstrumentMatch, QuoteBatch } from '../src/types.ts'
+import type { CandleRequest, DocumentRow, DragonTigerDashboard, InstrumentMatch, QuoteBatch } from '../src/types.ts'
 
 const MATCHES: readonly InstrumentMatch[] = [
   { thscode: '600519.SH', ticker: '600519', name: '贵州茅台', assetType: 'a-share', exchange: 'SH' },
@@ -38,12 +38,15 @@ const DOCUMENTS: readonly DocumentRow[] = [{
   summaryTruncated: false,
 }]
 
+const DRAGON_TIGER: DragonTigerDashboard = { tradeDate: '2026-10-12', boards: [] }
+
 /** Arguments one call reached the fake namespace with. */
 interface Recorded {
   readonly searchSymbols: unknown[][]
   readonly quotes: unknown[][]
   readonly candles: unknown[][]
   readonly documents: unknown[][]
+  readonly dragonTiger: unknown[][]
 }
 
 /** A scripted `stock` namespace: it records arguments and answers with one fixed outcome. */
@@ -60,12 +63,13 @@ function namespace(recorded: Recorded, answers: { readonly failure?: RemoteError
       return reply({ thscode: request.thscode, interval: request.interval, truncated: false, candles: [] })
     },
     documents: (...args: unknown[]) => { recorded.documents.push(args); return reply(DOCUMENTS) },
+    dragonTiger: (...args: unknown[]) => { recorded.dragonTiger.push(args); return reply(DRAGON_TIGER) },
   }
 }
 
 /** One booted client plugin over a scripted Remote face. */
 function boot(answers: { readonly failure?: RemoteError } = {}) {
-  const recorded: Recorded = { searchSymbols: [], quotes: [], candles: [], documents: [] }
+  const recorded: Recorded = { searchSymbols: [], quotes: [], candles: [], documents: [], dragonTiger: [] }
   const stock = namespace(recorded, answers)
   const ctx = new Context()
   ctx.provide('remote', { stock } as never)
@@ -86,6 +90,14 @@ describe('stock client apply', () => {
 })
 
 describe('stock client reads', () => {
+  it('reads the dashboard through the stock Remote', async () => {
+    const { ctx, recorded, fiber } = boot()
+    await fiber.await()
+    onTestFinished(async () => { await fiber.dispose() })
+    await expect(ctx.stockClient.dragonTiger()).resolves.toEqual(DRAGON_TIGER)
+    expect(recorded.dragonTiger).toHaveLength(1)
+  })
+
   it('forwards a symbol search and returns the candidates', async () => {
     const { ctx, recorded, fiber } = boot()
     await fiber.await()

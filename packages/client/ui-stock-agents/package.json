@@ -1,6 +1,6 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-stock-agents",
-  "description": "Web stock Agents catalog, launch, and history panel",
+  "description": "Web stock Agents catalog, specialist Sessions, and dragon-tiger dashboard",
   "version": "0.2.0-rc.2",
   "publishConfig": {
     "access": "public"
@@ -30,6 +30,7 @@
       "inject": [
         "@deepseek-ai/dsh-api-gateway",
         "@deepseek-ai/dsh-api-stock-agents-controller",
+        "@deepseek-ai/dsh-api-stock-controller",
         "@deepseek-ai/dsh-client-locale",
         "@deepseek-ai/dsh-client-ui-conversation",
         "@deepseek-ai/dsh-client-ui-sidebar",
@@ -51,6 +52,7 @@
     "@deepseek-ai/cordis": "workspace:~",
     "@deepseek-ai/dsh-api-gateway": "workspace:*",
     "@deepseek-ai/dsh-api-stock-agents-controller": "workspace:*",
+    "@deepseek-ai/dsh-api-stock-controller": "workspace:*",
     "@deepseek-ai/dsh-api-session-controller": "workspace:*",
     "@deepseek-ai/dsh-client-locale": "workspace:*",
     "@deepseek-ai/dsh-client-store": "workspace:*",

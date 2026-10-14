@@ -1,7 +1,7 @@
 /**
  * Browser half: the `stockClient` read face over the `stock` Remote namespace.
  *
- * The watchlist panel calls this service instead of the Remote directly, so the
+ * Browser panels call this service instead of the Remote directly, so the
  * package that owns the wire names is also the package that unwraps their
  * results. A failure is thrown as the Gateway's `RemoteError`, whose `code` a
  * caller branches on; nothing here pre-formats a code into copy, because the
@@ -19,12 +19,13 @@ import type {} from '@deepseek-ai/dsh-api-gateway/client'
 import type {} from '@deepseek-ai/dsh-api-stock-controller/remote'
 import type { RemoteResult, TypertRemoteNamespaceMap } from '@deepseek-ai/dsh-typert-protocol'
 import type {
-  CandleRequest, CandleSeries, DocumentRow, DocumentsRequest, InstrumentMatch, QuoteBatch,
+  CandleRequest, CandleSeries, DocumentRow, DocumentsRequest, DragonTigerDashboard, InstrumentMatch, QuoteBatch,
 } from '../types.ts'
 
 export type {
   Candle, CandleAdjust, CandleInterval, CandleRequest, CandleSeries,
   DocumentKind, DocumentRow, DocumentsRequest,
+  DragonTigerBoard, DragonTigerBoardType, DragonTigerDashboard, DragonTigerSeat, DragonTigerSeatStock, DragonTigerStock,
   InstrumentMatch, Quote, QuoteBatch,
 } from '../types.ts'
 
@@ -35,8 +36,14 @@ declare module '@deepseek-ai/cordis' {
   }
 }
 
-/** The reads the watchlist panel performs, each resolving to a value or throwing a `RemoteError`. */
+/** Browser market-data reads, each resolving to a value or throwing a `RemoteError`. */
 export interface IStockClient {
+  /**
+   * Read the latest same-date dragon-tiger boards.
+   * @param signal - caller cancellation.
+   * @returns all, institution, and hot-money boards.
+   */
+  dragonTiger(signal?: AbortSignal): Promise<DragonTigerDashboard>
   /**
    * Resolve a name, bare code, or thscode fragment to complete instruments.
    * @param query - user-facing search text.
@@ -87,6 +94,11 @@ export class StockClient extends Service implements IStockClient {
    */
   constructor(ctx: Context, private readonly namespace: TypertRemoteNamespaceMap['stock']) {
     super(ctx, 'stockClient')
+  }
+
+  /** {@inheritDoc IStockClient.dragonTiger} */
+  async dragonTiger(signal?: AbortSignal): Promise<DragonTigerDashboard> {
+    return unwrap(await this.namespace.dragonTiger(signal))
   }
 
   /** {@inheritDoc IStockClient.searchSymbols} */

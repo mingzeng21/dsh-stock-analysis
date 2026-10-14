@@ -8,7 +8,8 @@ import { QuoteOverlay } from '../src/client/QuotePanel.tsx'
 import { StockQuoteOverlay } from '../src/client/overlay.ts'
 import { WatchlistQuickAdd } from '../src/client/watchlist.ts'
 
-const stock: Pick<IStockClient, 'quotes' | 'candles' | 'searchSymbols' | 'documents'> = {
+const stock: IStockClient = {
+  dragonTiger: vi.fn(async () => { throw new Error('this spec never reads dragon-tiger boards') }),
   quotes: vi.fn(async () => ({ quotes: [{
     thscode: '600519.SH', last: 1252.57, change: -4.55, changePct: -0.36,
     open: 1259, high: 1259.95, low: 1250.8, prevClose: 1257.12, volume: 2_501_689, turnover: 3_135_910_000,
