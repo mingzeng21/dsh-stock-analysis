@@ -4,6 +4,7 @@ import type { HotRankBoard, HotRankDashboard as DashboardData, HotRankHistory } 
 import { IconLoadingOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import css from './HotRankDashboard.module.css'
+import type { DashboardScope } from './dashboard-inquiry.ts'
 
 interface Props {
   readonly data: DashboardData | null
@@ -12,6 +13,9 @@ interface Props {
   readonly onRetry: () => void
   readonly loadHistory: (thscode: string, signal: AbortSignal) => Promise<HotRankHistory>
   readonly t: TranslateNS<'stockAgents'>
+  readonly onScopeChange?: (scope: Extract<DashboardScope, { kind: 'hot' }>) => void
+  readonly onHistoryChange?: (history: HotRankHistory | null) => void
+  readonly focus?: { readonly code: string; readonly sequence: number } | null
 }
 
 const VIEWS = [
@@ -33,12 +37,22 @@ function dateLabel(timestamp: number | undefined, t: Props['t']): string {
 }
 
 /** Render four independently observed lists and a stock's daily rank chart. */
-export function HotRankDashboard({ data, loading, error, onRetry, loadHistory, t }: Props) {
+export function HotRankDashboard({ data, loading, error, onRetry, loadHistory, t, onScopeChange, onHistoryChange, focus }: Props) {
   const [view, setView] = useState<(typeof VIEWS)[number]>(VIEWS[0])
   const [selected, setSelected] = useState<string | null>(null)
   const [history, setHistory] = useState<HotRankHistory | null>(null)
   const [historyLoading, setHistoryLoading] = useState(false)
   const [historyError, setHistoryError] = useState(false)
+  useEffect(() => {
+    if (data === null || focus === null || focus === undefined) return
+    const contains = (item: (typeof VIEWS)[number]) => data.boards.some(board =>
+      board.kind === item.kind && board.period === item.period && board.stocks.some(stock => stock.thscode === focus.code))
+    const match = VIEWS.find(item => item.key === view.key && contains(item)) ?? VIEWS.find(contains)
+    if (match === undefined) return
+    setView(match)
+    setSelected(focus.code)
+    onScopeChange?.({ kind: 'hot', board: match.kind, period: match.period, stock: focus.code })
+  }, [data, focus, onScopeChange])
   const board: HotRankBoard | undefined = data?.boards.find(item => item.kind === view.kind && item.period === view.period)
   const stock = board?.stocks.find(item => item.thscode === selected) ?? board?.stocks[0]
   const code = stock?.thscode
@@ -47,17 +61,18 @@ export function HotRankDashboard({ data, loading, error, onRetry, loadHistory, t
     if (code === undefined) return
     const request = new AbortController()
     setHistory(null)
+    onHistoryChange?.(null)
     setHistoryLoading(true)
     setHistoryError(false)
     void loadHistory(code, request.signal).then((value) => {
-      if (!request.signal.aborted) setHistory(value)
+      if (!request.signal.aborted) { setHistory(value); onHistoryChange?.(value) }
     }).catch(() => {
       if (!request.signal.aborted) setHistoryError(true)
     }).finally(() => {
       if (!request.signal.aborted) setHistoryLoading(false)
     })
     return () => { request.abort() }
-  }, [code, data, loadHistory])
+  }, [code, data, loadHistory, onHistoryChange])
 
   if (data === null) return <div className={css.center}>
     {loading ? <IconLoadingOutlineRegular className={css.spinner} size={24} />
@@ -80,7 +95,11 @@ export function HotRankDashboard({ data, loading, error, onRetry, loadHistory, t
     {error && <div className={css.notice} role="alert">{t('hot.refreshFailure')} <button type="button" onClick={onRetry}>{t('hot.retry')}</button></div>}
     <nav className={css.tabs} aria-label={t('hot.views')}>
       {VIEWS.map(item => <button key={item.key} type="button" className={view.key === item.key ? css.active : undefined}
-        aria-current={view.key === item.key ? 'page' : undefined} onClick={() => { setView(item); setSelected(null) }}>{t(item.key)}</button>)}
+        aria-current={view.key === item.key ? 'page' : undefined} onClick={() => {
+          setView(item)
+          setSelected(null)
+          onScopeChange?.({ kind: 'hot', board: item.kind, period: item.period })
+        }}>{t(item.key)}</button>)}
     </nav>
     <section className={css.metrics} aria-label={t('hot.overview')}>
       <div><span>{t('hot.listed')}</span><strong>{board.stocks.length}</strong><small>{t('hot.topThirty')}</small></div>
@@ -94,7 +113,10 @@ export function HotRankDashboard({ data, loading, error, onRetry, loadHistory, t
         <div className={css.tableScroll}><table><thead><tr><th>{t('hot.rank')}</th><th>{t('hot.stock')}</th><th>{t('hot.heat')}</th><th>{t('hot.change')}</th></tr></thead><tbody>
           {board.stocks.map(item => <tr key={item.thscode} className={item.thscode === stock?.thscode ? css.selected : undefined}>
             <td><span className={css.rank}>#{item.rank}</span></td>
-            <td><button type="button" onClick={() => { setSelected(item.thscode) }} aria-pressed={item.thscode === stock?.thscode}><strong>{item.name}</strong><small>{item.ticker}</small></button></td>
+            <td><button type="button" onClick={() => {
+              setSelected(item.thscode)
+              onScopeChange?.({ kind: 'hot', board: view.kind, period: view.period, stock: item.thscode })
+            }} aria-pressed={item.thscode === stock?.thscode}><strong>{item.name}</strong><small>{item.ticker}</small></button></td>
             <td><div className={css.heat}><span>{item.heat}</span><i style={{ width: `${Number(item.heat) / heatMax * 100}%` }} /></div></td>
             <td className={item.rankChange === undefined ? undefined
               : item.rankChange > 0 ? css.up : item.rankChange < 0 ? css.down : undefined}>

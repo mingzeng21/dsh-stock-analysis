@@ -1,5 +1,5 @@
 ---
-description: "Web stock Agents catalog, skill-based conversations, and a native dragon-tiger dashboard."
+description: "Web stock Agents catalog, specialist conversations, and interactive stock dashboards."
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-The Web client registers one stock-analysis sidebar entry, builds specialist cards from Host skill metadata, and adds a native dragon-tiger dashboard card. Specialist Sessions appear in a collapsible history rail inside Agents; the dashboard reads current market data directly and creates no Session. Conversation history contains ordinary conversations; Agent records and results stay in Agents. Agents-owned labels use Simplified Chinese regardless of the app locale.
+The Web client registers one stock-analysis sidebar entry, builds specialist cards from Host skill metadata, and adds native dragon-tiger and hot-rank dashboard cards. Opening a dashboard reads market data without creating a Session. Asking a dashboard question creates a stock-analysis Session on the first question and reuses it for follow-ups. Agents-owned labels use Simplified Chinese regardless of the app locale.
 
 ## Table of Contents
 
@@ -25,12 +25,12 @@ The Web client registers one stock-analysis sidebar entry, builds specialist car
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount it beside the Session service, stock Agents Remote, stock data client, locale, and slots. Selecting an immediate specialist card creates a fresh Session and starts analysis in one click; an input card waits for the submitted query. Each run selects `stock-analysis` before the first turn, sends an explicit `/skill-name` prompt, and shows the streaming Conversation inside Agents. Selecting 龙虎榜观察 opens a dashboard immediately and reads the latest common trading date's three boards. Selecting 热股榜监控 opens four current attention lists; selecting a stock reads its last 30 calendar days of daily ranking. Both dashboards refresh without starting a Session. The history rail contains specialist Sessions and can be collapsed in every view.
+Mount it beside the Session service, stock Agents Remote, stock data client, locale, and slots. Selecting an immediate specialist card creates a fresh Session and starts analysis in one click; an input card waits for the submitted query. Each run selects `stock-analysis` before the first turn, sends an explicit `/skill-name` prompt, and shows the streaming Conversation inside Agents. Selecting 龙虎榜观察 opens a dashboard immediately and reads the latest common trading date's three boards. Selecting 热股榜监控 opens four current attention lists; selecting a stock reads its last 30 calendar days of daily ranking. Use 问看板 to ask about either current board. The panel shows the current scope, question examples, the Session transcript, and a notice when the board or selection changes after a question. Stocks mentioned in the latest answer appear as buttons that select and reveal their dashboard records. The history rail contains specialist Sessions and can be collapsed in every view.
 
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
-Specialist card metadata comes from `metadata.stockAgent` in bundled skills. The panel owns launch state, dashboard state, and temporary rail visibility; the Session log owns specialist answers and follow-ups. It reuses the `conversation.content` factory for specialist results. The dashboard uses `ctx.stockClient.dragonTiger()` and never invokes a skill or the model. It shows returned-sample rise/fall counts, trading amount, stock change percentages, and available signed amounts; missing upstream fields remain unavailable. Opening an Agent record does not change the ordinary Conversation selection. Removed skills leave history open but have no rerun card.
+Specialist card metadata comes from `metadata.stockAgent` in bundled skills. The panel owns launch state, dashboard state, and temporary rail visibility; the Session log owns answers and follow-ups. It reuses the `conversation.content` factory for Session results. The dashboards use `ctx.stockClient.dragonTiger()` and `ctx.stockClient.hotRank()`; dashboard questions submit a bounded current-data snapshot in the logged prompt. The dragon-tiger dashboard shows returned-sample rise/fall counts, trading amount, stock change percentages, and available signed amounts; missing fields remain unavailable. Opening an Agent record does not change the ordinary Conversation selection. Removed skills leave history open but have no rerun card.
 
 <a id="further-exploration"></a>
 ## Further Exploration
@@ -53,7 +53,7 @@ The first turn contains the user's selected request prefixed with `/stock-…`; 
 
 #### Token effect
 
-Only the submitted prompt and loaded skill body add request tokens; card discovery and history listing do not.
+Skill card discovery and history listing add no request tokens; only the submitted prompt and loaded skill body do. Dashboard questions add the current bounded board snapshot to each submitted prompt so the model can read it and the Session log can reconstruct it. Opening or refreshing a dashboard adds no model tokens.
 
 #### KV Cache effect
 
@@ -64,4 +64,5 @@ The first prompt and skill instruction are durable messages, so later turns reta
 <a id="known-limitations-and-deferred-work"></a>
 
 - Conversation specialist results use the shared Conversation view. The catalog needs the Host Remote to be available before specialist cards appear; the dragon-tiger dashboard needs the stock provider to serve its data.
+- Dashboard inquiry Sessions appear in the Agents history rail and reopen with their dashboard and transcript. Data refreshes on reopen; the next question includes the refreshed snapshot.
 - No runtime invariant companion is published; this panel renders Host-owned Session and catalog state without keeping an independent durable copy.

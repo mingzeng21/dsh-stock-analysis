@@ -5,6 +5,7 @@ import type { StockAgentCard } from '@deepseek-ai/dsh-api-stock-agents-controlle
 import type { DragonTigerDashboard, HotRankDashboard } from '@deepseek-ai/dsh-api-stock-controller/client'
 import type { SessionListState, SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { LocaleSnapshot } from '@deepseek-ai/dsh-client-locale/client'
+import type { ConversationSnapshot } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
@@ -59,7 +60,7 @@ const HOT_RANK: HotRankDashboard = { boards: [
 
 afterEach(cleanup)
 
-function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) {
+function mount(history: boolean | 'dragon' | 'hot' = false, cards: readonly StockAgentCard[] = [SCREENING]) {
   const catalog = createSnapshotStore<readonly StockAgentCard[]>(cards)
   const sessions = createSnapshotStore<SessionListState>({
     ids: history ? [SESSION] : [],
@@ -67,13 +68,18 @@ function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) 
       [SESSION]: {
         id: SESSION, displayTitle: '筛选结果', running: false, retainedBy: {}, blank: false,
         updatedAt: 1_780_000_000_000,
-        projectionValues: { stockAgent: { name: SCREENING.name, query: '半导体公司' } },
+        projectionValues: { stockAgent: history === 'dragon' || history === 'hot'
+          ? { name: `dashboard-${history}`, query: '榜单如何？' }
+          : { name: SCREENING.name, query: '半导体公司' } },
       },
     } : {},
     phase: 'ready',
     projectionsBySession: {},
   })
   const locale = createSnapshotStore<LocaleSnapshot>({ active: 'zh', locales: [], revision: 0 })
+  const conversation = createSnapshotStore<ConversationSnapshot>({
+    views: { get: () => undefined, grouped: () => undefined }, activeTargets: new Set(),
+  })
   const error = createSnapshotStore<string | null>(null)
   const binding = { sessionId: SESSION } as SessionReference['binding']
   const release = vi.fn()
@@ -85,6 +91,8 @@ function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) 
     [Symbol.dispose]: release,
   }
   const start = vi.fn(async () => reference)
+  const startDashboard = vi.fn(async (_prompt: string) => reference)
+  const continueDashboard = vi.fn(async (_sessionId: SessionId, _prompt: string) => {})
   const loadDragonTiger = vi.fn(async () => DASHBOARD)
   const loadHotRank = vi.fn(async () => HOT_RANK)
   const loadHotRankHistory = vi.fn(async () => ({ thscode: '600001.SH', points: [
@@ -99,9 +107,12 @@ function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) 
     useCatalog: bindSnapshotSelector(catalog),
     useSessions: bindSnapshotSelector(sessions),
     useLocale: bindSnapshotSelector(locale),
+    useConversation: bindSnapshotSelector(conversation),
     useCatalogError: bindSnapshotSelector(error),
     loadCatalog: vi.fn(),
     start,
+    startDashboard,
+    continueDashboard,
     loadDragonTiger,
     loadHotRank,
     loadHotRankHistory,
@@ -114,8 +125,45 @@ function mount(history = false, cards: readonly StockAgentCard[] = [SCREENING]) 
     useResource: unused,
   } as AgentsPanelProps
   render(<AgentsPanel {...props} />)
-  return { start, openSession, renderSlot, loadDragonTiger, loadHotRank, loadHotRankHistory }
+  return { start, startDashboard, continueDashboard, release, openSession, renderSlot, loadDragonTiger, loadHotRank, loadHotRankHistory }
 }
+
+it('starts a dashboard Session on first question and carries the selected snapshot into follow-ups', async () => {
+  const { startDashboard, continueDashboard, release } = mount()
+  fireEvent.click(screen.getByRole('button', { name: /龙虎榜观察/ }))
+  await waitFor(() => { expect(screen.getByText('2026-10-12')).toBeTruthy() })
+  expect(startDashboard).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByRole('button', { name: '问看板' }))
+  fireEvent.click(screen.getByRole('button', { name: /甲公司/ }))
+  fireEvent.change(screen.getByLabelText('你的问题'), { target: { value: '它的资金流向如何？' } })
+  fireEvent.click(screen.getByRole('button', { name: '发送问题' }))
+  await waitFor(() => { expect(startDashboard).toHaveBeenCalledTimes(1) })
+  const first = startDashboard.mock.calls[0]?.[0]
+  expect(first).toContain('它的资金流向如何？')
+  expect(first).toContain('600001.SH')
+  expect(first).toContain('2026-10-12')
+  await waitFor(() => { expect(screen.getByTestId('conversation')).toBeTruthy() })
+  fireEvent.change(screen.getByLabelText('你的问题'), { target: { value: '与另一只相比呢？' } })
+  fireEvent.click(screen.getByRole('button', { name: '发送问题' }))
+  await waitFor(() => { expect(continueDashboard).toHaveBeenCalledTimes(1) })
+  expect(continueDashboard.mock.calls[0]?.[0]).toBe(SESSION)
+  expect(continueDashboard.mock.calls[0]?.[1]).toContain('与另一只相比呢？')
+  fireEvent.click(screen.getByRole('button', { name: '返回Agents' }))
+  await waitFor(() => { expect(release).toHaveBeenCalledTimes(1) })
+})
+
+it('marks prior answers stale when the hot-rank selection changes', async () => {
+  const { startDashboard } = mount()
+  fireEvent.click(screen.getByRole('button', { name: /热股榜监控/ }))
+  await waitFor(() => { expect(screen.getByRole('button', { name: /甲公司/ })).toBeTruthy() })
+  fireEvent.click(screen.getByRole('button', { name: '问看板' }))
+  fireEvent.change(screen.getByLabelText('你的问题'), { target: { value: '排名如何？' } })
+  fireEvent.click(screen.getByRole('button', { name: '发送问题' }))
+  await waitFor(() => { expect(startDashboard).toHaveBeenCalledTimes(1) })
+  expect(startDashboard.mock.calls[0]?.[0]).toContain('1941909')
+  fireEvent.click(within(screen.getByRole('navigation', { name: '热股榜视图' })).getByRole('button', { name: '热股 · 小时' }))
+  expect(screen.getByText('看板内容已变化，下一条提问将使用当前数据。')).toBeTruthy()
+})
 
 it('opens hot-rank lists and daily history without starting a Session', async () => {
   const { start, loadHotRank, loadHotRankHistory } = mount()
@@ -188,6 +236,16 @@ it('opens a recorded Agent inside the same panel', () => {
   fireEvent.click(within(screen.getByRole('navigation', { name: '投研Agents' })).getByRole('button', { name: '重新分析' }))
   expect(screen.queryByTestId('conversation')).toBeNull()
   expect(screen.getByLabelText('描述你的筛选条件')).toHaveProperty('value', '半导体公司')
+})
+
+it('reopens a recorded dashboard Session with its board and inquiry panel', async () => {
+  const { openSession, loadDragonTiger } = mount('dragon')
+  fireEvent.click(screen.getByRole('button', { name: '查看结果' }))
+  await waitFor(() => { expect(screen.getByText('2026-10-12')).toBeTruthy() })
+  expect(openSession).toHaveBeenCalledWith(SESSION)
+  expect(loadDragonTiger).toHaveBeenCalledTimes(1)
+  expect(screen.getByRole('complementary', { name: '问看板' }).hasAttribute('hidden')).toBe(false)
+  expect(screen.getByTestId('conversation')).toBeTruthy()
 })
 
 it('collapses and restores Agent history with an icon button', () => {

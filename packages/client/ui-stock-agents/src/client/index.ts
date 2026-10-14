@@ -12,6 +12,7 @@ import type { SessionReference } from '@deepseek-ai/dsh-api-session-controller/c
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { MainPanelId } from '@deepseek-ai/dsh-client-ui-layout/client'
+import type { DragonTigerDashboard, HotRankDashboard } from '@deepseek-ai/dsh-api-stock-controller/client'
 import { AgentsPanel, type AgentsPanelInjected } from './AgentsPanel.tsx'
 import { AgentConversation } from './AgentConversation.tsx'
 import { en, NS, zh, type StockAgentsKey } from './locales.ts'
@@ -23,7 +24,14 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
   }
   interface SlotMap {
     /** Selected Session body inside the Agents main panel. */
-    'stock-agents.conversation': { kind: 'single'; scope: 'session-maybe' }
+    'stock-agents.conversation': {
+      kind: 'single'
+      scope: 'session-maybe'
+      owner: {
+        dashboardData?: DragonTigerDashboard | HotRankDashboard
+        onFocus?: (code: string) => void
+      }
+    }
   }
 }
 
@@ -80,6 +88,28 @@ export function apply(ctx: Context): void {
       if (!handedOff) reference.release()
     }
   }
+  const submitDashboard = async (id: SessionId, text: string): Promise<void> => {
+    const face = ctx.sessions.binding(id)?.session
+    if (face === undefined) throw new Error('session/not-found')
+    const submission = face.beginSubmission({ mode: 'queue', text, attachments: [] })
+    const result = await face.prompt([{ type: 'text', text }], 'queue', undefined, submission.requestId)
+    if (!result.ok) throw new Error(result.error.code)
+  }
+  const startDashboard = async (text: string): Promise<SessionReference> => {
+    const id = await ctx.sessions.create()
+    const selected = await ctx.remote.agentPresets.select(id, 'stock-analysis')
+    if (!selected.ok) throw new Error(selected.error.code)
+    const reference = ctx.sessions.retain(id, { source: 'stockAgent' })
+    let handedOff = false
+    try {
+      await reference.ready
+      await submitDashboard(id, text)
+      handedOff = true
+      return reference
+    } finally {
+      if (!handedOff) reference.release()
+    }
+  }
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'ui-stock-agents: dictionaries')
   const t = ctx.locale.bind(NS)
   ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
@@ -92,6 +122,8 @@ export function apply(ctx: Context): void {
       hooks: { catalog, sessions: ctx.sessions.list, catalogError },
       loadCatalog,
       start,
+      startDashboard,
+      continueDashboard: submitDashboard,
       loadDragonTiger: signal => ctx.stockClient.dragonTiger(signal),
       loadHotRank: signal => ctx.stockClient.hotRank(signal),
       loadHotRankHistory: (thscode, signal) => ctx.stockClient.hotRankHistory(thscode, signal),
@@ -99,6 +131,6 @@ export function apply(ctx: Context): void {
     }),
   }, AgentsPanel))
   ctx.slots.inject('stock-agents.conversation', () => ctx.slots.register({
-    name: 'stock-agents.conversation',
+    name: 'stock-agents.conversation', locale: NS,
   }, AgentConversation))
 }

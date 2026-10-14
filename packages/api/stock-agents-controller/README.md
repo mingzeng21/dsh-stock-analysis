@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This Host package lists only marked skills shipped with the Web stock application and records a specialist's identity in each Session projection. The `stockAgents.list()` Remote returns card metadata from DSH skill discovery without loading instruction bodies.
+This Host package lists marked skills shipped with the Web stock application and records a skill specialist or dashboard inquiry identity in each Session projection. The `stockAgents.list()` Remote returns card metadata from DSH skill discovery without loading instruction bodies.
 
 ## Table of Contents
 
@@ -30,7 +30,7 @@ Mount it with the `stock-analysis` preset, skill registry, Session projection re
 <a id="understand-the-implementation"></a>
 ## Understand the implementation
 
-The catalog leases the current stock preset scope and lists its winning skills. It accepts only skills whose source path is inside the bundled skill directory and validates their bilingual title, summary, launch mode, optional query input label and control kind, examples, and immediate prompt. The `stockAgent` projection folds the human prompt immediately preceding the first explicit `skill-invocation` message into `{ name, query }`, which the normal Session list can expose while the Session is cold. Later turns reload that skill from the current catalog and append its instructions to the committed model input. If the skill is missing, the turn is refused.
+The catalog leases the current stock preset scope and lists its winning skills. It accepts only skills whose source path is inside the bundled skill directory and validates their bilingual title, summary, launch mode, optional query input label and control kind, examples, and immediate prompt. The `stockAgent` projection folds the human prompt immediately preceding the first explicit `skill-invocation` message into `{ name, query }`; it also recognizes a dashboard inquiry marker in the first committed user prompt. The normal Session list exposes either identity while the Session is cold. Later skill turns reload current instructions and refuse the turn if the skill is missing; dashboard turns continue without a skill.
 
 <a id="further-exploration"></a>
 ## Further Exploration

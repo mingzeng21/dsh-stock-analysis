@@ -39,6 +39,13 @@ describe('stock Agent record projection', () => {
       name: 'stock-screening', query: '半导体公司近三年净利润增长',
     })
   })
+
+  it('records dashboard questions without requiring a skill invocation', () => {
+    const active = advanceStockAgent(empty, prompt('用户问题：机构净额最高的是谁？\n\ndashboard-session:dragon\n\n看板快照（JSON）：{}'))
+    expect(active.record).toEqual({ name: 'dashboard-dragon', query: '机构净额最高的是谁？' })
+    expect(active.firstPrompt).toBe('')
+    expect(advanceStockAgent(active, prompt('继续比较'))).toBe(active)
+  })
 })
 
 describe('specialist follow-up', () => {
@@ -60,5 +67,10 @@ describe('specialist follow-up', () => {
 
   it('blocks follow-up when its skill was removed', async () => {
     expect(await continueStockAgent(proposed, record, async () => undefined)).toEqual({ kind: 'reject' })
+  })
+
+  it('continues dashboard questions without loading a specialist skill', async () => {
+    const loadSkill = async () => { throw new Error('dashboard has no skill') }
+    expect(await continueStockAgent(proposed, { name: 'dashboard-hot', query: '排名如何' }, loadSkill)).toBe(proposed)
   })
 })

@@ -55,7 +55,12 @@ export function advanceStockAgent(
 ): z.infer<typeof stateSchema> {
   if (state.record !== null) return state
   if (message.source.kind === 'user') {
-    return { ...state, firstPrompt: firstText(message.content) }
+    const firstPrompt = firstText(message.content)
+    const dashboard = /^用户问题：([\s\S]*?)\n\ndashboard-session:(dragon|hot)(?:\n|$)/.exec(firstPrompt)
+    if (dashboard !== null) {
+      return { ...state, firstPrompt: '', record: { name: `dashboard-${dashboard[2]}`, query: dashboard[1]?.trim() ?? '' } }
+    }
+    return { ...state, firstPrompt }
   }
   if (message.source.kind !== 'skill-invocation') return state
   const name = message.source.name
@@ -88,6 +93,7 @@ export async function continueStockAgent(
   loadSkill: (name: string) => Promise<Pick<SkillDefinition, 'name' | 'provider' | 'resourceBase' | 'content'> | undefined>,
 ): Promise<PreStepDecision> {
   if (decision.kind === 'reject' || record === undefined || record === null) return decision
+  if (record.name === 'dashboard-dragon' || record.name === 'dashboard-hot') return decision
   if (decision.messages.some(message => message.source.kind === 'skill-invocation' && message.source.name === record.name)) {
     return decision
   }

@@ -1,9 +1,10 @@
 /** Interactive dragon-tiger dashboard rendered directly in the Agents panel. */
-import { useState, type CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import type { DragonTigerBoard, DragonTigerBoardType, DragonTigerDashboard as DashboardData, DragonTigerStock } from '@deepseek-ai/dsh-api-stock-controller/client'
 import { IconLoadingOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import css from './DragonTigerDashboard.module.css'
+import type { DashboardScope } from './dashboard-inquiry.ts'
 
 type Translate = PropsLocale<'stockAgents'>['t']
 type SortKey = 'netValue' | 'buyValue' | 'sellValue' | 'orgNetValue' | 'hotMoneyNetValue' | 'amount' | 'changePct'
@@ -15,6 +16,8 @@ export interface DragonTigerDashboardProps {
   readonly error: boolean
   readonly onRetry: () => void
   readonly t: Translate
+  readonly onScopeChange?: (scope: Extract<DashboardScope, { kind: 'dragon' }>) => void
+  readonly focus?: { readonly code: string; readonly sequence: number } | null
 }
 
 const BOARD_TYPES: readonly DragonTigerBoardType[] = ['all', 'org', 'hot_money']
@@ -66,10 +69,20 @@ function barStyle(value: number, maximum: number): CSSProperties {
 }
 
 /** Render the latest boards, their signed amounts, stock list, and linked seats. */
-export function DragonTigerDashboard({ data, loading, error, onRetry, t }: DragonTigerDashboardProps) {
+export function DragonTigerDashboard({ data, loading, error, onRetry, t, onScopeChange, focus }: DragonTigerDashboardProps) {
   const [boardType, setBoardType] = useState<DragonTigerBoardType>('all')
   const [sortKey, setSortKey] = useState<SortKey>('netValue')
   const [selection, setSelection] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (data === null || focus === null || focus === undefined) return
+    const board = data.boards.find(item => item.type === boardType && item.stocks.some(stock => stock.thscode === focus.code))
+      ?? data.boards.find(item => item.stocks.some(stock => stock.thscode === focus.code))
+    if (board === undefined) return
+    setBoardType(board.type)
+    setSelection(`stock:${focus.code}`)
+    onScopeChange?.({ kind: 'dragon', board: board.type, stock: focus.code })
+  }, [data, focus, onScopeChange])
 
   if (data === null) {
     if (loading) return <div className={css.center}><IconLoadingOutlineRegular className={css.spinner} size={24} /></div>
@@ -94,9 +107,9 @@ export function DragonTigerDashboard({ data, loading, error, onRetry, t }: Drago
   const amountAvailable = board.stocks.filter(stock => stock.amount !== undefined).length
   const turnover = sumAvailable(board.stocks, 'amount')
   const selectedStock = selection?.startsWith('stock:')
-    ? board.stocks[Number(selection.slice(6))] : undefined
+    ? board.stocks.find(stock => stock.thscode === selection.slice(6)) : undefined
   const selectedSeat = selection?.startsWith('seat:')
-    ? board.seats[Number(selection.slice(5))] : undefined
+    ? board.seats.find(seat => seat.name === selection.slice(5)) : undefined
 
   return <div className={css.scroll}>
     <div className={css.dashboard}>
@@ -116,7 +129,7 @@ export function DragonTigerDashboard({ data, loading, error, onRetry, t }: Drago
       <nav className={css.tabs} aria-label={t('dragon.boardNav')}>
         {BOARD_TYPES.map(type => <button key={type} type="button" className={boardType === type ? css.activeTab : undefined}
           aria-current={boardType === type ? 'page' : undefined}
-          onClick={() => { setBoardType(type); setSelection(null) }}>{boardLabel(type, t)}</button>)}
+          onClick={() => { setBoardType(type); setSelection(null); onScopeChange?.({ kind: 'dragon', board: type }) }}>{boardLabel(type, t)}</button>)}
       </nav>
 
       <section className={css.metrics} aria-label={t('dragon.overview')}>
@@ -158,7 +171,10 @@ export function DragonTigerDashboard({ data, loading, error, onRetry, t }: Drago
             {stocks.map(({ stock, index }, rank) => {
               const value = stock[sortKey]
               return <button type="button" key={`${stock.thscode}-${index}`} className={css.stockRow}
-                aria-pressed={selection === `stock:${index}`} onClick={() => { setSelection(`stock:${index}`) }}>
+                aria-pressed={selection === `stock:${stock.thscode}`} onClick={() => {
+                  setSelection(`stock:${stock.thscode}`)
+                  onScopeChange?.({ kind: 'dragon', board: boardType, stock: stock.thscode })
+                }}>
                 <span className={css.stockIdentity}><b>{String(rank + 1).padStart(2, '0')}</b><span><strong>{stock.name}</strong><small>{stock.thscode}</small></span></span>
                 <span className={`${css.stockChange} ${stock.changePct === undefined ? '' : stock.changePct >= 0 ? css.positive : css.negative}`}>{percent(stock.changePct, t)}</span>
                 <span className={css.stockAmount}>{value === undefined ? t('dragon.unavailable') : <><span className={css.miniBar}><i className={value >= 0 ? css.positiveBar : css.negativeBar} style={barStyle(value, maxStock)} /></span><strong className={value >= 0 ? css.positive : css.negative}>{sortKey === 'changePct' ? percent(value, t) : amount(value, t, !['buyValue', 'sellValue', 'amount'].includes(sortKey))}</strong></>}</span>
@@ -175,7 +191,10 @@ export function DragonTigerDashboard({ data, loading, error, onRetry, t }: Drago
               const values = seat.stocks.map(stock => stock.netValue)
               const net = values.length > 0 && values.every(value => value !== undefined)
                 ? values.reduce<number>((sum, value) => sum + value, 0) : undefined
-              return <button type="button" key={`${seat.name}-${index}`} aria-pressed={selection === `seat:${index}`} onClick={() => { setSelection(`seat:${index}`) }}>
+              return <button type="button" key={`${seat.name}-${index}`} aria-pressed={selection === `seat:${seat.name}`} onClick={() => {
+                setSelection(`seat:${seat.name}`)
+                onScopeChange?.({ kind: 'dragon', board: boardType, seat: seat.name })
+              }}>
                 <span className={css.seatRank}>{String(index + 1).padStart(2, '0')}</span><span className={css.seatIdentity}><strong>{seat.name}</strong><small>{t('dragon.seatStocks', { count: seat.stocks.length })}{seat.truncated ? ` · ${t('dragon.truncated')}` : ''}</small></span><span className={net === undefined ? css.seatNet : `${css.seatNet} ${net >= 0 ? css.positive : css.negative}`}>{net === undefined ? t('dragon.unavailable') : amount(net, t)}</span>
               </button>
             })}</div>}

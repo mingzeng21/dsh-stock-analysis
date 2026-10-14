@@ -12,7 +12,7 @@ export interface StockAgentCard {
   readonly prompt?: Readonly<Record<'zh' | 'en', string>>
 }
 
-/** Durable specialist identity extracted from the first explicit skill invocation. */
+/** Durable specialist identity extracted from a dashboard question or explicit skill invocation. */
 export interface StockAgentRecord {
   readonly name: string
   readonly query: string
