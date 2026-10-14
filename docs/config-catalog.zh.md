@@ -259,7 +259,7 @@ export interface SettingsControllerInternals {
 ## `@deepseek-ai/dsh-api-stock-controller`
 
 - `inject`: `stock`
-- `source`: [`packages/api/stock-controller/src/index.ts:114`](../packages/api/stock-controller/src/index.ts)
+- `source`: [`packages/api/stock-controller/src/index.ts:115`](../packages/api/stock-controller/src/index.ts)
 
 ```ts config-catalog
 /** Reads this service exposes and the caps a deployment applies to them. */
@@ -272,6 +272,12 @@ export interface Config {
   readonly maxSummaryChars: number
   /** Inclusive cap on symbol-search candidates. */
   readonly maxSymbolMatches: number
+  /** Inclusive cap on stock entries per dragon-tiger board sent to the browser. */
+  readonly maxDragonTigerStocks: number
+  /** Inclusive cap on active seats per board sent to the browser. */
+  readonly maxDragonTigerSeats: number
+  /** Inclusive cap on stock links sent for each active seat. */
+  readonly maxDragonTigerSeatStocks: number
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-api-stock-controller -->

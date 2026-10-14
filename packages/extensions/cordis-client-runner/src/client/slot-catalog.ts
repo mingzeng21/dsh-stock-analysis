@@ -4030,7 +4030,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     ],
     replaceRisk: 'shadows-shipped-ui',
     example: 'return {\n  inject: [\'slots\'],\n  apply(ctx) {\n    ctx.slots.inject(\'stock-agents.conversation\', () => ctx.slots.register(\n      { name: \'stock-agents.conversation\' },\n      () => React.createElement(\'div\', null, \'hello\'),\n    ))\n  },\n}',
-    source: 'packages/client/ui-stock-agents/src/client/index.ts:25',
+    source: 'packages/client/ui-stock-agents/src/client/index.ts:26',
   },
   {
     key: 'tool.call.images',

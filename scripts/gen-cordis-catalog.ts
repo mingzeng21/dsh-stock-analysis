@@ -963,6 +963,7 @@ export const TYPE_LINK_EXEMPTIONS: Readonly<Record<string, string>> = {
   Candle: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   CandleRequest: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   CandleSeries: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
+  DragonTigerDashboard: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   DocumentRow: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   DocumentsRequest: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   WatchlistEntry: 'Host watchlist endpoint contract is owned by packages/api/watchlist-controller/README.md',

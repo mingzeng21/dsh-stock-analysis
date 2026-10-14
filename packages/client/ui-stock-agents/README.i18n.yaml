@@ -3,29 +3,29 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/client/ui-stock-agents/README.md
 /:
-  en: 62d32894f87c2b86
-  zh: a5f7266dc0434cea
+  en: 42e7c16324f1b3d9
+  zh: a62a39525205ffdb
 /deepseek-ai-dsh-client-ui-stock-agents:
   en: 523b1823914412ad
   zh: a7cd7809ec56ef75
 /deepseek-ai-dsh-client-ui-stock-agents/summary:
-  en: 4a3cce2bce0091f0
-  zh: 88affc1e35a635bb
+  en: 32af8e651dd54e91
+  zh: 8435b27c133bb544
 /deepseek-ai-dsh-client-ui-stock-agents/table-of-contents:
   en: 07f3642294ee905d
   zh: b73c83ce583f5a94
 /deepseek-ai-dsh-client-ui-stock-agents/use-this-package:
-  en: 6f17de50d14e61e6
-  zh: d755ac55091b0b73
+  en: be55a714a12cbcfd
+  zh: b8fa9f216a4bab3c
 /deepseek-ai-dsh-client-ui-stock-agents/understand-the-implementation:
-  en: 4e15888f95b184cf
-  zh: ff88155daf9ae78a
+  en: a466fc6711afac2f
+  zh: 783df23361083743
 /deepseek-ai-dsh-client-ui-stock-agents/further-exploration:
   en: dcd113641d07c1c9
   zh: 089770db75cc04dd
 /deepseek-ai-dsh-client-ui-stock-agents/dev-note:
-  en: 8146971ef4ee89c8
-  zh: 61af1a896df023e8
+  en: f3b2edf1869ac98a
+  zh: 92b36058200803ec
 /deepseek-ai-dsh-client-ui-stock-agents/model-experience:
   en: 215e7ba838619b7b
   zh: a311da3843709f90
@@ -42,5 +42,5 @@
   en: 667c06dc95176b78
   zh: 697814ff9fb8181f
 /deepseek-ai-dsh-client-ui-stock-agents/known-limitations-and-deferred-work:
-  en: 23ae19e9cd343ca1
-  zh: 2a619dfbcb7ea00f
+  en: f026c1308fd5cd3e
+  zh: eaa0638fc4a2a6e9

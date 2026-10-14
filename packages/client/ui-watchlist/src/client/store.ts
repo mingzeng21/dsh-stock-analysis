@@ -11,6 +11,9 @@ import type { SessionId } from '@deepseek-ai/dsh-session/types'
 /** Period the chart opens on, before the reader picks one. */
 const DEFAULT_INTERVAL: CandleInterval = '1d'
 
+/** Number of latest bars fitted into the chart, or the full returned series. */
+export type ChartRange = 30 | 90 | 180 | 'all'
+
 /** Document channel the list opens on, before the reader picks one. */
 const DEFAULT_DOCUMENT_KIND: DocumentKind = 'report'
 
@@ -22,6 +25,8 @@ interface WatchlistPanelState {
   selected: string | null
   /** Period the chart draws; it survives a tab switch like the selection does. */
   interval: CandleInterval
+  /** Preset viewport for the chart; the canvas still supports manual zoom and pan. */
+  chartRange: ChartRange
   /** Document channel the list shows; it survives a tab switch too. */
   documentKind: DocumentKind
   /** Preferred list width, retained when the panel unmounts. */
@@ -41,6 +46,7 @@ interface WatchlistPanelState {
 type WatchlistPanelActions = {
   select: (draft: WatchlistPanelState, thscode: string | null) => void
   setInterval: (draft: WatchlistPanelState, interval: CandleInterval) => void
+  setChartRange: (draft: WatchlistPanelState, range: ChartRange) => void
   setDocumentKind: (draft: WatchlistPanelState, kind: DocumentKind) => void
   setRailWidth: (draft: WatchlistPanelState, width: number) => void
   setAnalysisSession: (draft: WatchlistPanelState, sessionId: SessionId | null) => void
@@ -57,6 +63,7 @@ export function createWatchlistStore(): EngineStoreHandle<WatchlistPanelState, W
     init: (): WatchlistPanelState => ({
       selected: null,
       interval: DEFAULT_INTERVAL,
+      chartRange: 90,
       documentKind: DEFAULT_DOCUMENT_KIND,
       railWidth: DEFAULT_RAIL_WIDTH,
       analysisSession: null,
@@ -69,6 +76,7 @@ export function createWatchlistStore(): EngineStoreHandle<WatchlistPanelState, W
         draft.selected = thscode
       },
       setInterval: (draft, interval) => { draft.interval = interval },
+      setChartRange: (draft, range) => { draft.chartRange = range },
       setDocumentKind: (draft, kind) => { draft.documentKind = kind },
       setRailWidth: (draft, width) => { draft.railWidth = width },
       setAnalysisSession: (draft, sessionId) => { draft.analysisSession = sessionId },

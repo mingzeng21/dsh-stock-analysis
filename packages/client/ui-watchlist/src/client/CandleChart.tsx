@@ -2,9 +2,9 @@
  * The candle canvas as a React element.
  *
  * The library is imperative and canvas-based, so this component owns exactly
- * three effects: build the chart once, repaint it when the palette changes, and
- * replace its bars when the series changes. It reads no hook of its own beyond
- * React's — the bars and the theme revision arrive as props.
+ * four effects: build the chart once, repaint it when the palette changes,
+ * replace its bars, and apply the selected range. It reads no hook of its own
+ * beyond React's — the bars, range, and theme revision arrive as props.
  */
 import { useEffect, useRef } from 'react'
 import { createCandleChart, resolveChartColors, type CandleChartHandle, type ChartBar } from './chart/index.ts'
@@ -14,6 +14,8 @@ import css from './CandleChart.module.css'
 export interface CandleChartProps {
   /** Bars to draw, in ascending time order. */
   readonly bars: readonly ChartBar[]
+  /** Latest bars to fit in the initial chart viewport. */
+  readonly range: number | 'all'
   /**
    * Monotonic theme revision. A change re-reads the design tokens and repaints,
    * because a canvas cannot follow a CSS variable on its own.
@@ -23,10 +25,10 @@ export interface CandleChartProps {
 
 /**
  * Render the candle canvas.
- * @param props - the series and the theme revision.
+ * @param props - the series, range, and theme revision.
  * @returns the chart host element.
  */
-export function CandleChart({ bars, themeRevision }: CandleChartProps) {
+export function CandleChart({ bars, range, themeRevision }: CandleChartProps) {
   const host = useRef<HTMLDivElement | null>(null)
   const chart = useRef<CandleChartHandle | undefined>(undefined)
 
@@ -52,6 +54,10 @@ export function CandleChart({ bars, themeRevision }: CandleChartProps) {
   useEffect(() => {
     chart.current?.setBars(bars)
   }, [bars])
+
+  useEffect(() => {
+    chart.current?.setRange(range)
+  }, [range])
 
   return <div ref={host} className={css.canvas} />
 }

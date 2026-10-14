@@ -26,6 +26,8 @@ export interface ChartBar {
   readonly low: number
   readonly close: number
   readonly volume: number
+  /** Traded amount in the instrument's currency. */
+  readonly turnover: number
 }
 
 /** Price and volume precision: A-share prices carry cents and volumes are whole shares. */
@@ -33,7 +35,7 @@ const PRICE_PRECISION = 2
 const VOLUME_PRECISION = 0
 
 /** Moving average periods drawn over the candle pane. */
-const MA_PERIODS = [5, 10, 20]
+const MA_PERIODS = [20, 60]
 
 /** The library's own pane id for the candle plot, where a moving average belongs. */
 const CANDLE_PANE = 'candle_pane'
@@ -42,6 +44,8 @@ const CANDLE_PANE = 'candle_pane'
 export interface CandleChartHandle {
   /** Replace the drawn series. */
   setBars(bars: readonly ChartBar[]): void
+  /** Show the latest number of bars, or the complete series. */
+  setRange(count: number | 'all'): void
   /** Repaint for a new palette, without rebuilding the chart. */
   setColors(colors: ChartColors): void
   /** Release the canvas and its listeners. */
@@ -50,7 +54,7 @@ export interface CandleChartHandle {
 
 /** One bar in the library's own row vocabulary. */
 function toRow(bar: ChartBar): KLineData {
-  return { timestamp: bar.time, open: bar.open, high: bar.high, low: bar.low, close: bar.close, volume: bar.volume }
+  return { timestamp: bar.time, open: bar.open, high: bar.high, low: bar.low, close: bar.close, volume: bar.volume, turnover: bar.turnover }
 }
 
 /**
@@ -70,6 +74,13 @@ export function createCandleChart(container: HTMLElement, colors: ChartColors): 
   chart.setSymbol({ ticker: '', pricePrecision: PRICE_PRECISION, volumePrecision: VOLUME_PRECISION })
   chart.setPeriod({ span: 1, type: 'day' })
   let bars: readonly KLineData[] = []
+  let range: number | 'all' = 90
+  const showRange = (): void => {
+    const count = range === 'all' ? bars.length : Math.min(range, bars.length)
+    if (count === 0) return
+    chart.setBarSpace(Math.max(1, Math.min(24, (container.clientWidth - 60) / count)))
+    chart.scrollToRealTime()
+  }
   chart.setDataLoader({
     // The loader answers from the bars this handle holds, so a replacement is
     // one `resetData` and the library keeps owning paging and zoom.
@@ -81,6 +92,11 @@ export function createCandleChart(container: HTMLElement, colors: ChartColors): 
     setBars(next) {
       bars = next.map(toRow)
       chart.resetData()
+      showRange()
+    },
+    setRange(next) {
+      range = next
+      showRange()
     },
     setColors(next) {
       chart.setStyles(chartStyles(next))

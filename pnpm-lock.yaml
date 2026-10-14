@@ -5907,6 +5907,9 @@ importers:
       '@deepseek-ai/dsh-api-stock-agents-controller':
         specifier: workspace:*
         version: link:../../api/stock-agents-controller
+      '@deepseek-ai/dsh-api-stock-controller':
+        specifier: workspace:*
+        version: link:../../api/stock-controller
       '@deepseek-ai/dsh-client-locale':
         specifier: workspace:*
         version: link:../locale

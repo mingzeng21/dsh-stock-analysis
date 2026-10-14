@@ -37,7 +37,7 @@ function candleStock(candles: readonly Candle[], truncated = false): IStockClien
 
 /** One candle, overridable per test. */
 function candle(time: number, close: number): Candle {
-  return { time, open: close, high: close + 1, low: close - 1, close, volume: 10 }
+  return { time, open: close, high: close + 1, low: close - 1, close, volume: 10, turnover: 100 }
 }
 
 /** One externally settled promise, for pinning read ordering. */
@@ -84,6 +84,7 @@ function watchlistStub(initial: readonly WatchlistEntry[] = []): IWatchlist {
 /** A scripted market-data face whose batch answers from a set of quotes. */
 function stockStub(quotes: readonly Quote[] = [], asOf?: number): IStockClient {
   return {
+    dragonTiger: async () => { throw new Error('this spec never reads dragon-tiger boards') },
     searchSymbols: async () => [{ thscode: '600519.SH', ticker: '600519', name: '贵州茅台' }],
     quotes: async (): Promise<QuoteBatch> => ({
       quotes,
@@ -312,11 +313,12 @@ describe('WatchlistSurface.loadCandles', () => {
     await surface.loadCandles('600519.SH', '1w', 2_000_000)
     expect(surface.candles.getSnapshot()).toEqual({
       phase: 'ready',
+      thscode: '600519.SH',
       interval: '1w',
       truncated: true,
       bars: [
-        { time: 1, open: 10, high: 11, low: 9, close: 10, volume: 10 },
-        { time: 2, open: 11, high: 12, low: 10, close: 11, volume: 10 },
+        { time: 1, open: 10, high: 11, low: 9, close: 10, volume: 10, turnover: 100 },
+        { time: 2, open: 11, high: 12, low: 10, close: 11, volume: 10, turnover: 100 },
       ],
     })
   })
@@ -347,6 +349,25 @@ describe('WatchlistSurface.loadCandles', () => {
     await pending
     expect(surface.candles.getSnapshot().bars).toHaveLength(1)
     expect(surface.candles.getSnapshot().bars[0]?.close).toBe(22)
+  })
+
+  it('clears retained bars when the period changes', async () => {
+    const gate = deferred()
+    const stock: IStockClient = {
+      ...stockStub(),
+      candles: async (request) => {
+        if (request.interval === '1d') return { thscode: request.thscode, interval: '1d', truncated: false, candles: [candle(1, 10)] }
+        await gate.promise
+        return { thscode: request.thscode, interval: '1w', truncated: false, candles: [candle(2, 20)] }
+      },
+    }
+    const surface = new WatchlistSurface(watchlistStub(), stock)
+    await surface.loadCandles('600519.SH', '1d', 0)
+    const pending = surface.loadCandles('600519.SH', '1w', 0)
+    expect(surface.candles.getSnapshot().bars).toEqual([])
+    gate.resolve()
+    await pending
+    expect(surface.candles.getSnapshot().bars[0]?.close).toBe(20)
   })
 
   it('publishes a failed read as its Remote code while the last series stays', async () => {
@@ -385,7 +406,7 @@ describe('WatchlistSurface.loadCandles', () => {
     await superseded
     await current
     expect(surface.candles.getSnapshot().bars).toEqual([
-      { time: 2, open: 22, high: 23, low: 21, close: 22, volume: 10 },
+      { time: 2, open: 22, high: 23, low: 21, close: 22, volume: 10, turnover: 100 },
     ])
   })
 })

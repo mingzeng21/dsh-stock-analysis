@@ -46,6 +46,7 @@ function watchlistStub(initial: readonly WatchlistEntry[] = []): IWatchlist {
 /** The market-data face as a scripted Client model. */
 function stockStub(): IStockClient {
   return {
+    dragonTiger: async () => { throw new Error('this spec never reads dragon-tiger boards') },
     searchSymbols: async () => [{ thscode: '600519.SH', ticker: '600519', name: '贵州茅台' }],
     quotes: async () => ({
       asOf: 1789560797000,
@@ -66,7 +67,7 @@ function stockStub(): IStockClient {
       thscode,
       interval,
       truncated: false,
-      candles: [{ time: 1, open: 1, high: 2, low: 0.5, close: 1.5, volume: 10 }],
+      candles: [{ time: 1, open: 1, high: 2, low: 0.5, close: 1.5, volume: 10, turnover: 100 }],
     }),
     documents: async () => [],
   }

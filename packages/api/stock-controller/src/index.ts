@@ -5,11 +5,10 @@
  * The capability seam (`ctx.stock`) keeps the vendor's own field names on its
  * rows and leaves symbol disambiguation, parameter validation, row bounds, and
  * the failure taxonomy to itself. This service is the seam's first consumer
- * that fixes a canonical type: it performs the four reads one instrument
- * surface needs — symbol search, a quote batch, a candle series, and research
- * documents — and resolves the vendor's field names, encodings, and search
- * vocabulary once, on the Host, so no browser view or store ever reads a vendor
- * row.
+ * that fixes a canonical type: it performs the browser reads for symbol search,
+ * quotes, candles, research documents, and same-date dragon-tiger boards. It
+ * resolves vendor field names, encodings, and search vocabulary on the Host,
+ * so no browser view or store reads a vendor row.
  *
  * It adds no state and no cache. Every read is a thin composition over one or
  * two seam capabilities, and every seam failure keeps a distinct Remote code
@@ -27,9 +26,10 @@ import type {} from '@deepseek-ai/dsh-stock'
 import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import z from '@deepseek-ai/schemastery'
 import type {
-  Candle, CandleRequest, CandleSeries, DocumentKind, DocumentRow, DocumentsRequest,
+  Candle, CandleRequest, CandleSeries, DocumentKind, DocumentRow, DocumentsRequest, DragonTigerDashboard,
   InstrumentMatch, Quote, QuoteBatch,
 } from './types.ts'
+import { toDragonTigerBoard } from './dragon-tiger.ts'
 import { toCandle, toDocument, toQuote, type RowContext } from './vendor.ts'
 
 export type * from './types.ts'
@@ -45,6 +45,7 @@ declare module '@deepseek-ai/cordis' {
 const SYMBOL_SEARCH_ENDPOINT = 'meta.tickers.search'
 const QUOTE_ENDPOINT = 'a-share.prices.snapshot'
 const CANDLE_ENDPOINT = 'a-share.prices.historical'
+const DRAGON_TIGER_ENDPOINT = 'a-share.special-data.dragon-tiger-list'
 const DOCUMENT_ENDPOINTS: Readonly<Record<DocumentKind, string>> = {
   report: 'iwencai.search.report',
   announcement: 'iwencai.search.announcement',
@@ -120,6 +121,12 @@ export interface Config {
   readonly maxSummaryChars: number
   /** Inclusive cap on symbol-search candidates. */
   readonly maxSymbolMatches: number
+  /** Inclusive cap on stock entries per dragon-tiger board sent to the browser. */
+  readonly maxDragonTigerStocks: number
+  /** Inclusive cap on active seats per board sent to the browser. */
+  readonly maxDragonTigerSeats: number
+  /** Inclusive cap on stock links sent for each active seat. */
+  readonly maxDragonTigerSeatStocks: number
 }
 
 /**
@@ -194,11 +201,14 @@ export class StockController extends TypertRemoteService {
     maxDocuments: z.number().step(1).min(1).default(30),
     maxSummaryChars: z.number().step(1).min(1).default(400),
     maxSymbolMatches: z.number().step(1).min(1).default(20),
+    maxDragonTigerStocks: z.number().step(1).min(1).default(200),
+    maxDragonTigerSeats: z.number().step(1).min(1).default(60),
+    maxDragonTigerSeatStocks: z.number().step(1).min(1).default(30),
   })
 
   /**
    * @param ctx - Host context carrying the stock seam.
-   * @param config - deployment caps on the four reads.
+   * @param config - deployment caps on the browser reads.
    */
   constructor(ctx: Context, private readonly config: Config) {
     super(ctx, 'stockController', { namespace: 'stock' })
@@ -252,6 +262,39 @@ export class StockController extends TypertRemoteService {
     const context: RowContext = { endpoint: QUOTE_ENDPOINT }
     const quotes: Quote[] = result.rows.map(row => toQuote(row, context))
     return { ...asOfOf(result.meta.asOf), quotes }
+  }
+
+  /**
+   * Read all three dragon-tiger boards for the latest available trading date.
+   * @param signal - caller cancellation.
+   * @returns same-date boards, with bounded nested entries and vendor counts.
+   */
+  @Remote
+  async dragonTiger(signal: AbortSignal): Promise<DragonTigerDashboard> {
+    const limits = {
+      stocks: this.config.maxDragonTigerStocks,
+      seats: this.config.maxDragonTigerSeats,
+      seatStocks: this.config.maxDragonTigerSeatStocks,
+    }
+    const allResult = await this.seam(
+      () => this.ctx.stock.call(DRAGON_TIGER_ENDPOINT, { board_type: 'all' }, signal),
+      DRAGON_TIGER_ENDPOINT, undefined,
+    )
+    const all = toDragonTigerBoard(allResult, 'all', limits)
+    const [orgResult, hotResult] = await Promise.all([
+      this.seam(() => this.ctx.stock.call(DRAGON_TIGER_ENDPOINT, { board_type: 'org', date: all.tradeDate }, signal), DRAGON_TIGER_ENDPOINT, undefined),
+      this.seam(() => this.ctx.stock.call(DRAGON_TIGER_ENDPOINT, { board_type: 'hot_money', date: all.tradeDate }, signal), DRAGON_TIGER_ENDPOINT, undefined),
+    ])
+    const org = toDragonTigerBoard(orgResult, 'org', limits)
+    const hot = toDragonTigerBoard(hotResult, 'hot_money', limits)
+    if (org.tradeDate !== all.tradeDate || hot.tradeDate !== all.tradeDate) {
+      throw new RemoteError('stock/upstream', 'dragon-tiger boards returned different trade dates', { endpoint: DRAGON_TIGER_ENDPOINT })
+    }
+    return {
+      tradeDate: all.tradeDate,
+      ...allResult.meta.asOf === undefined ? {} : { asOf: allResult.meta.asOf },
+      boards: [all.board, org.board, hot.board],
+    }
   }
 
   /**

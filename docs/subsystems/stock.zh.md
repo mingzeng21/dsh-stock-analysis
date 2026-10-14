@@ -190,6 +190,13 @@ Host Remote reads over the stock capability seam.
 @Remote async quotes(thscodes: string[], signal: AbortSignal): Promise<QuoteBatch>
 
 /**
+ * Read all three dragon-tiger boards for the latest available trading date.
+ * @param signal - caller cancellation.
+ * @returns same-date boards, with bounded nested entries and vendor counts.
+ */
+@Remote async dragonTiger(signal: AbortSignal): Promise<DragonTigerDashboard>
+
+/**
  * Read one instrument's candle series for a window.
  * @param request - instrument, period, adjustment, and the window.
  * @param signal - caller cancellation.

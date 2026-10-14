@@ -111,6 +111,7 @@ export function toCandle(row: StockRow, context: RowContext): Candle {
     low: readNumber(row, 'low_price', context),
     close: readNumber(row, 'close_price', context),
     volume: readNumber(row, 'volume', context),
+    turnover: readNumber(row, 'turnover', context),
   }
 }
 

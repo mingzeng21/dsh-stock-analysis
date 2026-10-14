@@ -53,6 +53,9 @@ function harness(overrides: Partial<Config> = {}): Harness {
       maxDocuments: 30,
       maxSummaryChars: 400,
       maxSymbolMatches: 20,
+      maxDragonTigerStocks: 200,
+      maxDragonTigerSeats: 60,
+      maxDragonTigerSeatStocks: 30,
       ...overrides,
     }),
     calls,
@@ -105,6 +108,7 @@ function candleRow(overrides: Record<string, unknown> = {}): StockRow {
     low_price: 1392.78877,
     close_price: 1411.96877,
     volume: 4497058,
+    turnover: 6320190000,
     ...overrides,
   }
 }
@@ -247,6 +251,7 @@ describe('stockController.candles', () => {
         low: 1392.78877,
         close: 1411.96877,
         volume: 4497058,
+        turnover: 6320190000,
       }],
     })
     expect(h.calls[0]).toEqual({
