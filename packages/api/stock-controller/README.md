@@ -25,7 +25,7 @@ Use this package when a browser surface needs market data. It reads symbols, quo
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount the package beside `dsh-stock` and one provider. A Client calls `remote.stock.searchSymbols(query, limit)`, `quotes(thscodes)`, `candles(request)`, `documents(request)`, `dragonTiger()`, `hotRank()`, or `hotRankHistory(thscode)`; no method takes a Session, because market data belongs to no Session.
+Mount the package beside `dsh-stock` and one provider. A Client calls `remote.stock.searchSymbols(query, limit)`, `quotes(thscodes)`, `candles(request)`, `documents(request)`, `dragonTiger()`, `hotRank()`, `hotRankHistory(thscode)`, `sectors()`, or `sectorDashboard(sector)`; no method takes a Session, because market data belongs to no Session.
 
 | Method | Returns | Purpose |
 |---|---|---|
@@ -36,6 +36,8 @@ Mount the package beside `dsh-stock` and one provider. A Client calls `remote.st
 | `dragonTiger()` | `DragonTigerDashboard` | Latest trading date's all, institution, and hot-money boards |
 | `hotRank()` | `HotRankDashboard` | Current 24-hour and hourly hot-stock and rank-surge lists, with separate observation times |
 | `hotRankHistory(thscode)` | `HotRankHistory` | Selected A-share's daily rank points for the last 30 calendar days, including ranks outside Top 30 |
+| `sectors()` | `SectorCatalog` | Concept and industry board names for user selection |
+| `sectorDashboard(sector)` | `SectorDashboard` | Current constituents and 120-calendar-day daily index history |
 
 ### Normalization
 
@@ -61,7 +63,9 @@ Because the vendor's quote rows carry no instrument name, `Quote` has none: the 
 
 `dragonTiger()` first reads the latest all-board date, then reads the institution and hot-money boards for that same date. A mismatched date or malformed nested row fails the read. The response carries stock net amounts, optional change percentages and trading amounts, active seats, linked stocks, and a `truncated` flag when configured row caps cut any list. The upstream list does not provide turnover rates or separate institution/hot-money buy and sell amounts; consumers must leave those values unavailable. It is a current market-data read, not a Session result.
 
-`hotRank()` reads four independent current lists: hot stocks and rank surges for 24-hour/day and hourly periods. Each list retains its own observation time, original heat string, rank, optional rank change, and trend direction; missing rank change is not zero. `hotRankHistory(thscode)` reads the selected stock's daily rank series over the last 30 calendar days; a rank beyond Top 30 is valid. A malformed returned row fails its read. Neither method stores a Session result.
+`hotRank()` reads four independent current lists: hot stocks and rank surges for 24-hour/day and hourly periods. Each list retains its own observation time, original heat string, rank, optional rank change, and trend direction; missing rank change is not zero. `hotRankHistory(thscode)` reads the selected stock's daily rank series over the last 30 calendar days; a rank beyond Top 30 is valid. A malformed returned row fails its read. None of these methods stores a Session result.
+
+`sectors()` reads concept and industry catalog entries for name matching and reports catalog truncation. `sectorDashboard(sector)` reads current constituents and the past 120 calendar days of daily index history as separate observations; neither proves historical membership.
 
 ### Periods, adjustments, and windows
 
@@ -136,9 +140,9 @@ The browser export provides `ctx.stockClient` and requires `remote` and `remote.
 
 Typert generates the Host and Client Remote artifacts exposed by `./typert` and `./remote`.
 
-### Why the read surface is A-share only
+### Why stock symbol search is A-share only
 
-Symbol search filters by asset type because the quote, candle, and document capabilities this package reads all serve that universe: a match outside it would enter a list that could never quote it. Admitting another asset class means widening the filter and those reads together.
+Stock symbol search filters by asset type because the quote, candle, and document capabilities this package reads all serve that universe: a match outside it would enter a list that could never quote it. Sector catalog reads use the separate A-share index capabilities. Admitting another stock asset class means widening the filter and the stock reads together.
 
 </details>
 
@@ -168,7 +172,7 @@ None; this package neither assembles nor sends a provider request, and it regist
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- **A-share only** — symbol search filters to that universe, and the quote, candle, and document reads serve no other asset class.
+- **A-share stocks and indices** — stock symbol search, quotes, candles, and documents serve A shares; the sector reads serve A-share indices.
 - **Document relevance is the gateway's** — the search takes a natural-language query, so a row about a different instrument whose text mentions this one can appear; the surface shows the source and time so a user judges a row rather than trusting the order.
 - **No subscription or push** — the seam publishes none, so the browser reads on demand and holds whatever it last fetched.
 - **No candle aggregation** — the series is the vendor's own; a period the vendor does not publish cannot be requested.

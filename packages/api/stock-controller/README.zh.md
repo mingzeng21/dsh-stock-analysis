@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-把本包与 `dsh-stock` 及一个 provider 一起挂载。Client 调用 `remote.stock.searchSymbols(query, limit)`、`quotes(thscodes)`、`candles(request)`、`documents(request)`、`dragonTiger()`、`hotRank()` 或 `hotRankHistory(thscode)`；没有任何方法接收 Session，因为行情数据不属于任何 Session。
+把本包与 `dsh-stock` 及一个 provider 一起挂载。Client 调用 `remote.stock.searchSymbols(query, limit)`、`quotes(thscodes)`、`candles(request)`、`documents(request)`、`dragonTiger()`、`hotRank()` 、`hotRankHistory(thscode)`、`sectors()` 或 `sectorDashboard(sector)`；没有任何方法接收 Session，因为行情数据不属于任何 Session。
 
 | 方法 | 返回 | 用途 |
 |---|---|---|
@@ -36,6 +36,8 @@ kind: "package-reference"
 | `dragonTiger()` | `DragonTigerDashboard` | 最新交易日的全部、机构与游资龙虎榜 |
 | `hotRank()` | `HotRankDashboard` | 当前 24 小时及小时热股榜、飙升榜，各自保留榜单时间 |
 | `hotRankHistory(thscode)` | `HotRankHistory` | 指定 A 股近 30 个自然日的日线名次点位，包含 Top 30 以外名次 |
+| `sectors()` | `SectorCatalog` | 供用户选择的概念与行业板块目录 |
+| `sectorDashboard(sector)` | `SectorDashboard` | 当前成分股与近 120 个自然日的指数日线 |
 
 ### 归一化
 
@@ -61,7 +63,9 @@ seam 有意在其行上保留 vendor 自己的字段名，因为其 94 个能力
 
 `dragonTiger()` 先读取最新全部榜的交易日期，再按同一日期读取机构榜和游资榜。日期不一致或嵌套行格式错误时整次读取失败。响应包含股票净额、可选的涨跌幅与成交额、活跃席位、关联股票；配置的行数上限截断任一列表时会设置 `truncated`。上游榜单没有提供换手率，也没有机构和游资各自的买入额、卖出额；消费端应将这些值标为未提供。这是实时市场数据读取，不属于 Session 结果。
 
-`hotRank()` 分别读取热股和飙升的 24 小时／日榜与小时榜四类当前榜单。各榜保留自己的时间、原始热度字符串、名次、可选的名次变化和趋势方向；缺少名次变化不等于零。`hotRankHistory(thscode)` 读取指定股票近 30 个自然日的日线名次；Top 30 以外的名次有效。返回行格式错误时该次读取失败。两个方法均不保存 Session 结果。
+`hotRank()` 分别读取热股和飙升的 24 小时／日榜与小时榜四类当前榜单。各榜保留自己的时间、原始热度字符串、名次、可选的名次变化和趋势方向；缺少名次变化不等于零。`hotRankHistory(thscode)` 读取指定股票近 30 个自然日的日线名次；Top 30 以外的名次有效。返回行格式错误时该次读取失败。这些方法均不保存 Session 结果。
+
+`sectors()` 读取用于名称匹配的概念和行业板块目录，并报告目录截断。`sectorDashboard(sector)` 分别读取当前成分股与近 120 个自然日的指数日线；当前成分不代表历史成分。
 
 ### 周期、复权与窗口
 
@@ -136,9 +140,9 @@ seam 错误码按字符串而非类身份比较，因为 `StockError` 类属于�
 
 Typert 生成由 `./typert` 与 `./remote` 暴露的 Host 与 Client Remote 产物。
 
-### 为什么读取面只有 A 股
+### 为什么股票标的检索仅限 A 股
 
-标的检索按资产类别过滤，因为本包读取的快照、K 线与文档能力都只服务该universe：该范围之外的匹配会进入一个永远无法为它取快照的列表。接纳另一种资产类别意味着同时放宽该过滤器和这些读取。
+股票标的检索按资产类别过滤，因为本包读取的快照、K 线与文档能力都只服务该universe：该范围之外的匹配会进入一个永远无法为它取快照的列表。板块目录使用单独的 A 股指数能力。接纳另一种股票资产类别意味着同时放宽该过滤器和股票读取。
 
 </details>
 
@@ -168,7 +172,7 @@ Typert 生成由 `./typert` 与 `./remote` 暴露的 Host 与 Client Remote 产�
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- **仅限 A 股** —— 标的检索过滤到该universe，而快照、K 线与文档读取不服务其他资产类别。
+- **A 股股票与指数** —— 股票标的检索、快照、K 线与文档服务 A 股；板块读取服务 A 股指数。
 - **文档相关性由网关决定** —— 检索接收自然语言查询，因此可能出现一篇关于另一只标的、正文提到本标的的行；界面展示来源与时间，让用户自行判断某一行，而不是信任排序。
 - **无订阅与推送** —— seam 不发布订阅，因此浏览器按需读取，并持有它最后一次取到的内容。
 - **不做 K 线聚合** —— 序列就是 vendor 自己的；vendor 未发布的周期无法请求。

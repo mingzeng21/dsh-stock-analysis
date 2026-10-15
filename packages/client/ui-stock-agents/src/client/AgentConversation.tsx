@@ -13,9 +13,9 @@ function InquiryTargets({ useConversation, dashboardData, onFocus, t }: Pick<
     return assistant?.blocks.flatMap(block => block.kind === 'text' ? [block.text] : []).join('') ?? ''
   }) ?? ''
   if (dashboardData === undefined || onFocus === undefined) return null
-  const stocks = dashboardData.boards.flatMap(board => board.stocks.map(stock => ({
-    code: stock.thscode, name: stock.name,
-  })))
+  const stocks = 'boards' in dashboardData
+    ? dashboardData.boards.flatMap(board => board.stocks.map(stock => ({ code: stock.thscode, name: stock.name })))
+    : dashboardData.constituents.map(stock => ({ code: stock.thscode, name: stock.name }))
   const mentioned = [...new Map(stocks.filter(stock => response.includes(stock.code) || response.includes(stock.name))
     .map(stock => [stock.code, stock])).values()].slice(0, 4)
   if (mentioned.length === 0) return null

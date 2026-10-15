@@ -2879,6 +2879,18 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'all returned daily rank points, including ranks outside the current Top 30.',
       },
       {
+        signature: '@Remote async sectors(signal: AbortSignal): Promise<SectorCatalog>',
+        description: 'Read concept and industry board names for exact or partial user matching.',
+        parameters: [{ name: 'signal', description: 'caller cancellation.' }],
+        returns: 'catalog entries in provider order and whether either list was cut.',
+      },
+      {
+        signature: '@Remote async sectorDashboard(sector: SectorMatch, signal: AbortSignal): Promise<SectorDashboard>',
+        description: 'Read current constituents and daily history for one catalog entry.',
+        parameters: [{ name: 'sector', description: 'selected catalog entry.' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'independent current membership and history observations.',
+      },
+      {
         signature: '@Remote async candles(request: CandleRequest, signal: AbortSignal): Promise<CandleSeries>',
         description: 'Read one instrument\'s candle series for a window.',
         parameters: [{ name: 'request', description: 'instrument, period, adjustment, and the window.' }, { name: 'signal', description: 'caller cancellation.' }],
@@ -6620,6 +6632,22 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'SearchResultView',
     declaration: 'export type SearchResultView = SearchMatchesResultView | SearchPathsResultView;',
+  },
+  {
+    name: 'SectorCatalog',
+    declaration: 'export interface SectorCatalog {\n    readonly matches: readonly SectorMatch[];\n    readonly truncated: boolean;\n}',
+  },
+  {
+    name: 'SectorConstituent',
+    declaration: 'export interface SectorConstituent {\n    readonly thscode: string;\n    readonly ticker: string;\n    readonly name: string;\n}',
+  },
+  {
+    name: 'SectorDashboard',
+    declaration: 'export interface SectorDashboard {\n    readonly sector: SectorMatch;\n    readonly constituents: readonly SectorConstituent[];\n    readonly constituentsTruncated: boolean;\n    readonly constituentsAsOf?: number;\n    readonly history: CandleSeries;\n}',
+  },
+  {
+    name: 'SectorMatch',
+    declaration: 'export interface SectorMatch {\n    readonly thscode: string;\n    readonly name: string;\n    readonly kind: \'concept\' | \'industry\';\n}',
   },
   {
     name: 'SendTeamMessageRequest',

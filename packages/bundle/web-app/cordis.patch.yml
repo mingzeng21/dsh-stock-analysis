@@ -604,6 +604,8 @@
     # is a per-request cost that `standard` and `ptc` must not carry.
     - id: stock
       name: '@deepseek-ai/dsh-stock'
+      config:
+        maxRows: 5000
 
     - id: stock-hithink
       name: '@deepseek-ai/dsh-stock-hithink'

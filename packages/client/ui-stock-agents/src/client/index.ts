@@ -12,7 +12,7 @@ import type { SessionReference } from '@deepseek-ai/dsh-api-session-controller/c
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { MainPanelId } from '@deepseek-ai/dsh-client-ui-layout/client'
-import type { DragonTigerDashboard, HotRankDashboard } from '@deepseek-ai/dsh-api-stock-controller/client'
+import type { DragonTigerDashboard, HotRankDashboard, SectorDashboard } from '@deepseek-ai/dsh-api-stock-controller/client'
 import { AgentsPanel, type AgentsPanelInjected } from './AgentsPanel.tsx'
 import { AgentConversation } from './AgentConversation.tsx'
 import { en, NS, zh, type StockAgentsKey } from './locales.ts'
@@ -28,7 +28,7 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
       kind: 'single'
       scope: 'session-maybe'
       owner: {
-        dashboardData?: DragonTigerDashboard | HotRankDashboard
+        dashboardData?: DragonTigerDashboard | HotRankDashboard | SectorDashboard
         onFocus?: (code: string) => void
       }
     }
@@ -127,6 +127,8 @@ export function apply(ctx: Context): void {
       loadDragonTiger: signal => ctx.stockClient.dragonTiger(signal),
       loadHotRank: signal => ctx.stockClient.hotRank(signal),
       loadHotRankHistory: (thscode, signal) => ctx.stockClient.hotRankHistory(thscode, signal),
+      loadSectors: signal => ctx.stockClient.sectors(signal),
+      loadSectorDashboard: (sector, signal) => ctx.stockClient.sectorDashboard(sector, signal),
       openSession: (sessionId: SessionId) => ctx.sessions.retain(sessionId, { source: 'stockAgent' }),
     }),
   }, AgentsPanel))

@@ -212,6 +212,21 @@ Host Remote reads over the stock capability seam.
 @Remote async hotRankHistory(thscode: string, signal: AbortSignal): Promise<HotRankHistory>
 
 /**
+ * Read concept and industry board names for exact or partial user matching.
+ * @param signal - caller cancellation.
+ * @returns catalog entries in provider order and whether either list was cut.
+ */
+@Remote async sectors(signal: AbortSignal): Promise<SectorCatalog>
+
+/**
+ * Read current constituents and daily history for one catalog entry.
+ * @param sector - selected catalog entry.
+ * @param signal - caller cancellation.
+ * @returns independent current membership and history observations.
+ */
+@Remote async sectorDashboard(sector: SectorMatch, signal: AbortSignal): Promise<SectorDashboard>
+
+/**
  * Read one instrument's candle series for a window.
  * @param request - instrument, period, adjustment, and the window.
  * @param signal - caller cancellation.

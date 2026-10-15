@@ -473,3 +473,29 @@ describe('stockController seam failures', () => {
     await expect(h.controller.quotes(['600519.SH'], SIGNAL)).rejects.toMatchObject({ code: 'ENOENT' })
   })
 })
+
+describe('stockController.sectorDashboard', () => {
+  it('reads current constituents and index history using separate capabilities', async () => {
+    const h = harness()
+    h.answer(result('a-share-index.catalog.ths-index-list', [{ thscode: '886001.TI', name: '机器人概念' }]))
+    await expect(h.controller.sectors(SIGNAL)).resolves.toEqual({ matches: [
+      { thscode: '886001.TI', name: '机器人概念', kind: 'concept' },
+      { thscode: '886001.TI', name: '机器人概念', kind: 'industry' },
+    ], truncated: false })
+    h.answer(result('a-share-index.constituents.ths-stock-list', [{ thscode: '600001.SH', ticker: '600001', name: '甲公司', date_ms: 1, open_price: 100, high_price: 102, low_price: 99, close_price: 101, volume: 1, turnover: 1 }], { asOf: 1_780_000_000_000 }))
+    const data = await h.controller.sectorDashboard({ thscode: '886001.TI', name: '机器人概念', kind: 'concept' }, SIGNAL)
+    expect(data.constituents).toEqual([{ thscode: '600001.SH', ticker: '600001', name: '甲公司' }])
+    expect(data.constituentsAsOf).toBe(1_780_000_000_000)
+    expect(data.history.candles[0]?.close).toBe(101)
+    expect(h.calls.map(call => call.endpointId).slice(-2)).toEqual([
+      'a-share-index.constituents.ths-stock-list', 'a-share-index.prices.historical',
+    ])
+  })
+
+  it('omits constituent observation time when the read does not provide one', async () => {
+    const h = harness()
+    h.answer(result('a-share-index.constituents.ths-stock-list', []))
+    const data = await h.controller.sectorDashboard({ thscode: '886001.TI', name: '机器人概念', kind: 'concept' }, SIGNAL)
+    expect(data).not.toHaveProperty('constituentsAsOf')
+  })
+})

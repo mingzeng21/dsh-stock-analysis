@@ -158,6 +158,35 @@ export interface HotRankHistory {
   readonly points: readonly HotRankPoint[]
 }
 
+/** One concept or industry entry returned by the board catalog. */
+export interface SectorMatch {
+  readonly thscode: string
+  readonly name: string
+  readonly kind: 'concept' | 'industry'
+}
+
+/** Catalog lookup result; `truncated` means some names could not be searched. */
+export interface SectorCatalog {
+  readonly matches: readonly SectorMatch[]
+  readonly truncated: boolean
+}
+
+/** One current constituent of a selected board. */
+export interface SectorConstituent {
+  readonly thscode: string
+  readonly ticker: string
+  readonly name: string
+}
+
+/** Index history and current constituents are independent observations. */
+export interface SectorDashboard {
+  readonly sector: SectorMatch
+  readonly constituents: readonly SectorConstituent[]
+  readonly constituentsTruncated: boolean
+  readonly constituentsAsOf?: number
+  readonly history: CandleSeries
+}
+
 /** One candlestick. */
 export interface Candle {
   /** Bar open time in milliseconds since the Unix epoch. */

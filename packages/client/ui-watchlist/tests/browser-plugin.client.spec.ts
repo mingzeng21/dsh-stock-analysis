@@ -49,6 +49,8 @@ function stockStub(): IStockClient {
     dragonTiger: async () => { throw new Error('this spec never reads dragon-tiger boards') },
     hotRank: async () => { throw new Error('this spec never reads hot-rank lists') },
     hotRankHistory: async () => { throw new Error('this spec never reads rank history') },
+    sectors: async () => { throw new Error('this spec never reads sectors') },
+    sectorDashboard: async () => { throw new Error('this spec never reads sector dashboards') },
     searchSymbols: async () => [{ thscode: '600519.SH', ticker: '600519', name: '贵州茅台' }],
     quotes: async () => ({
       asOf: 1789560797000,

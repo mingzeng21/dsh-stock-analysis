@@ -2,7 +2,7 @@
 /** The Agents panel keeps specialist output and history inside its own main entry. */
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import type { StockAgentCard } from '@deepseek-ai/dsh-api-stock-agents-controller/types'
-import type { DragonTigerDashboard, HotRankDashboard } from '@deepseek-ai/dsh-api-stock-controller/client'
+import type { DragonTigerDashboard, HotRankDashboard, SectorCatalog, SectorDashboard, SectorMatch } from '@deepseek-ai/dsh-api-stock-controller/client'
 import type { SessionListState, SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { LocaleSnapshot } from '@deepseek-ai/dsh-client-locale/client'
 import type { ConversationSnapshot } from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -49,6 +49,9 @@ const DASHBOARD: DragonTigerDashboard = {
   ],
 }
 
+const SECTORS: SectorCatalog = { matches: [{ thscode: '886001.TI', name: '机器人概念', kind: 'concept' }], truncated: false }
+const SECTOR_DASHBOARD: SectorDashboard = { sector: SECTORS.matches[0]!, constituents: [{ thscode: '600001.SH', ticker: '600001', name: '甲公司' }], constituentsTruncated: false, history: { thscode: '886001.TI', interval: '1d', truncated: false, candles: [{ time: 1_780_000_000_000, open: 100, high: 102, low: 99, close: 101, volume: 1, turnover: 1 }, { time: 1_780_086_400_000, open: 101, high: 104, low: 100, close: 103, volume: 1, turnover: 1 }] } }
+
 const HOT_RANK: HotRankDashboard = { boards: [
   { kind: 'hot', period: 'day', asOf: 1_781_000_000_000, stocks: [
     { thscode: '600001.SH', ticker: '600001', name: '甲公司', rank: 1, heat: '1941909', rankChange: 7, rankTrend: 'up' },
@@ -60,7 +63,7 @@ const HOT_RANK: HotRankDashboard = { boards: [
 
 afterEach(cleanup)
 
-function mount(history: boolean | 'dragon' | 'hot' = false, cards: readonly StockAgentCard[] = [SCREENING]) {
+function mount(history: boolean | 'dragon' | 'hot' | 'sector' = false, cards: readonly StockAgentCard[] = [SCREENING]) {
   const catalog = createSnapshotStore<readonly StockAgentCard[]>(cards)
   const sessions = createSnapshotStore<SessionListState>({
     ids: history ? [SESSION] : [],
@@ -68,8 +71,8 @@ function mount(history: boolean | 'dragon' | 'hot' = false, cards: readonly Stoc
       [SESSION]: {
         id: SESSION, displayTitle: '筛选结果', running: false, retainedBy: {}, blank: false,
         updatedAt: 1_780_000_000_000,
-        projectionValues: { stockAgent: history === 'dragon' || history === 'hot'
-          ? { name: `dashboard-${history}`, query: '榜单如何？' }
+        projectionValues: { stockAgent: history === 'dragon' || history === 'hot' || history === 'sector'
+          ? { name: `dashboard-${history}`, query: history === 'sector' ? '886001.TI' : '榜单如何？' }
           : { name: SCREENING.name, query: '半导体公司' } },
       },
     } : {},
@@ -95,6 +98,8 @@ function mount(history: boolean | 'dragon' | 'hot' = false, cards: readonly Stoc
   const continueDashboard = vi.fn(async (_sessionId: SessionId, _prompt: string) => {})
   const loadDragonTiger = vi.fn(async () => DASHBOARD)
   const loadHotRank = vi.fn(async () => HOT_RANK)
+  const loadSectors = vi.fn(async () => SECTORS)
+  const loadSectorDashboard = vi.fn(async (_sector: SectorMatch, _signal: AbortSignal) => SECTOR_DASHBOARD)
   const loadHotRankHistory = vi.fn(async () => ({ thscode: '600001.SH', points: [
     { date: '2026-10-12', rank: 12 }, { date: '2026-10-13', rank: 1 },
   ] }))
@@ -116,6 +121,8 @@ function mount(history: boolean | 'dragon' | 'hot' = false, cards: readonly Stoc
     loadDragonTiger,
     loadHotRank,
     loadHotRankHistory,
+    loadSectors,
+    loadSectorDashboard,
     openSession,
     renderSlot,
     usePanelInfo: unused,
@@ -125,7 +132,10 @@ function mount(history: boolean | 'dragon' | 'hot' = false, cards: readonly Stoc
     useResource: unused,
   } as AgentsPanelProps
   render(<AgentsPanel {...props} />)
-  return { start, startDashboard, continueDashboard, release, openSession, renderSlot, loadDragonTiger, loadHotRank, loadHotRankHistory }
+  return {
+    start, startDashboard, continueDashboard, release, openSession, renderSlot,
+    loadDragonTiger, loadHotRank, loadHotRankHistory, loadSectors, loadSectorDashboard,
+  }
 }
 
 it('starts a dashboard Session on first question and carries the selected snapshot into follow-ups', async () => {
@@ -261,4 +271,54 @@ it('collapses and restores Agent history with an icon button', () => {
   fireEvent.click(show)
   expect(history).toHaveProperty('hidden', false)
   expect(within(history).getByRole('button', { name: '隐藏分析记录' })).toBeTruthy()
+})
+
+it('selects a named concept board and asks about its current members and index history', async () => {
+  const { startDashboard, loadSectorDashboard } = mount()
+  fireEvent.click(screen.getByRole('button', { name: /概念板块联动/ }))
+  await waitFor(() => { expect(screen.getByLabelText('板块名称')).toBeTruthy() })
+  fireEvent.change(screen.getByLabelText('板块名称'), { target: { value: '机器人' } })
+  fireEvent.click(screen.getByRole('button', { name: /机器人概念.*886001.TI/ }))
+  await waitFor(() => { expect(loadSectorDashboard).toHaveBeenCalledTimes(1) })
+  expect(screen.getByText('当前成分不代表历史成分；指数涨跌不能证明单只股票的概念相关度。仅供观察，非投资建议。')).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: '问看板' }))
+  fireEvent.change(screen.getByLabelText('你的问题'), { target: { value: '有哪些股票？' } })
+  fireEvent.click(screen.getByRole('button', { name: '发送问题' }))
+  await waitFor(() => { expect(startDashboard).toHaveBeenCalledTimes(1) })
+  expect(startDashboard.mock.calls[0]?.[0]).toContain('sector-code:886001.TI')
+  expect(startDashboard.mock.calls[0]?.[0]).toContain('600001.SH')
+  expect(startDashboard.mock.calls[0]?.[0]).toContain('103')
+})
+
+it('reopens a sector question with the recorded board', async () => {
+  const { loadSectorDashboard } = mount('sector')
+  fireEvent.click(screen.getByRole('button', { name: '查看结果' }))
+  await waitFor(() => { expect(loadSectorDashboard).toHaveBeenCalledTimes(1) })
+  expect(screen.getByDisplayValue('机器人概念')).toBeTruthy()
+})
+
+it('retries a failed sector catalog read before selecting a board', async () => {
+  const { loadSectors, loadSectorDashboard } = mount()
+  loadSectors.mockRejectedValueOnce(new Error('catalog unavailable'))
+  fireEvent.click(screen.getByRole('button', { name: /概念板块联动/ }))
+  await waitFor(() => { expect(screen.getByRole('alert').textContent).toContain('暂时无法加载板块数据') })
+  fireEvent.click(screen.getByRole('button', { name: '重试' }))
+  await waitFor(() => { expect(loadSectors).toHaveBeenCalledTimes(2) })
+  fireEvent.change(screen.getByLabelText('板块名称'), { target: { value: '机器人' } })
+  fireEvent.click(screen.getByRole('button', { name: /机器人概念.*886001.TI/ }))
+  await waitFor(() => { expect(loadSectorDashboard).toHaveBeenCalledTimes(1) })
+})
+
+it('keeps the selected board when its data read fails and retries that board', async () => {
+  const { loadSectorDashboard } = mount()
+  loadSectorDashboard.mockRejectedValueOnce(new Error('history unavailable'))
+  fireEvent.click(screen.getByRole('button', { name: /概念板块联动/ }))
+  await waitFor(() => { expect(screen.getByLabelText('板块名称')).toBeTruthy() })
+  fireEvent.change(screen.getByLabelText('板块名称'), { target: { value: '机器人' } })
+  fireEvent.click(screen.getByRole('button', { name: /机器人概念.*886001.TI/ }))
+  await waitFor(() => { expect(screen.getByRole('alert').textContent).toContain('暂时无法加载板块数据') })
+  fireEvent.click(screen.getByRole('button', { name: '重试' }))
+  await waitFor(() => { expect(loadSectorDashboard).toHaveBeenCalledTimes(2) })
+  expect(loadSectorDashboard.mock.calls[1]?.[0]).toEqual(SECTORS.matches[0])
+  expect(screen.getByDisplayValue('机器人概念')).toBeTruthy()
 })

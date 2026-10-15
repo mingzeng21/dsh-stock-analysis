@@ -6,7 +6,8 @@
  * rows and leaves symbol disambiguation, parameter validation, row bounds, and
  * the failure taxonomy to itself. This service is the seam's first consumer
  * that fixes a canonical type: it performs the browser reads for symbol search,
- * quotes, candles, research documents, and same-date dragon-tiger boards. It
+ * quotes, candles, research documents, board catalogs, index history,
+ * constituents, and same-date dragon-tiger boards. It
  * resolves vendor field names, encodings, and search vocabulary on the Host,
  * so no browser view or store reads a vendor row.
  *
@@ -14,7 +15,7 @@
  * two seam capabilities, and every seam failure keeps a distinct Remote code
  * so the browser branches on a code rather than a message.
  *
- * The read surface is A-share only, which is why symbol search filters by asset
+ * Stock symbol search is A-share only, which is why it filters by asset
  * type: the quote, candle, and document capabilities the panel consumes all
  * serve that universe, so admitting another asset class means widening the
  * filter and those reads together.
@@ -27,11 +28,11 @@ import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typer
 import z from '@deepseek-ai/schemastery'
 import type {
   Candle, CandleRequest, CandleSeries, DocumentKind, DocumentRow, DocumentsRequest, DragonTigerDashboard,
-  HotRankDashboard, HotRankHistory, InstrumentMatch, Quote, QuoteBatch,
+  HotRankDashboard, HotRankHistory, InstrumentMatch, Quote, QuoteBatch, SectorCatalog, SectorDashboard, SectorMatch,
 } from './types.ts'
 import { toDragonTigerBoard } from './dragon-tiger.ts'
 import { toHotRankBoard, toHotRankHistory } from './hot-rank.ts'
-import { toCandle, toDocument, toQuote, type RowContext } from './vendor.ts'
+import { readString, toCandle, toDocument, toQuote, type RowContext } from './vendor.ts'
 
 export type * from './types.ts'
 
@@ -50,6 +51,9 @@ const DRAGON_TIGER_ENDPOINT = 'a-share.special-data.dragon-tiger-list'
 const HOT_RANK_ENDPOINT = 'a-share.special-data.hot-stock-list'
 const SURGE_ENDPOINT = 'a-share.special-data.skyrocket-list'
 const HOT_RANK_TREND_ENDPOINT = 'a-share.special-data.hot-stock-rank-trend'
+const SECTOR_CATALOG_ENDPOINT = 'a-share-index.catalog.ths-index-list'
+const SECTOR_CONSTITUENTS_ENDPOINT = 'a-share-index.constituents.ths-stock-list'
+const SECTOR_HISTORY_ENDPOINT = 'a-share-index.prices.historical'
 const DOCUMENT_ENDPOINTS: Readonly<Record<DocumentKind, string>> = {
   report: 'iwencai.search.report',
   announcement: 'iwencai.search.announcement',
@@ -339,6 +343,62 @@ export class StockController extends TypertRemoteService {
       HOT_RANK_TREND_ENDPOINT, code,
     )
     return toHotRankHistory(result, code)
+  }
+
+  /**
+   * Read concept and industry board names for exact or partial user matching.
+   * @param signal - caller cancellation.
+   * @returns catalog entries in provider order and whether either list was cut.
+   */
+  @Remote
+  async sectors(signal: AbortSignal): Promise<SectorCatalog> {
+    const kinds = [
+      { tag: 'cn_concept', kind: 'concept' },
+      { tag: 'industry', kind: 'industry' },
+    ] as const
+    const results = await Promise.all(kinds.map(async ({ tag, kind }) => {
+      const result = await this.seam(
+        () => this.ctx.stock.call(SECTOR_CATALOG_ENDPOINT, { tag }, signal), SECTOR_CATALOG_ENDPOINT, undefined,
+      )
+      const context: RowContext = { endpoint: SECTOR_CATALOG_ENDPOINT }
+      const matches: SectorMatch[] = result.rows.map(row => ({
+        thscode: readString(row, 'thscode', context), name: readString(row, 'name', context), kind,
+      }))
+      return { matches, truncated: result.meta.truncated }
+    }))
+    return { matches: results.flatMap(result => result.matches), truncated: results.some(result => result.truncated) }
+  }
+
+  /**
+   * Read current constituents and daily history for one catalog entry.
+   * @param sector - selected catalog entry.
+   * @param signal - caller cancellation.
+   * @returns independent current membership and history observations.
+   */
+  @Remote
+  async sectorDashboard(sector: SectorMatch, signal: AbortSignal): Promise<SectorDashboard> {
+    const thscode = requireThscode(sector.thscode)
+    const end = Date.now()
+    const start = end - 120 * 24 * 60 * 60 * 1000
+    const [members, history] = await Promise.all([
+      this.seam(() => this.ctx.stock.call(SECTOR_CONSTITUENTS_ENDPOINT, { thscode }, signal), SECTOR_CONSTITUENTS_ENDPOINT, thscode),
+      this.seam(() => this.ctx.stock.call(SECTOR_HISTORY_ENDPOINT, { thscode, interval: '1d', start, end }, signal), SECTOR_HISTORY_ENDPOINT, thscode),
+    ])
+    const context: RowContext = { endpoint: SECTOR_CONSTITUENTS_ENDPOINT, thscode }
+    const constituents = members.rows.map(row => ({
+      thscode: readString(row, 'thscode', context),
+      ticker: readString(row, 'ticker', context),
+      name: readString(row, 'name', context),
+    }))
+    const bars: RowContext = { endpoint: SECTOR_HISTORY_ENDPOINT, thscode }
+    return {
+      sector: { thscode, name: sector.name, kind: sector.kind },
+      constituents,
+      constituentsTruncated: members.meta.truncated,
+      ...members.meta.asOf === undefined ? {} : { constituentsAsOf: members.meta.asOf },
+      history: { thscode, interval: '1d', ...asOfOf(history.meta.asOf), truncated: history.meta.truncated,
+        candles: history.rows.map(row => toCandle(row, bars)) },
+    }
   }
 
   /**

@@ -20,7 +20,7 @@ import type {} from '@deepseek-ai/dsh-api-stock-controller/remote'
 import type { RemoteResult, TypertRemoteNamespaceMap } from '@deepseek-ai/dsh-typert-protocol'
 import type {
   CandleRequest, CandleSeries, DocumentRow, DocumentsRequest, DragonTigerDashboard,
-  HotRankDashboard, HotRankHistory, InstrumentMatch, QuoteBatch,
+  HotRankDashboard, HotRankHistory, InstrumentMatch, QuoteBatch, SectorCatalog, SectorDashboard, SectorMatch,
 } from '../types.ts'
 
 export type {
@@ -28,7 +28,7 @@ export type {
   DocumentKind, DocumentRow, DocumentsRequest,
   DragonTigerBoard, DragonTigerBoardType, DragonTigerDashboard, DragonTigerSeat, DragonTigerSeatStock, DragonTigerStock,
   HotRankBoard, HotRankDashboard, HotRankHistory, HotRankPoint, HotRankStock,
-  InstrumentMatch, Quote, QuoteBatch,
+  InstrumentMatch, Quote, QuoteBatch, SectorCatalog, SectorConstituent, SectorDashboard, SectorMatch,
 } from '../types.ts'
 
 declare module '@deepseek-ai/cordis' {
@@ -59,6 +59,19 @@ export interface IStockClient {
    * @returns daily rank points, including ranks beyond the current Top 30.
    */
   hotRankHistory(thscode: string, signal?: AbortSignal): Promise<HotRankHistory>
+  /**
+   * Read concept and industry board entries for name matching.
+   * @param signal - caller cancellation.
+   * @returns catalog entries and the truncation fact.
+   */
+  sectors(signal?: AbortSignal): Promise<SectorCatalog>
+  /**
+   * Read independent current membership and index history observations.
+   * @param sector - selected board from the catalog.
+   * @param signal - caller cancellation.
+   * @returns current constituents and the past 120 calendar days of daily index bars.
+   */
+  sectorDashboard(sector: SectorMatch, signal?: AbortSignal): Promise<SectorDashboard>
   /**
    * Resolve a name, bare code, or thscode fragment to complete instruments.
    * @param query - user-facing search text.
@@ -124,6 +137,16 @@ export class StockClient extends Service implements IStockClient {
   /** {@inheritDoc IStockClient.hotRankHistory} */
   async hotRankHistory(thscode: string, signal?: AbortSignal): Promise<HotRankHistory> {
     return unwrap(await this.namespace.hotRankHistory(thscode, signal))
+  }
+
+  /** {@inheritDoc IStockClient.sectors} */
+  async sectors(signal?: AbortSignal): Promise<SectorCatalog> {
+    return unwrap(await this.namespace.sectors(signal))
+  }
+
+  /** {@inheritDoc IStockClient.sectorDashboard} */
+  async sectorDashboard(sector: SectorMatch, signal?: AbortSignal): Promise<SectorDashboard> {
+    return unwrap(await this.namespace.sectorDashboard(sector, signal))
   }
 
   /** {@inheritDoc IStockClient.searchSymbols} */

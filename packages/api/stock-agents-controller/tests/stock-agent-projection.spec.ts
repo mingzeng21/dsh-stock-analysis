@@ -40,6 +40,11 @@ describe('stock Agent record projection', () => {
     })
   })
 
+  it('records a sector dashboard with its selected code for reopening', () => {
+    const active = advanceStockAgent(empty, prompt('用户问题：有哪些成分？\n\ndashboard-session:sector\nsector-code:886001.TI\n\n看板快照（JSON）：{}'))
+    expect(active.record).toEqual({ name: 'dashboard-sector', query: '886001.TI' })
+  })
+
   it('records dashboard questions without requiring a skill invocation', () => {
     const active = advanceStockAgent(empty, prompt('用户问题：机构净额最高的是谁？\n\ndashboard-session:dragon\n\n看板快照（JSON）：{}'))
     expect(active.record).toEqual({ name: 'dashboard-dragon', query: '机构净额最高的是谁？' })
@@ -72,5 +77,6 @@ describe('specialist follow-up', () => {
   it('continues dashboard questions without loading a specialist skill', async () => {
     const loadSkill = async () => { throw new Error('dashboard has no skill') }
     expect(await continueStockAgent(proposed, { name: 'dashboard-hot', query: '排名如何' }, loadSkill)).toBe(proposed)
+    expect(await continueStockAgent(proposed, { name: 'dashboard-sector', query: '886001.TI' }, loadSkill)).toBe(proposed)
   })
 })
