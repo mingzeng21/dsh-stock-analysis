@@ -28,10 +28,11 @@ import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typer
 import z from '@deepseek-ai/schemastery'
 import type {
   Candle, CandleRequest, CandleSeries, DocumentKind, DocumentRow, DocumentsRequest, DragonTigerDashboard,
-  HotRankDashboard, HotRankHistory, InstrumentMatch, Quote, QuoteBatch, SectorCatalog, SectorDashboard, SectorMatch,
+  HotRankDashboard, HotRankHistory, InstrumentMatch, LimitUpPulseDashboard, Quote, QuoteBatch, SectorCatalog, SectorDashboard, SectorMatch,
 } from './types.ts'
 import { toDragonTigerBoard } from './dragon-tiger.ts'
 import { toHotRankBoard, toHotRankHistory } from './hot-rank.ts'
+import { pulseDate, pulseDateMs, pulseLevels, pulseStocks } from './limit-up-pulse.ts'
 import { readString, toCandle, toDocument, toQuote, type RowContext } from './vendor.ts'
 
 export type * from './types.ts'
@@ -54,6 +55,8 @@ const HOT_RANK_TREND_ENDPOINT = 'a-share.special-data.hot-stock-rank-trend'
 const SECTOR_CATALOG_ENDPOINT = 'a-share-index.catalog.ths-index-list'
 const SECTOR_CONSTITUENTS_ENDPOINT = 'a-share-index.constituents.ths-stock-list'
 const SECTOR_HISTORY_ENDPOINT = 'a-share-index.prices.historical'
+const LIMIT_UP_LADDER_ENDPOINT = 'a-share.special-data.limit-up-ladder'
+const LIMIT_UP_POOL_ENDPOINT = 'a-share.special-data.limit-up-pool'
 const DOCUMENT_ENDPOINTS: Readonly<Record<DocumentKind, string>> = {
   report: 'iwencai.search.report',
   announcement: 'iwencai.search.announcement',
@@ -135,6 +138,8 @@ export interface Config {
   readonly maxDragonTigerSeats: number
   /** Inclusive cap on stock links sent for each active seat. */
   readonly maxDragonTigerSeatStocks: number
+  /** Maximum 200-row pool pages read per trading date in the pulse dashboard. */
+  readonly maxLimitUpPagesPerDay: number
 }
 
 /**
@@ -212,6 +217,7 @@ export class StockController extends TypertRemoteService {
     maxDragonTigerStocks: z.number().step(1).min(1).default(200),
     maxDragonTigerSeats: z.number().step(1).min(1).default(60),
     maxDragonTigerSeatStocks: z.number().step(1).min(1).default(30),
+    maxLimitUpPagesPerDay: z.number().step(1).min(1).default(5),
   })
 
   /**
@@ -343,6 +349,40 @@ export class StockController extends TypertRemoteService {
       HOT_RANK_TREND_ENDPOINT, code,
     )
     return toHotRankHistory(result, code)
+  }
+
+  /**
+   * Read the vendor's recent trading-date ladder and closing-limit pools for those dates.
+   * The ladder's tiers are limited samples; pool metrics disclose when the
+   * configured page bound prevented complete aggregation.
+   * @param signal - caller cancellation.
+   * @returns trading-day pulse observations in chronological order.
+   */
+  @Remote
+  async limitUpPulse(signal: AbortSignal): Promise<LimitUpPulseDashboard> {
+    const ladder = await this.seam(
+      () => this.ctx.stock.call(LIMIT_UP_LADDER_ENDPOINT, {}, signal), LIMIT_UP_LADDER_ENDPOINT, undefined,
+    )
+    const entries = ladder.rows.map(row => ({ date: pulseDate(readString(row, 'date', { endpoint: LIMIT_UP_LADDER_ENDPOINT })), levels: pulseLevels(row) }))
+      .sort((left, right) => left.date.localeCompare(right.date))
+    const days = await Promise.all(entries.map(async ({ date, levels }) => {
+      const stocks = [] as ReturnType<typeof pulseStocks>[number][]
+      let page = 1
+      let poolTruncated = false
+      while (page <= this.config.maxLimitUpPagesPerDay) {
+        const result = await this.seam(
+          () => this.ctx.stock.call(LIMIT_UP_POOL_ENDPOINT, { date_ms: pulseDateMs(date), page, size: 200 }, signal),
+          LIMIT_UP_POOL_ENDPOINT, undefined,
+        )
+        stocks.push(...pulseStocks(result))
+        poolTruncated ||= result.meta.truncated
+        if (result.meta.next === undefined) break
+        if (page === this.config.maxLimitUpPagesPerDay) { poolTruncated = true; break }
+        page += 1
+      }
+      return { date, stocks, poolTruncated, levels }
+    }))
+    return { ...ladder.meta.asOf === undefined ? {} : { asOf: ladder.meta.asOf }, days }
   }
 
   /**

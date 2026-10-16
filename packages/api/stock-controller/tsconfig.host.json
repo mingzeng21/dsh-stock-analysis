@@ -10,6 +10,7 @@
     "src/types.ts",
     "src/dragon-tiger.ts",
     "src/hot-rank.ts",
+    "src/limit-up-pulse.ts",
     "src/vendor.ts"
   ],
   "references": [

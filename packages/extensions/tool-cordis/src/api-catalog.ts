@@ -2879,6 +2879,12 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'all returned daily rank points, including ranks outside the current Top 30.',
       },
       {
+        signature: '@Remote async limitUpPulse(signal: AbortSignal): Promise<LimitUpPulseDashboard>',
+        description: 'Read the vendor\'s recent trading-date ladder and closing-limit pools for those dates. The ladder\'s tiers are limited samples; pool metrics disclose when the configured page bound prevented complete aggregation.',
+        parameters: [{ name: 'signal', description: 'caller cancellation.' }],
+        returns: 'trading-day pulse observations in chronological order.',
+      },
+      {
         signature: '@Remote async sectors(signal: AbortSignal): Promise<SectorCatalog>',
         description: 'Read concept and industry board names for exact or partial user matching.',
         parameters: [{ name: 'signal', description: 'caller cancellation.' }],
@@ -5788,6 +5794,22 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'KvUnitDescriptor',
     declaration: 'export interface KvUnitDescriptor {\n    readonly name: string;\n    readonly version: number;\n    readonly tables: readonly string[];\n    readonly hasGlobal: boolean;\n    readonly layout?: \'single\' | \'per-record\';\n    readonly compatibleVersions?: readonly number[];\n}',
+  },
+  {
+    name: 'LimitUpPulseDashboard',
+    declaration: 'export interface LimitUpPulseDashboard {\n    readonly asOf?: number;\n    readonly days: readonly LimitUpPulseDay[];\n}',
+  },
+  {
+    name: 'LimitUpPulseDay',
+    declaration: 'export interface LimitUpPulseDay {\n    readonly date: string;\n    readonly stocks: readonly LimitUpPulseStock[];\n    readonly poolTruncated: boolean;\n    readonly levels: readonly LimitUpPulseLevel[];\n}',
+  },
+  {
+    name: 'LimitUpPulseLevel',
+    declaration: 'export interface LimitUpPulseLevel {\n    readonly boards: 2 | 3 | 4 | 5 | 6 | 7;\n    readonly stocks: readonly {\n        readonly thscode?: string;\n        readonly name: string;\n    }[];\n}',
+  },
+  {
+    name: 'LimitUpPulseStock',
+    declaration: 'export interface LimitUpPulseStock {\n    readonly thscode: string;\n    readonly name: string;\n    readonly boards: number;\n    readonly sealMoney?: number;\n    readonly maxSealMoney?: number;\n    readonly limitUpTime?: string;\n    readonly reason?: string;\n}',
   },
   {
     name: 'LlmAdapter',

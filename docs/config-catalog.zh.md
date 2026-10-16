@@ -259,7 +259,7 @@ export interface SettingsControllerInternals {
 ## `@deepseek-ai/dsh-api-stock-controller`
 
 - `inject`: `stock`
-- `source`: [`packages/api/stock-controller/src/index.ts:123`](../packages/api/stock-controller/src/index.ts)
+- `source`: [`packages/api/stock-controller/src/index.ts:126`](../packages/api/stock-controller/src/index.ts)
 
 ```ts config-catalog
 /** Reads this service exposes and the caps a deployment applies to them. */
@@ -278,6 +278,8 @@ export interface Config {
   readonly maxDragonTigerSeats: number
   /** Inclusive cap on stock links sent for each active seat. */
   readonly maxDragonTigerSeatStocks: number
+  /** Maximum 200-row pool pages read per trading date in the pulse dashboard. */
+  readonly maxLimitUpPagesPerDay: number
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-api-stock-controller -->

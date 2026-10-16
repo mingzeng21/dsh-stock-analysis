@@ -1,5 +1,5 @@
 ---
-description: "Browser-facing market-data reads over the stock capability seam: normalized symbol matches, quotes, candles, documents, and dragon-tiger boards."
+description: "Browser-facing market-data reads over the stock capability seam, including market pulse and other native dashboards."
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Use this package when a browser surface needs market data. It reads symbols, quotes, candles, documents, and dragon-tiger boards over the [stock capability seam](../../stock/stock/README.md), resolving vendor fields on the Host. It registers no tool or prompt; `dsh-tool-stock` remains the model-facing consumer of the same seam.
+Use this package when a browser surface needs market data. It reads symbols, quotes, candles, documents, and native dashboard data over the [stock capability seam](../../stock/stock/README.md), resolving vendor fields on the Host. It registers no tool or prompt; `dsh-tool-stock` remains the model-facing consumer of the same seam.
 
 ## Table of Contents
 
@@ -25,7 +25,7 @@ Use this package when a browser surface needs market data. It reads symbols, quo
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount the package beside `dsh-stock` and one provider. A Client calls `remote.stock.searchSymbols(query, limit)`, `quotes(thscodes)`, `candles(request)`, `documents(request)`, `dragonTiger()`, `hotRank()`, `hotRankHistory(thscode)`, `sectors()`, or `sectorDashboard(sector)`; no method takes a Session, because market data belongs to no Session.
+Mount the package beside `dsh-stock` and one provider. A Client calls `remote.stock.searchSymbols(query, limit)`, `quotes(thscodes)`, `candles(request)`, `documents(request)`, `dragonTiger()`, `hotRank()`, `hotRankHistory(thscode)`, `sectors()`, `sectorDashboard(sector)`, or `limitUpPulse()`; no method takes a Session, because market data belongs to no Session.
 
 | Method | Returns | Purpose |
 |---|---|---|
@@ -38,6 +38,7 @@ Mount the package beside `dsh-stock` and one provider. A Client calls `remote.st
 | `hotRankHistory(thscode)` | `HotRankHistory` | Selected A-share's daily rank points for the last 30 calendar days, including ranks outside Top 30 |
 | `sectors()` | `SectorCatalog` | Concept and industry board names for user selection |
 | `sectorDashboard(sector)` | `SectorDashboard` | Current constituents and 120-calendar-day daily index history |
+| `limitUpPulse()` | `LimitUpPulseDashboard` | Closing-limit pools for the ladder's recent trading dates, with incomplete dates marked |
 
 ### Normalization
 
@@ -67,6 +68,8 @@ Because the vendor's quote rows carry no instrument name, `Quote` has none: the 
 
 `sectors()` reads concept and industry catalog entries for name matching and reports catalog truncation. `sectorDashboard(sector)` reads current constituents and the past 120 calendar days of daily index history as separate observations; neither proves historical membership.
 
+`limitUpPulse()` reads the 30-trading-day ladder and each listed date's closing-limit pool. Pool pages are bounded by `maxLimitUpPagesPerDay`; a date whose continuation remains is marked `poolTruncated`, so its returned count and seal sum are lower bounds. The six ladder tiers are limited vendor samples, not market-wide board counts. Missing seal amounts remain absent in stock rows. The browser calculates seal retention only for rows carrying both current and maximum seal amounts.
+
 ### Periods, adjustments, and windows
 
 `interval` is the vendor's own `1d`, `1w`, or `1mo`, so a period switch needs no client-side aggregation. `adjust` defaults to `forward`. The vendor accepts at most ten years per request, so a window is refused with `gateway/bad-request` when `end` precedes `start`, when either bound is not an integer millisecond timestamp, or when `end` is later than `start` plus ten calendar years. The seam bounds rows independently, and `CandleSeries.truncated` reports that bound rather than hiding it.
@@ -94,6 +97,7 @@ Announcements, reports, and news come from the 问财 gateway, whose search take
 | `maxDragonTigerStocks` | `200` | Stock rows per board sent to the browser |
 | `maxDragonTigerSeats` | `60` | Active seats per board sent to the browser |
 | `maxDragonTigerSeatStocks` | `30` | Linked stocks per seat sent to the browser |
+| `maxLimitUpPagesPerDay` | `5` | Maximum 200-row closing-limit pool pages read per trading date |
 
 The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-api-stock-controller) is the exhaustive source for every accepted field and its JSDoc.
 
@@ -133,6 +137,7 @@ The browser export provides `ctx.stockClient` and requires `remote` and `remote.
 |---|---|
 | [`src/index.ts`](src/index.ts) | `StockController`: the `stock` service and Remote namespace, reads, failure mapping, and caps |
 | [`src/dragon-tiger.ts`](src/dragon-tiger.ts) | Validation and projection of nested dragon-tiger lists |
+| [`src/limit-up-pulse.ts`](src/limit-up-pulse.ts) | Closing-limit pool and ladder row projection |
 | [`src/vendor.ts`](src/vendor.ts) | Vendor-row readers and the row projections; the one place vendor field names are read |
 | [`src/types.ts`](src/types.ts) | Wire vocabulary, published as `./types` for Client packages |
 | [`src/client/index.ts`](src/client/index.ts) | Browser plugin and `ctx.stockClient` |

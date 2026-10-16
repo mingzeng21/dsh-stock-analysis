@@ -1,7 +1,7 @@
 /** Catalog, specialist launch form, dashboard, and history rail for stock Agents. */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { StockAgentCard } from '@deepseek-ai/dsh-api-stock-agents-controller/types'
-import type { DragonTigerDashboard as DragonTigerData, HotRankDashboard as HotRankData, HotRankHistory, SectorCatalog, SectorDashboard as SectorData, SectorMatch } from '@deepseek-ai/dsh-api-stock-controller/client'
+import type { DragonTigerDashboard as DragonTigerData, HotRankDashboard as HotRankData, HotRankHistory, LimitUpPulseDashboard as PulseData, SectorCatalog, SectorDashboard as SectorData, SectorMatch } from '@deepseek-ai/dsh-api-stock-controller/client'
 import type { SessionListState, SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { ObservableSnapshot } from '@deepseek-ai/dsh-client-store'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
@@ -10,15 +10,19 @@ import type { InjectFace, PropsLocale, PropsRenderSlots, PropsRuntime } from '@d
 import css from './AgentsPanel.module.css'
 import { DragonTigerDashboard } from './DragonTigerDashboard.tsx'
 import { HotRankDashboard } from './HotRankDashboard.tsx'
+import { LimitUpPulseDashboard } from './LimitUpPulseDashboard.tsx'
 import { SectorDashboard } from './SectorDashboard.tsx'
 import { dashboardInquiryPrompt, type DashboardScope } from './dashboard-inquiry.ts'
 
 type DashboardFocus = { readonly code: string; readonly sequence: number }
 
-function dashboardRecordKind(name: string): 'dragon' | 'hot' | 'sector' | null {
+type DashboardKind = 'dragon' | 'hot' | 'sector' | 'pulse'
+
+function dashboardRecordKind(name: string): DashboardKind | null {
   if (name === 'dashboard-dragon') return 'dragon'
   if (name === 'dashboard-hot') return 'hot'
   if (name === 'dashboard-sector') return 'sector'
+  if (name === 'dashboard-pulse') return 'pulse'
   return null
 }
 
@@ -39,6 +43,7 @@ export interface AgentsPanelInjected {
   loadHotRankHistory: (thscode: string, signal: AbortSignal) => Promise<HotRankHistory>
   loadSectors: (signal: AbortSignal) => Promise<SectorCatalog>
   loadSectorDashboard: (sector: SectorMatch, signal: AbortSignal) => Promise<SectorData>
+  loadLimitUpPulse: (signal: AbortSignal) => Promise<PulseData>
 }
 export type AgentsPanelProps = PropsRuntime<'main'> & PropsRenderSlots<'stock-agents.conversation'>
   & PropsLocale<'stockAgents'> & InjectFace<AgentsPanelInjected>
@@ -47,7 +52,7 @@ export type AgentsPanelProps = PropsRuntime<'main'> & PropsRenderSlots<'stock-ag
 export function AgentsPanel({
   t, renderSlot, SessionProvider, useCatalog, useSessions, useCatalogError,
   loadCatalog, start, startDashboard, continueDashboard, openSession,
-  loadDragonTiger, loadHotRank, loadHotRankHistory, loadSectors, loadSectorDashboard,
+  loadDragonTiger, loadHotRank, loadHotRankHistory, loadSectors, loadSectorDashboard, loadLimitUpPulse,
 }: AgentsPanelProps) {
   const catalog = useCatalog(value => value)
   const sessions = useSessions(value => value)
@@ -62,11 +67,12 @@ export function AgentsPanel({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [historyVisible, setHistoryVisible] = useState(true)
-  const [dashboardKind, setDashboardKind] = useState<'dragon' | 'hot' | 'sector' | null>(null)
+  const [dashboardKind, setDashboardKind] = useState<DashboardKind | null>(null)
   const [dashboardData, setDashboardData] = useState<DragonTigerData | null>(null)
   const [hotRankData, setHotRankData] = useState<HotRankData | null>(null)
   const [sectorCatalog, setSectorCatalog] = useState<SectorCatalog | null>(null)
   const [sectorData, setSectorData] = useState<SectorData | null>(null)
+  const [pulseData, setPulseData] = useState<PulseData | null>(null)
   const [selectedSector, setSelectedSector] = useState<SectorMatch | null>(null)
   const [dashboardLoading, setDashboardLoading] = useState(false)
   const [dashboardError, setDashboardError] = useState(false)
@@ -79,7 +85,7 @@ export function AgentsPanel({
   const [inquiryBusy, setInquiryBusy] = useState(false)
   const [inquiryError, setInquiryError] = useState(false)
   const [dashboardReference, setDashboardReference] = useState<SessionReference | null>(null)
-  const [lastInquiryData, setLastInquiryData] = useState<DragonTigerData | HotRankData | SectorData | null>(null)
+  const [lastInquiryData, setLastInquiryData] = useState<DragonTigerData | HotRankData | SectorData | PulseData | null>(null)
   const [lastInquiryHistory, setLastInquiryHistory] = useState<HotRankHistory | null>(null)
   const [lastInquiryScope, setLastInquiryScope] = useState('')
   const inquiryEpoch = useRef(0)
@@ -191,10 +197,11 @@ export function AgentsPanel({
     dashboardRequest.current = request
     setDashboardLoading(true)
     setDashboardError(false)
-    const load = kind === 'hot' ? loadHotRank : loadDragonTiger
+    const load = kind === 'hot' ? loadHotRank : kind === 'pulse' ? loadLimitUpPulse : loadDragonTiger
     void load(request.signal).then((value) => {
       if (!request.signal.aborted && mounted.current) {
         if (kind === 'hot') setHotRankData(value as HotRankData)
+        else if (kind === 'pulse') setPulseData(value as PulseData)
         else setDashboardData(value as DragonTigerData)
       }
     }).catch(() => {
@@ -203,7 +210,7 @@ export function AgentsPanel({
       if (!request.signal.aborted && mounted.current) setDashboardLoading(false)
     })
   }
-  const openDashboard = (kind: 'dragon' | 'hot' | 'sector', initialSector?: string) => {
+  const openDashboard = (kind: DashboardKind, initialSector?: string) => {
     inquiryEpoch.current += 1
     setDashboardReference(null)
     setInquiryBusy(false)
@@ -215,19 +222,21 @@ export function AgentsPanel({
     setInquiryError(false)
     setHotHistory(null)
     setDashboardFocus(null)
-    setDashboardScope(kind === 'dragon' ? { kind, board: 'all' } : kind === 'hot' ? { kind, board: 'hot', period: 'day' } : { kind, sector: initialSector ?? '', windowDays: 120 })
+    setDashboardScope(kind === 'dragon' ? { kind, board: 'all' } : kind === 'hot' ? { kind, board: 'hot', period: 'day' }
+      : kind === 'pulse' ? { kind, date: '' } : { kind, sector: initialSector ?? '', windowDays: 120 })
     clearActiveSession()
     setSelected(null)
     setHistoryVisible(false)
     setDashboardData(null)
     setHotRankData(null)
     setSectorData(null)
+    setPulseData(null)
     setSectorCatalog(null)
     setSelectedSector(null)
     setDashboardKind(kind)
     refreshDashboard(kind, initialSector)
   }
-  const showDashboardSession = (sessionId: SessionId, kind: 'dragon' | 'hot' | 'sector', sectorName?: string) => {
+  const showDashboardSession = (sessionId: SessionId, kind: DashboardKind, sectorName?: string) => {
     openDashboard(kind, sectorName)
     setDashboardReference(openSession(sessionId))
     setInquiryOpen(true)
@@ -235,7 +244,7 @@ export function AgentsPanel({
   const submitInquiry = (question = inquiryQuery) => {
     const trimmed = question.trim()
     if (dashboardKind === null || dashboardLoading || inquiryBusy || trimmed === '') return
-    const data = dashboardKind === 'dragon' ? dashboardData : dashboardKind === 'hot' ? hotRankData : sectorData
+    const data = dashboardKind === 'dragon' ? dashboardData : dashboardKind === 'hot' ? hotRankData : dashboardKind === 'pulse' ? pulseData : sectorData
     if (data === null || dashboardScope.kind !== dashboardKind) return
     let prompt: string
     if (dashboardScope.kind === 'dragon' && dashboardData !== null) {
@@ -244,6 +253,8 @@ export function AgentsPanel({
       prompt = dashboardInquiryPrompt({ kind: 'hot', data: hotRankData, scope: dashboardScope, history: hotHistory }, trimmed)
     } else if (dashboardScope.kind === 'sector' && sectorData !== null) {
       prompt = dashboardInquiryPrompt({ kind: 'sector', data: sectorData, scope: dashboardScope }, trimmed)
+    } else if (dashboardScope.kind === 'pulse' && pulseData !== null) {
+      prompt = dashboardInquiryPrompt({ kind: 'pulse', data: pulseData, scope: dashboardScope }, trimmed)
     } else return
     const epoch = inquiryEpoch.current
     setInquiryBusy(true)
@@ -311,7 +322,8 @@ export function AgentsPanel({
           >
             <span className={css.historyAgent}>{card?.title.zh
               ?? (recordedDashboard === 'dragon' ? t('dragon.title')
-                : recordedDashboard === 'hot' ? t('hot.title') : recordedDashboard === 'sector' ? t('sector.title') : t('panel.removedAgent'))}</span>
+                : recordedDashboard === 'hot' ? t('hot.title') : recordedDashboard === 'sector' ? t('sector.title')
+                  : recordedDashboard === 'pulse' ? t('pulse.title') : t('panel.removedAgent'))}</span>
             {record.query !== '' && <span className={css.historyQuery}>{record.query}</span>}
             <time dateTime={new Date(updatedAt).toISOString()}>{dateFormat.format(updatedAt)}</time>
           </button>
@@ -346,7 +358,7 @@ export function AgentsPanel({
     </main>
   }
   if (dashboardKind !== null) {
-    const currentData = dashboardKind === 'dragon' ? dashboardData : dashboardKind === 'hot' ? hotRankData : sectorData
+    const currentData = dashboardKind === 'dragon' ? dashboardData : dashboardKind === 'hot' ? hotRankData : dashboardKind === 'pulse' ? pulseData : sectorData
     const inquiryStale = dashboardReference !== null && currentData !== null && (
       currentData !== lastInquiryData || JSON.stringify(dashboardScope) !== lastInquiryScope
       || (dashboardKind === 'hot' && hotHistory !== lastInquiryHistory)
@@ -357,17 +369,22 @@ export function AgentsPanel({
       : dashboardScope.kind === 'sector'
         ? [sectorData?.sector.name ?? selectedSector?.name ?? t('inquiry.noSector'),
           selectedSector === null ? undefined : t(`sector.days${dashboardScope.windowDays}`), dashboardScope.stock]
-        : [dashboardScope.board === 'hot'
-          ? dashboardScope.period === 'day' ? t('hot.day') : t('hot.hour')
-          : dashboardScope.period === 'day' ? t('hot.surgeDay') : t('hot.surgeHour'), dashboardScope.stock]
+        : dashboardScope.kind === 'pulse'
+          ? [dashboardScope.date || t('pulse.tradeDate'), dashboardScope.stock]
+          : [dashboardScope.board === 'hot'
+            ? dashboardScope.period === 'day' ? t('hot.day') : t('hot.hour')
+            : dashboardScope.period === 'day' ? t('hot.surgeDay') : t('hot.surgeHour'), dashboardScope.stock]
     const inquiryExamples = dashboardKind === 'dragon'
       ? [t('inquiry.dragonExample1'), t('inquiry.dragonExample2')]
       : dashboardKind === 'hot' ? [t('inquiry.hotExample1'), t('inquiry.hotExample2')]
-        : [t('inquiry.sectorExample1'), t('inquiry.sectorExample2')]
+        : dashboardKind === 'pulse' ? [t('inquiry.pulseExample1'), t('inquiry.pulseExample2')]
+          : [t('inquiry.sectorExample1'), t('inquiry.sectorExample2')]
+    const dashboardTitle = dashboardKind === 'dragon' ? t('dragon.title') : dashboardKind === 'hot' ? t('hot.title')
+      : dashboardKind === 'pulse' ? t('pulse.title') : t('sector.title')
     return <main className={css.panel}>
       {historyRail}
       <section className={css.detail}>
-        <nav className={css.detailNav} aria-label={dashboardKind === 'dragon' ? t('dragon.title') : dashboardKind === 'hot' ? t('hot.title') : t('sector.title')}>
+        <nav className={css.detailNav} aria-label={dashboardTitle}>
           {!historyVisible && historyToggle}
           <button type="button" className={css.back} onClick={() => {
             inquiryEpoch.current += 1
@@ -376,10 +393,10 @@ export function AgentsPanel({
             setInquiryBusy(false)
             setDashboardKind(null)
           }}>{t('panel.back')}</button>
-          <span>{dashboardKind === 'dragon' ? t('dragon.title') : dashboardKind === 'hot' ? t('hot.title') : t('sector.title')}</span>
+          <span>{dashboardTitle}</span>
           <button type="button" aria-expanded={inquiryOpen} aria-controls="stock-dashboard-inquiry"
             onClick={() => { setInquiryOpen(value => !value) }}>{inquiryOpen ? t('inquiry.hide') : t('inquiry.open')}</button>
-          <button type="button" onClick={() => { if (dashboardKind === 'sector' && selectedSector !== null) refreshSector(selectedSector); else refreshDashboard() }} disabled={dashboardLoading}>{dashboardKind === 'dragon' ? t('dragon.refresh') : dashboardKind === 'hot' ? t('hot.refresh') : t('sector.refresh')}</button>
+          <button type="button" onClick={() => { if (dashboardKind === 'sector' && selectedSector !== null) refreshSector(selectedSector); else refreshDashboard() }} disabled={dashboardLoading}>{dashboardKind === 'dragon' ? t('dragon.refresh') : dashboardKind === 'hot' ? t('hot.refresh') : dashboardKind === 'pulse' ? t('pulse.refresh') : t('sector.refresh')}</button>
         </nav>
         <div className={css.dashboardWorkspace}>
           <div className={css.dashboardCanvas}>
@@ -389,18 +406,20 @@ export function AgentsPanel({
               : dashboardKind === 'hot' ? <HotRankDashboard data={hotRankData} loading={dashboardLoading} error={dashboardError}
                 onRetry={() => { refreshDashboard() }} loadHistory={loadHotRankHistory}
                 onScopeChange={setDashboardScope} onHistoryChange={onHotHistoryChange} focus={dashboardFocus} t={t} />
-                : <SectorDashboard catalog={sectorCatalog} data={sectorData} loading={dashboardLoading} error={dashboardError}
-                  selected={selectedSector} onRetry={() => {
-                    if (selectedSector !== null) refreshSector(selectedSector)
-                    else refreshDashboard()
-                  }} onSelect={(sector) => {
-                    setSelectedSector(sector)
-                    setDashboardFocus(null)
-                    setDashboardScope(current => ({ kind: 'sector', sector: sector.thscode,
-                      windowDays: current.kind === 'sector' ? current.windowDays : 120 }))
-                    setSectorData(null)
-                    refreshSector(sector)
-                  }} onScopeChange={setDashboardScope} focus={dashboardFocus} t={t} />}
+                : dashboardKind === 'pulse' ? <LimitUpPulseDashboard data={pulseData} loading={dashboardLoading} error={dashboardError}
+                  onRetry={() => { refreshDashboard() }} onScopeChange={setDashboardScope} focus={dashboardFocus} t={t} />
+                  : <SectorDashboard catalog={sectorCatalog} data={sectorData} loading={dashboardLoading} error={dashboardError}
+                    selected={selectedSector} onRetry={() => {
+                      if (selectedSector !== null) refreshSector(selectedSector)
+                      else refreshDashboard()
+                    }} onSelect={(sector) => {
+                      setSelectedSector(sector)
+                      setDashboardFocus(null)
+                      setDashboardScope(current => ({ kind: 'sector', sector: sector.thscode,
+                        windowDays: current.kind === 'sector' ? current.windowDays : 120 }))
+                      setSectorData(null)
+                      refreshSector(sector)
+                    }} onScopeChange={setDashboardScope} focus={dashboardFocus} t={t} />}
           </div>
           <aside id="stock-dashboard-inquiry" className={css.inquiry} aria-label={t('inquiry.title')} hidden={!inquiryOpen}>
             <header className={css.inquiryHeader}>
@@ -432,7 +451,8 @@ export function AgentsPanel({
               <label htmlFor="stock-dashboard-query">{t('inquiry.query')}</label>
               <textarea id="stock-dashboard-query" value={inquiryQuery}
                 onChange={(event) => { setInquiryQuery(event.target.value) }}
-                placeholder={dashboardKind === 'sector' ? t('inquiry.sectorPlaceholder') : t('inquiry.placeholder')} />
+                placeholder={dashboardKind === 'sector' ? t('inquiry.sectorPlaceholder')
+                  : dashboardKind === 'pulse' ? t('inquiry.pulsePlaceholder') : t('inquiry.placeholder')} />
               <button type="submit" disabled={currentData === null || dashboardLoading || inquiryBusy || inquiryQuery.trim() === ''}>
                 {inquiryBusy ? t('inquiry.sending') : t('inquiry.send')}
               </button>
@@ -464,6 +484,9 @@ export function AgentsPanel({
         </button>
         <button type="button" className={css.card} onClick={() => { openDashboard('sector') }}>
           <strong>{t('sector.cardTitle')}</strong><span>{t('sector.cardSummary')}</span>
+        </button>
+        <button type="button" className={css.card} onClick={() => { openDashboard('pulse') }}>
+          <strong>{t('pulse.cardTitle')}</strong><span>{t('pulse.cardSummary')}</span>
         </button>
         {catalog.map(card => <button type="button" className={css.card} key={card.name} onClick={() => { choose(card) }}>
           <strong>{card.title.zh}</strong><span>{card.summary.zh}</span>

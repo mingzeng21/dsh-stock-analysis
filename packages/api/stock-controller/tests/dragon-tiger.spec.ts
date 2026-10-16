@@ -64,6 +64,7 @@ describe('stockController.dragonTiger', () => {
       service: new StockController(ctx, {
         maxQuotes: 50, maxDocuments: 30, maxSummaryChars: 400, maxSymbolMatches: 20,
         maxDragonTigerStocks: 200, maxDragonTigerSeats: 60, maxDragonTigerSeatStocks: 30,
+        maxLimitUpPagesPerDay: 5,
       }),
     }
   }

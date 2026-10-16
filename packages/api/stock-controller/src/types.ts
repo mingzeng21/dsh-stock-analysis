@@ -187,6 +187,37 @@ export interface SectorDashboard {
   readonly history: CandleSeries
 }
 
+/** One closing-limit stock returned for a trading date. Money amounts are yuan. */
+export interface LimitUpPulseStock {
+  readonly thscode: string
+  readonly name: string
+  readonly boards: number
+  readonly sealMoney?: number
+  readonly maxSealMoney?: number
+  readonly limitUpTime?: string
+  readonly reason?: string
+}
+
+/** A ladder level contains a bounded vendor sample, not a market-wide total. */
+export interface LimitUpPulseLevel {
+  readonly boards: 2 | 3 | 4 | 5 | 6 | 7
+  readonly stocks: readonly { readonly thscode?: string; readonly name: string }[]
+}
+
+/** One trading date's pool and ladder observations. */
+export interface LimitUpPulseDay {
+  readonly date: string
+  readonly stocks: readonly LimitUpPulseStock[]
+  readonly poolTruncated: boolean
+  readonly levels: readonly LimitUpPulseLevel[]
+}
+
+/** Recent trading days, oldest first, from the 30-day ladder window. */
+export interface LimitUpPulseDashboard {
+  readonly asOf?: number
+  readonly days: readonly LimitUpPulseDay[]
+}
+
 /** One candlestick. */
 export interface Candle {
   /** Bar open time in milliseconds since the Unix epoch. */

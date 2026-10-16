@@ -1,6 +1,6 @@
 /** Dashboard questions carry the visible selection and bounded returned data into the Session log. */
 import { expect, it } from 'vitest'
-import type { DragonTigerDashboard, HotRankDashboard, SectorDashboard } from '@deepseek-ai/dsh-api-stock-controller/client'
+import type { DragonTigerDashboard, HotRankDashboard, LimitUpPulseDashboard, SectorDashboard } from '@deepseek-ai/dsh-api-stock-controller/client'
 import { dashboardInquiryPrompt } from '../src/client/dashboard-inquiry.ts'
 
 it('includes the selected dragon-tiger stock and observation date', () => {
@@ -82,4 +82,18 @@ it('uses the visible calendar-day window for sector history', () => {
   }
   expect(payload.selection.windowDays).toBe(30)
   expect(payload.candles.map(bar => bar.close)).toEqual([2, 3])
+})
+
+it('logs the selected pulse day with pool completeness and ladder sample', () => {
+  const data: LimitUpPulseDashboard = { days: [{
+    date: '2026-10-15', poolTruncated: true,
+    stocks: [{ thscode: '600001.SH', name: '甲公司', boards: 2, reason: '存储芯片' }],
+    levels: [{ boards: 2, stocks: [{ thscode: '600001.SH', name: '甲公司' }] }],
+  }] }
+  const prompt = dashboardInquiryPrompt({ kind: 'pulse', data,
+    scope: { kind: 'pulse', date: '2026-10-15', stock: '600001.SH' } }, '板位如何？')
+  expect(prompt).toContain('dashboard-session:pulse')
+  expect(prompt).toContain('"poolTruncated":true')
+  expect(prompt).toContain('"selectedStock":{"thscode":"600001.SH"')
+  expect(prompt).toContain('涨停原因不是行业')
 })

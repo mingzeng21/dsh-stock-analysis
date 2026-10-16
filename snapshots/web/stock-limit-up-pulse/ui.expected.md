@@ -1,0 +1,109 @@
+- button "Collapse sidebar"
+- navigation "Global panels":
+  - button "Conversation"
+  - button "Agents"
+  - button "Watchlist"
+- main:
+  - navigation "涨停情绪市场脉冲屏":
+    - button "显示分析记录"
+    - button "返回Agents"
+    - text: 涨停情绪市场脉冲屏
+    - button "收起追问" [expanded]
+    - button "刷新数据"
+  - text: 涨停结构 · 连板迁徙 · 封单观察
+  - heading "涨停情绪市场脉冲屏" [level=1]
+  - paragraph: 用涨停、连板和封单结构观察市场情绪；仅展示返回数据，不生成交易动作。
+  - text: 交易日
+  - combobox "交易日":
+    - option "2026-10-09"
+    - option "2026-10-10"
+    - option "2026-10-13"
+    - option "2026-10-14"
+    - option "2026-10-15" [selected]
+  - group "图表数值模式":
+    - button "绝对值" [pressed]
+    - button "30日分位"
+  - button "导出复盘"
+  - region "市场情绪概览":
+    - text: 当前情绪
+    - strong: 升温
+    - text: 较上一交易日涨停家数 涨停家数
+    - strong: "6"
+    - text: 封单留存
+    - strong: 80.0%
+    - text: 按已返回且有金额的股票计算 连板样本
+    - strong: "2"
+    - text: 最高板
+    - strong: 3 板
+    - text: 总封单额
+    - strong: 21.0亿
+  - region "30 日涨停结构同步面板":
+    - heading "30 日涨停结构同步面板" [level=2]
+    - paragraph: 上轨：涨停与连板 · 中轨：连板热力矩阵 · 下轨：封单额与留存率
+    - text: 涨停家数 连板样本 总封单额
+    - img "30 日涨停结构同步面板": 0 3 6 10-09 10-10 10-13 10-14 10-15 2板 3板 4板 5板 6板 7+板 连板天梯返回样本 封单额 / 留存率
+    - paragraph: 点击日期列切换观察日。热力矩阵使用天梯有限样本；涨停与封单按已返回涨停池显示，缺页日期仅为下限。30日分位按已返回值排序。
+  - region "所选日期连板天梯":
+    - heading "所选日期连板天梯" [level=2]
+    - paragraph: 2026-10-15 · 点击历史列切换 · 每板位展示前 4 只
+    - strong: 首板
+    - button "丙公司 3.0亿"
+    - button "丁公司 4.0亿"
+    - button "戊公司 5.0亿"
+    - button "己公司 6.0亿"
+    - text: "4"
+    - strong: 2 板
+    - button "甲公司 1.0亿"
+    - text: "1"
+    - strong: 3 板
+    - button "乙公司 2.0亿"
+    - text: "1"
+    - strong: 4 板
+    - text: "0"
+    - strong: 5 板
+    - text: "0"
+    - strong: 6 板
+    - text: "0"
+    - strong: 7+ 板
+    - text: "0"
+    - paragraph: 首板来自所选日涨停池；2 板及以上来自有限覆盖的连板天梯，数量不等于全市场总数。
+  - heading "情绪结构变化" [level=2]
+  - paragraph: 较上一交易日的返回数据变化
+  - strong: 升温
+  - text: 涨停家数
+  - strong: "+1"
+  - text: 连板样本
+  - strong: "0"
+  - text: 总封单额
+  - strong: +6.0亿
+  - text: 封单留存
+  - strong: 0.0%
+  - heading "涨停原因分布" [level=2]
+  - paragraph: 直接按涨停原因聚合，不映射为行业
+  - text: 存储芯片
+  - strong: "3"
+  - text: 机器人概念
+  - strong: "3"
+  - text: 数据为交易日观察；缺失值不按 0 处理。仅供观察，非投资建议。
+  - complementary "问看板":
+    - heading "问看板" [level=2]
+    - paragraph: 看板内容已变化，下一条提问将使用当前数据。
+    - text: "用户问题：所选交易日的涨停情绪如何？ dashboard-session:pulse 请结合下方涨停情绪快照回答。连板天梯是有限覆盖样本，不代表全市场晋级率；涨停池未完整返回的日期只可报告已返回样本。涨停原因不是行业。仅供观察，不构成投资建议。 看板快照（JSON；truncated 为 true 时只含前段记录，不能推断未展示记录）： {\"dashboard\":\"limit-up-pulse\",\"selection\":{\"kind\":\"pulse\",\"date\":\"2026-10-15\"},\"days\":[{\"date\":\"2026-10-15\",\"returnedCount\":3,\"continuousCount\":2,\"poolTruncated\":false}],\"selectedDay\":{\"date\":\"2026-10-15\",\"poolTruncated\":false,\"stocks\":[{\"thscode\":\"600001.SH\",\"name\":\"甲公司\",\"boards\":2,\"reason\":\"存储芯片\"}]}} {{clock}}"
+    - button "Copy"
+    - status: Completed
+    - button "Completed in {{duration}}" [disabled]
+    - paragraph: 所选交易日已返回 3 只涨停股，其中 2 只为连板。甲公司（600001.SH）的涨停原因为存储芯片；连板天梯只代表有限样本。
+    - button "Copy"
+    - button "Good response"
+    - button "Bad response"
+    - button "Branch into a new conversation"
+    - text: {{clock}} 回答提及
+    - button "甲公司"
+    - text: 继续提问
+    - button "最近涨停家数和连板样本如何变化？"
+    - button "所选日封单留存和涨停原因有哪些特点？"
+    - group "当前范围": 当前范围 2026-10-15
+    - text: 你的问题
+    - textbox "你的问题":
+      - /placeholder: 例如：所选日的连板结构如何变化？
+    - button "发送问题" [disabled]

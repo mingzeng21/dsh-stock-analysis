@@ -1,5 +1,5 @@
 ---
-description: "面向浏览器的行情数据读取：归一化的标的匹配、行情快照、K 线、研究文档和龙虎榜。"
+description: "面向浏览器的行情数据读取，包括涨停情绪与其他原生看板。"
 kind: "package-reference"
 ---
 
@@ -9,7 +9,7 @@ kind: "package-reference"
 
 ## 概述
 
-当浏览器界面需要行情数据时使用本包。它通过[股票能力 seam](../../stock/stock/README.zh.md)读取标的、快照、K 线、文档和龙虎榜，并在 Host 上解析 vendor 字段。本包不注册工具或 prompt；`dsh-tool-stock` 仍是同一 seam 面向模型的 consumer。
+当浏览器界面需要行情数据时使用本包。它通过[股票能力 seam](../../stock/stock/README.zh.md)读取标的、快照、K 线、文档和原生看板数据，并在 Host 上解析 vendor 字段。本包不注册工具或 prompt；`dsh-tool-stock` 仍是同一 seam 面向模型的 consumer。
 
 ## 目录
 
@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-把本包与 `dsh-stock` 及一个 provider 一起挂载。Client 调用 `remote.stock.searchSymbols(query, limit)`、`quotes(thscodes)`、`candles(request)`、`documents(request)`、`dragonTiger()`、`hotRank()` 、`hotRankHistory(thscode)`、`sectors()` 或 `sectorDashboard(sector)`；没有任何方法接收 Session，因为行情数据不属于任何 Session。
+把本包与 `dsh-stock` 及一个 provider 一起挂载。Client 调用 `remote.stock.searchSymbols(query, limit)`、`quotes(thscodes)`、`candles(request)`、`documents(request)`、`dragonTiger()`、`hotRank()`、`hotRankHistory(thscode)`、`sectors()`、`sectorDashboard(sector)` 或 `limitUpPulse()`；没有任何方法接收 Session，因为行情数据不属于任何 Session。
 
 | 方法 | 返回 | 用途 |
 |---|---|---|
@@ -38,6 +38,7 @@ kind: "package-reference"
 | `hotRankHistory(thscode)` | `HotRankHistory` | 指定 A 股近 30 个自然日的日线名次点位，包含 Top 30 以外名次 |
 | `sectors()` | `SectorCatalog` | 供用户选择的概念与行业板块目录 |
 | `sectorDashboard(sector)` | `SectorDashboard` | 当前成分股与近 120 个自然日的指数日线 |
+| `limitUpPulse()` | `LimitUpPulseDashboard` | 天梯最近交易日的涨停池，并标出未取全的日期 |
 
 ### 归一化
 
@@ -67,6 +68,8 @@ seam 有意在其行上保留 vendor 自己的字段名，因为其 94 个能力
 
 `sectors()` 读取用于名称匹配的概念和行业板块目录，并报告目录截断。`sectorDashboard(sector)` 分别读取当前成分股与近 120 个自然日的指数日线；当前成分不代表历史成分。
 
+`limitUpPulse()` 读取近 30 个交易日的连板天梯及各日收盘涨停池。涨停池每个交易日最多读取 `maxLimitUpPagesPerDay` 页；若仍有续页，`poolTruncated` 为真，该日已返回家数与封单额只是下限。天梯的六档板位是厂商有限样本，不是全市场板位家数。股票行缺少封单金额时保持缺失；浏览器只对同时有当前封单额和最大封单额的股票计算留存率。
+
 ### 周期、复权与窗口
 
 `interval` 就是 vendor 自己的 `1d`、`1w` 或 `1mo`，因此周期切换不需要客户端聚合。`adjust` 默认为 `forward`。vendor 每次请求最多接受十年，因此当 `end` 早于 `start`、任一边界不是整数毫秒时间戳，或 `end` 晚于 `start` 加十个日历年时，窗口会以 `gateway/bad-request` 被拒绝。行数上限由 seam 独立约束，`CandleSeries.truncated` 会报告该约束而不是隐藏它。
@@ -94,6 +97,7 @@ seam 有意在其行上保留 vendor 自己的字段名，因为其 94 个能力
 | `maxDragonTigerStocks` | `200` | 发送给浏览器的每榜股票行数上限 |
 | `maxDragonTigerSeats` | `60` | 发送给浏览器的每榜活跃席位上限 |
 | `maxDragonTigerSeatStocks` | `30` | 发送给浏览器的每个席位关联股票上限 |
+| `maxLimitUpPagesPerDay` | `5` | 每个交易日最多读取的 200 行涨停池分页数 |
 
 生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-api-stock-controller)是每个可接受字段及其 JSDoc 的完整来源。
 
@@ -133,6 +137,7 @@ seam 错误码按字符串而非类身份比较，因为 `StockError` 类属于�
 |---|---|
 | [`src/index.ts`](src/index.ts) | `StockController`：`stock` 服务与 Remote 命名空间、读取、失败映射及上限 |
 | [`src/dragon-tiger.ts`](src/dragon-tiger.ts) | 龙虎榜嵌套列表的校验与映射 |
+| [`src/limit-up-pulse.ts`](src/limit-up-pulse.ts) | 涨停池与连板天梯行的映射 |
 | [`src/vendor.ts`](src/vendor.ts) | vendor 行读取器与行投影；唯一读取 vendor 字段名的地方 |
 | [`src/types.ts`](src/types.ts) | 线上词汇，作为 `./types` 发布给 Client 包 |
 | [`src/client/index.ts`](src/client/index.ts) | 浏览器插件与 `ctx.stockClient` |

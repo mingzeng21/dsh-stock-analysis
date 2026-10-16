@@ -7,8 +7,12 @@
  * make a stale or undocumented contract fail loudly instead of shipping.
  */
 
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { collectSlotEntries, oversizedSlotReports, resolveSlotEntries, validateSlotContracts } from './gen-client-catalog.ts'
+import { indexExportedTypes } from './slot-walk.ts'
 import type { SlotDeclaration, SlotRegistration, TypeDeclaration } from './slot-walk.ts'
 
 /** A declaration with every field the catalog needs, overridable per case. */
@@ -44,6 +48,20 @@ const OWNER_TYPES = new Map<string, TypeDeclaration>([
     source: 'packages/client/demo/src/client/contract/slots.ts:20',
   }],
 ])
+
+it('indexes source interfaces once when a compiler emitted a sibling declaration file', () => {
+  const root = mkdtempSync(join(tmpdir(), 'dsh-slot-catalog-'))
+  try {
+    writeFileSync(join(root, 'dashboard.ts'), 'export interface Dashboard { readonly source: true }\n')
+    writeFileSync(join(root, 'dashboard.d.ts'), 'export interface Dashboard { readonly source: true }\n')
+    writeFileSync(join(root, 'ambient.d.ts'), 'export interface AmbientOnly { readonly value: string }\n')
+    const types = indexExportedTypes(root, ['*.ts'])
+    expect(types.get('Dashboard')?.source).toBe('dashboard.ts:1')
+    expect(types.get('AmbientOnly')?.source).toBe('ambient.d.ts:1')
+  } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
 
 describe('client slot contract validation', () => {
   it('accepts a documented slot whose owner props resolve', () => {

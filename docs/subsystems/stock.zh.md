@@ -212,6 +212,15 @@ Host Remote reads over the stock capability seam.
 @Remote async hotRankHistory(thscode: string, signal: AbortSignal): Promise<HotRankHistory>
 
 /**
+ * Read the vendor's recent trading-date ladder and closing-limit pools for those dates.
+ * The ladder's tiers are limited samples; pool metrics disclose when the
+ * configured page bound prevented complete aggregation.
+ * @param signal - caller cancellation.
+ * @returns trading-day pulse observations in chronological order.
+ */
+@Remote async limitUpPulse(signal: AbortSignal): Promise<LimitUpPulseDashboard>
+
+/**
  * Read concept and industry board names for exact or partial user matching.
  * @param signal - caller cancellation.
  * @returns catalog entries in provider order and whether either list was cut.

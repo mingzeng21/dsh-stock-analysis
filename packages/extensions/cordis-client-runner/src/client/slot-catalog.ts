@@ -4005,9 +4005,16 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     doc: 'Selected Session body inside the Agents main panel.',
     registerOptions: [],
     ownerProps: [
+      '/** Three boards aligned to the latest available trading date. */\nexport interface DragonTigerDashboard {\n  readonly tradeDate: string\n  readonly asOf?: number\n  readonly boards: readonly DragonTigerBoard[]\n}',
+      '/** Four independent current attention lists. */\nexport interface HotRankDashboard {\n  readonly boards: readonly HotRankBoard[]\n}',
+      '/** Recent trading days, oldest first, from the 30-day ladder window. */\nexport interface LimitUpPulseDashboard {\n  readonly asOf?: number\n  readonly days: readonly LimitUpPulseDay[]\n}',
       '/** Index history and current constituents are independent observations. */\nexport interface SectorDashboard {\n  readonly sector: SectorMatch\n  readonly constituents: readonly SectorConstituent[]\n  readonly constituentsTruncated: boolean\n  readonly constituentsAsOf?: number\n  readonly history: CandleSeries\n}',
     ],
     ownerPropsReferences: [
+      'CandleSeries',
+      'DragonTigerBoard',
+      'HotRankBoard',
+      'LimitUpPulseDay',
       'SectorConstituent',
       'SectorMatch',
     ],

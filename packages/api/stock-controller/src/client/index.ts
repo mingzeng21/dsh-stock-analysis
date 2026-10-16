@@ -20,7 +20,7 @@ import type {} from '@deepseek-ai/dsh-api-stock-controller/remote'
 import type { RemoteResult, TypertRemoteNamespaceMap } from '@deepseek-ai/dsh-typert-protocol'
 import type {
   CandleRequest, CandleSeries, DocumentRow, DocumentsRequest, DragonTigerDashboard,
-  HotRankDashboard, HotRankHistory, InstrumentMatch, QuoteBatch, SectorCatalog, SectorDashboard, SectorMatch,
+  HotRankDashboard, HotRankHistory, InstrumentMatch, LimitUpPulseDashboard, QuoteBatch, SectorCatalog, SectorDashboard, SectorMatch,
 } from '../types.ts'
 
 export type {
@@ -28,6 +28,7 @@ export type {
   DocumentKind, DocumentRow, DocumentsRequest,
   DragonTigerBoard, DragonTigerBoardType, DragonTigerDashboard, DragonTigerSeat, DragonTigerSeatStock, DragonTigerStock,
   HotRankBoard, HotRankDashboard, HotRankHistory, HotRankPoint, HotRankStock,
+  LimitUpPulseDashboard, LimitUpPulseDay, LimitUpPulseLevel, LimitUpPulseStock,
   InstrumentMatch, Quote, QuoteBatch, SectorCatalog, SectorConstituent, SectorDashboard, SectorMatch,
 } from '../types.ts'
 
@@ -59,6 +60,12 @@ export interface IStockClient {
    * @returns daily rank points, including ranks beyond the current Top 30.
    */
   hotRankHistory(thscode: string, signal?: AbortSignal): Promise<HotRankHistory>
+  /**
+   * Read recent closing-limit pools alongside the bounded ladder matrix.
+   * @param signal - caller cancellation.
+   * @returns chronological observations with incomplete pool days marked.
+   */
+  limitUpPulse(signal?: AbortSignal): Promise<LimitUpPulseDashboard>
   /**
    * Read concept and industry board entries for name matching.
    * @param signal - caller cancellation.
@@ -137,6 +144,11 @@ export class StockClient extends Service implements IStockClient {
   /** {@inheritDoc IStockClient.hotRankHistory} */
   async hotRankHistory(thscode: string, signal?: AbortSignal): Promise<HotRankHistory> {
     return unwrap(await this.namespace.hotRankHistory(thscode, signal))
+  }
+
+  /** {@inheritDoc IStockClient.limitUpPulse} */
+  async limitUpPulse(signal?: AbortSignal): Promise<LimitUpPulseDashboard> {
+    return unwrap(await this.namespace.limitUpPulse(signal))
   }
 
   /** {@inheritDoc IStockClient.sectors} */

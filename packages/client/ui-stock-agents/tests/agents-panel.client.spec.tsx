@@ -98,6 +98,7 @@ function mount(history: boolean | 'dragon' | 'hot' | 'sector' = false, cards: re
   const continueDashboard = vi.fn(async (_sessionId: SessionId, _prompt: string) => {})
   const loadDragonTiger = vi.fn(async () => DASHBOARD)
   const loadHotRank = vi.fn(async () => HOT_RANK)
+  const loadLimitUpPulse = vi.fn(async () => ({ days: [] }))
   const loadSectors = vi.fn(async () => SECTORS)
   const loadSectorDashboard = vi.fn(async (_sector: SectorMatch, _signal: AbortSignal) => SECTOR_DASHBOARD)
   const loadHotRankHistory = vi.fn(async () => ({ thscode: '600001.SH', points: [
@@ -120,6 +121,7 @@ function mount(history: boolean | 'dragon' | 'hot' | 'sector' = false, cards: re
     continueDashboard,
     loadDragonTiger,
     loadHotRank,
+    loadLimitUpPulse,
     loadHotRankHistory,
     loadSectors,
     loadSectorDashboard,

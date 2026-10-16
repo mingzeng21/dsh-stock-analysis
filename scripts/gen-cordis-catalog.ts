@@ -968,6 +968,7 @@ export const TYPE_LINK_EXEMPTIONS: Readonly<Record<string, string>> = {
   HotRankHistory: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   SectorCatalog: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   SectorDashboard: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
+  LimitUpPulseDashboard: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   SectorMatch: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   DocumentRow: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   DocumentsRequest: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',

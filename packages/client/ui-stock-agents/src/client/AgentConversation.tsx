@@ -11,7 +11,9 @@ function InquiryTargets({ response, dashboardData, onFocus, t }: Pick<
   if (dashboardData === undefined || onFocus === undefined) return null
   const stocks = 'boards' in dashboardData
     ? dashboardData.boards.flatMap(board => board.stocks.map(stock => ({ code: stock.thscode, name: stock.name })))
-    : dashboardData.constituents.map(stock => ({ code: stock.thscode, name: stock.name }))
+    : 'constituents' in dashboardData
+      ? dashboardData.constituents.map(stock => ({ code: stock.thscode, name: stock.name }))
+      : dashboardData.days.flatMap(day => day.stocks.map(stock => ({ code: stock.thscode, name: stock.name })))
   const mentioned = [...new Map(stocks.filter(stock => response.includes(stock.code) || response.includes(stock.name))
     .map(stock => [stock.code, stock])).values()].slice(0, 4)
   if (mentioned.length === 0) return null

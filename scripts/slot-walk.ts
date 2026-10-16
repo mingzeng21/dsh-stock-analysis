@@ -7,7 +7,7 @@
  * reachable-export closure.
  */
 
-import { globSync, readFileSync } from 'node:fs'
+import { existsSync, globSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve, sep } from 'node:path'
 import ts from 'typescript'
 
@@ -126,6 +126,7 @@ export function indexExportedTypes(scanRoot: string, patterns: readonly string[]
     .map(path => path.split(sep).join('/')))].sort()
   for (const rel of rels) {
     const abs = resolve(scanRoot, rel)
+    if (rel.endsWith('.d.ts') && existsSync(resolve(scanRoot, rel.slice(0, -5) + '.ts'))) continue
     const sf = ts.createSourceFile(abs, readFileSync(abs, 'utf8'), ts.ScriptTarget.Latest, true, scriptKindOf(rel))
     for (const statement of sf.statements) {
       if (!ts.isInterfaceDeclaration(statement) && !ts.isTypeAliasDeclaration(statement)) continue

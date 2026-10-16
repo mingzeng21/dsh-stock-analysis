@@ -56,7 +56,7 @@ export function advanceStockAgent(
   if (state.record !== null) return state
   if (message.source.kind === 'user') {
     const firstPrompt = firstText(message.content)
-    const dashboard = /^用户问题：([\s\S]*?)\n\ndashboard-session:(dragon|hot|sector)(?:\n|$)/.exec(firstPrompt)
+    const dashboard = /^用户问题：([\s\S]*?)\n\ndashboard-session:(dragon|hot|sector|pulse)(?:\n|$)/.exec(firstPrompt)
     if (dashboard !== null) {
       const sectorCode = dashboard[2] === 'sector' ? /\nsector-code:([^\n]+)/.exec(firstPrompt)?.[1] : undefined
       return { ...state, firstPrompt: '', record: { name: `dashboard-${dashboard[2]}`, query: sectorCode ?? dashboard[1]?.trim() ?? '' } }
@@ -94,7 +94,7 @@ export async function continueStockAgent(
   loadSkill: (name: string) => Promise<Pick<SkillDefinition, 'name' | 'provider' | 'resourceBase' | 'content'> | undefined>,
 ): Promise<PreStepDecision> {
   if (decision.kind === 'reject' || record === undefined || record === null) return decision
-  if (record.name === 'dashboard-dragon' || record.name === 'dashboard-hot' || record.name === 'dashboard-sector') return decision
+  if (record.name === 'dashboard-dragon' || record.name === 'dashboard-hot' || record.name === 'dashboard-sector' || record.name === 'dashboard-pulse') return decision
   if (decision.messages.some(message => message.source.kind === 'skill-invocation' && message.source.name === record.name)) {
     return decision
   }
