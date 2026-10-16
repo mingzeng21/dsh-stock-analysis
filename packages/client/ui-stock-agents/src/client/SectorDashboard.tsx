@@ -1,5 +1,5 @@
 /** Concept and industry index history beside current constituent membership. */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { SectorCatalog, SectorDashboard as DashboardData, SectorMatch } from '@deepseek-ai/dsh-api-stock-controller/client'
 import { IconLoadingOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
@@ -30,6 +30,15 @@ export function SectorDashboard({ catalog, data, loading, error, selected, onSel
   const [memberQuery, setMemberQuery] = useState('')
   const [window, setWindow] = useState<30 | 60 | 120>(120)
   const [selectedStock, setSelectedStock] = useState<string | null>(null)
+  const appliedFocus = useRef<number | null>(null)
+  const previousSector = useRef(data?.sector.thscode)
+  useEffect(() => {
+    const sector = data?.sector.thscode
+    if (sector === undefined || previousSector.current === sector) return
+    previousSector.current = sector
+    appliedFocus.current = null
+    setSelectedStock(null)
+  }, [data?.sector.thscode])
   useEffect(() => { if (selected !== null) setQuery(selected.name) }, [selected])
   const normalized = query.trim().toLocaleLowerCase()
   const matches = useMemo(() => {
@@ -40,13 +49,14 @@ export function SectorDashboard({ catalog, data, loading, error, selected, onSel
       .sort((left, right) => Number(exact(right)) - Number(exact(left))).slice(0, 12) ?? []
   }, [catalog, normalized])
   useEffect(() => {
-    if (focus === null || focus === undefined || data === null) return
+    if (focus === null || focus === undefined || data === null || appliedFocus.current === focus.sequence) return
     if (data.constituents.some(item => item.thscode === focus.code)) {
+      appliedFocus.current = focus.sequence
       setSelectedStock(focus.code)
-      onScopeChange({ kind: 'sector', sector: data.sector.thscode, stock: focus.code })
+      onScopeChange({ kind: 'sector', sector: data.sector.thscode, windowDays: window, stock: focus.code })
     }
-  }, [focus, data, onScopeChange])
-  const selectedCode = focus?.code ?? selectedStock
+  }, [focus, data, onScopeChange, window])
+  const selectedCode = selectedStock ?? focus?.code
   const members = data?.constituents.filter(item => item.name.includes(memberQuery.trim())
     || item.thscode.includes(memberQuery.trim())) ?? []
   const latestTime = data?.history.candles.at(-1)?.time
@@ -114,7 +124,11 @@ export function SectorDashboard({ catalog, data, loading, error, selected, onSel
       <div className={css.grid}>
         <section className={css.chartPanel} aria-label={t('sector.history')}>
           <div className={css.panelHead}><div><span className={css.eyebrow}>{t('sector.chartEyebrow')}</span><h2>{t('sector.history')}</h2></div><div className={css.windows}>
-            {([30, 60, 120] as const).map(days => <button type="button" key={days} aria-pressed={window === days} onClick={() => { setWindow(days) }}>{t(`sector.days${days}`)}</button>)}
+            {([30, 60, 120] as const).map(days => <button type="button" key={days} aria-pressed={window === days} onClick={() => {
+              setWindow(days)
+              onScopeChange({ kind: 'sector', sector: data.sector.thscode, windowDays: days,
+                ...(selectedCode === undefined ? {} : { stock: selectedCode }) })
+            }}>{t(`sector.days${days}`)}</button>)}
           </div></div>
           {first === undefined || last === undefined ? <div className={css.center}>{t('sector.noHistory')}</div> : <>
             <div className={css.chartSummary}>
@@ -167,7 +181,7 @@ export function SectorDashboard({ catalog, data, loading, error, selected, onSel
           <input id="sector-member-search" value={memberQuery} onChange={(event) => { setMemberQuery(event.target.value) }} placeholder={t('sector.memberPlaceholder')} />
           <div className={css.memberList}>{members.map(item => <button type="button" key={item.thscode} className={selectedCode === item.thscode ? css.selected : undefined} onClick={() => {
             setSelectedStock(item.thscode)
-            onScopeChange({ kind: 'sector', sector: data.sector.thscode, stock: item.thscode })
+            onScopeChange({ kind: 'sector', sector: data.sector.thscode, windowDays: window, stock: item.thscode })
           }}><strong>{item.name}</strong><small>{item.thscode}</small></button>)}</div>
           {members.length === 0 && <p className={css.note}>{t('sector.noMembers')}</p>}
           {data.constituentsTruncated && <p className={css.note}>{t('sector.membersTruncated')}</p>}

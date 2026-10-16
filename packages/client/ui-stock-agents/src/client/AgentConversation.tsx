@@ -4,14 +4,10 @@ import type { PropsLocale, PropsRenderFactories, PropsRuntime } from '@deepseek-
 import type {} from '@deepseek-ai/dsh-client-ui-chat/client'
 import css from './AgentsPanel.module.css'
 
-function InquiryTargets({ useConversation, dashboardData, onFocus, t }: Pick<
+function InquiryTargets({ response, dashboardData, onFocus, t }: Pick<
   PropsRuntime<'stock-agents.conversation'> & PropsLocale<'stockAgents'>,
-  'useConversation' | 'dashboardData' | 'onFocus' | 't'
->) {
-  const response = useConversation((snapshot) => {
-    const assistant = snapshot.views.get('chat')?.legacy.nodes.findLast(node => node.kind === 'assistant')
-    return assistant?.blocks.flatMap(block => block.kind === 'text' ? [block.text] : []).join('') ?? ''
-  }) ?? ''
+  'dashboardData' | 'onFocus' | 't'
+> & { response: string }) {
   if (dashboardData === undefined || onFocus === undefined) return null
   const stocks = 'boards' in dashboardData
     ? dashboardData.boards.flatMap(board => board.stocks.map(stock => ({ code: stock.thscode, name: stock.name })))
@@ -31,10 +27,14 @@ function AgentChatView({ renderSlot }: ConversationViewsProps) {
 
 /** Render the selected Agent Session with the shared transcript and composer. */
 export function AgentConversation({
-  sessionId, useSession, useConversation, renderFactorySlot, dashboardData, onFocus, t,
+  sessionId, useSession, useConversation, renderFactorySlot, dashboardData, onFocus, suggestions, onSuggest, t,
 }: PropsRuntime<'stock-agents.conversation'> & PropsRenderFactories & PropsLocale<'stockAgents'>) {
   const session = useSession(value => value)
   const conversation = useConversation(value => value)
+  const response = useConversation((snapshot) => {
+    const assistant = snapshot.views.get('chat')?.legacy.nodes.findLast(node => node.kind === 'assistant')
+    return assistant?.blocks.flatMap(block => block.kind === 'text' ? [block.text] : []).join('') ?? ''
+  }) ?? ''
   if (sessionId === undefined) return null
   const phase = session === undefined || conversation === undefined || session.openState === 'loading'
     ? 'settling' : 'active'
@@ -42,7 +42,13 @@ export function AgentConversation({
     {renderFactorySlot('conversation.content', {
       variant: 'embedded', phase, hero: false,
     }, { slots: { views: AgentChatView } })}
-    {dashboardData !== undefined && <InquiryTargets useConversation={useConversation} dashboardData={dashboardData}
+    {dashboardData !== undefined && <InquiryTargets response={response} dashboardData={dashboardData}
       {...onFocus === undefined ? {} : { onFocus }} t={t} />}
+    {dashboardData !== undefined && session?.running === false && response !== ''
+      && suggestions !== undefined && onSuggest !== undefined && <div className={css.inquirySuggestions}>
+      <span>{t('inquiry.followups')}</span>
+      {suggestions.map(question => <button type="button" key={question}
+        onClick={() => { onSuggest(question) }}>{question}</button>)}
+    </div>}
   </>
 }

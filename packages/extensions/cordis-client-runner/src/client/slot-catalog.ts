@@ -4004,8 +4004,13 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     summary: 'Selected Session body inside the Agents main panel.',
     doc: 'Selected Session body inside the Agents main panel.',
     registerOptions: [],
-    ownerProps: [],
-    ownerPropsReferences: [],
+    ownerProps: [
+      '/** Index history and current constituents are independent observations. */\nexport interface SectorDashboard {\n  readonly sector: SectorMatch\n  readonly constituents: readonly SectorConstituent[]\n  readonly constituentsTruncated: boolean\n  readonly constituentsAsOf?: number\n  readonly history: CandleSeries\n}',
+    ],
+    ownerPropsReferences: [
+      'SectorConstituent',
+      'SectorMatch',
+    ],
     standardProps: [
       'useResource: UseResource',
       'useWorkspaces: SnapshotSelectorHook<WorkspaceSnapshot>',

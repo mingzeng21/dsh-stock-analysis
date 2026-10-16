@@ -61,12 +61,13 @@ it('shows index measures and filters or selects current constituents', () => {
   expect(screen.getByText('近 20 日波动')).toBeTruthy()
   expect(screen.getByText('当日成交额')).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: /甲公司/ }))
-  expect(onScopeChange).toHaveBeenCalledWith({ kind: 'sector', sector: sector.thscode, stock: '600001.SH' })
+  expect(onScopeChange).toHaveBeenCalledWith({ kind: 'sector', sector: sector.thscode, windowDays: 120, stock: '600001.SH' })
   fireEvent.change(screen.getByLabelText('查找成分股'), { target: { value: '000002' } })
   expect(screen.queryByRole('button', { name: /甲公司/ })).toBeNull()
   expect(screen.getByRole('button', { name: /乙公司/ })).toBeTruthy()
-  fireEvent.click(screen.getByRole('button', { name: '近 30 日' }))
-  expect(screen.getByRole('button', { name: '近 30 日' }).getAttribute('aria-pressed')).toBe('true')
+  fireEvent.click(screen.getByRole('button', { name: '近 30 天' }))
+  expect(screen.getByRole('button', { name: '近 30 天' }).getAttribute('aria-pressed')).toBe('true')
+  expect(onScopeChange).toHaveBeenCalledWith({ kind: 'sector', sector: sector.thscode, windowDays: 30, stock: '600001.SH' })
 })
 
 it('draws daily opening and closing candles with highs, lows, and volume', () => {
@@ -96,7 +97,18 @@ it('keeps loading, failure, empty series, and capped members explicit', () => {
 
 it('moves a mentioned stock into the current inquiry scope', () => {
   const { onScopeChange } = mount({ data, selected: sector, focus: { code: '600001.SH', sequence: 1 } })
-  expect(onScopeChange).toHaveBeenCalledWith({ kind: 'sector', sector: sector.thscode, stock: '600001.SH' })
+  expect(onScopeChange).toHaveBeenCalledWith({ kind: 'sector', sector: sector.thscode, windowDays: 120, stock: '600001.SH' })
+})
+
+it('clears a selected stock when the board changes', () => {
+  const { rerender, props, onScopeChange } = mount({ data, selected: sector })
+  fireEvent.click(screen.getByRole('button', { name: /甲公司/ }))
+  const nextData: SectorData = { ...data, sector: industry, constituents: [
+    { thscode: '000003.SZ', ticker: '000003', name: '丙公司' },
+  ] }
+  rerender(<SectorDashboard {...props} data={nextData} selected={industry} />)
+  fireEvent.click(screen.getByRole('button', { name: '近 30 天' }))
+  expect(onScopeChange).toHaveBeenLastCalledWith({ kind: 'sector', sector: industry.thscode, windowDays: 30 })
 })
 
 it('accepts an exact board code and leaves an unmatched submission untouched', () => {
@@ -131,7 +143,7 @@ it('shows one flat point, a falling window, and an empty selected window', () =>
   const spaced: SectorData = { ...data, history: { ...data.history,
     candles: [candle(1_760_000_000_000, 100), candle(1_780_086_400_000, 103)] } }
   rerender(<SectorDashboard {...props} data={spaced} selected={sector} />)
-  fireEvent.click(screen.getByRole('button', { name: '近 30 日' }))
+  fireEvent.click(screen.getByRole('button', { name: '近 30 天' }))
   expect(screen.getByText('所选走势窗口')).toBeTruthy()
 })
 

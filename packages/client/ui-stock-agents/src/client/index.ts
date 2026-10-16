@@ -30,6 +30,8 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
       owner: {
         dashboardData?: DragonTigerDashboard | HotRankDashboard | SectorDashboard
         onFocus?: (code: string) => void
+        suggestions?: readonly string[]
+        onSuggest?: (question: string) => void
       }
     }
   }

@@ -57,9 +57,8 @@
 .dashboardCanvas { display: flex; flex: 1; min-width: 0; min-height: 0; }
 .inquiry { display: flex; flex: 0 0 410px; flex-direction: column; min-width: 0; min-height: 0; border-left: 1px solid var(--dsw-alias-border-l2); background: var(--dsw-alias-bg-base); }
 .inquiry[hidden] { display: none; }
-.inquiryHeader { flex: none; padding: 19px 20px 14px; border-bottom: 1px solid var(--dsw-alias-border-l2); }
-.inquiryHeader h2 { margin: 0 0 8px; font-size: 17px; font-weight: 500; }
-.inquiryHeader p { margin: 0; color: var(--dsw-alias-label-secondary); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.inquiryHeader { flex: none; padding: 16px 20px; border-bottom: 1px solid var(--dsw-alias-border-l2); }
+.inquiryHeader h2 { margin: 0; font-size: 17px; font-weight: 500; }
 .inquiryIntro { flex: 1; min-height: 0; overflow: auto; padding: 24px 20px; }
 .inquiryIntro p { margin: 0 0 16px; color: var(--dsw-alias-label-secondary); font-size: 13px; line-height: 1.6; }
 .inquiryExamples { display: grid; gap: 8px; }
@@ -68,16 +67,24 @@
 .inquiryTranscript { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
 .inquiryTranscript :global([data-conversation-region='composer']) { display: none; }
 .inquiryTranscript :global([data-chat-flow-kind='user']) { max-height: 104px; overflow: auto; }
+.inquirySuggestions { display: flex; flex: none; align-items: center; gap: 6px; overflow-x: auto; padding: 9px 16px; border-top: 0.5px solid var(--dsw-alias-border-l2); white-space: nowrap; }
+.inquirySuggestions span { flex: none; color: var(--dsw-alias-label-secondary); font-size: 12px; }
+.inquirySuggestions button { flex: none; padding: 5px 8px; border: 0.5px solid var(--dsw-alias-border-l2); border-radius: var(--dsw-radius-sm); color: inherit; background: transparent; cursor: pointer; font: inherit; font-size: 12px; }
+.inquirySuggestions button:hover, .inquirySuggestions button:focus-visible { background: var(--dsw-alias-interactive-bg-hover); }
 .inquiryTargets { display: flex; flex: none; align-items: center; gap: 6px; overflow-x: auto; padding: 8px 12px; border-top: 1px solid var(--dsw-alias-border-l2); white-space: nowrap; }
 .inquiryTargets span { color: var(--dsw-alias-label-secondary); font-size: 12px; }
 .inquiryTargets button { padding: 5px 8px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; color: inherit; background: transparent; cursor: pointer; font-size: 12px; }
 .inquiryTargets button:hover, .inquiryTargets button:focus-visible { background: var(--dsw-alias-interactive-bg-hover); }
 .inquiryNotice { flex: none; margin: 10px 16px 0; padding: 9px 11px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; color: var(--dsw-alias-label-secondary); font-size: 12px; line-height: 1.5; }
 .inquiryForm { display: grid; flex: none; gap: 9px; padding: 14px 16px 18px; border-top: 1px solid var(--dsw-alias-border-l2); }
+.inquiryScope { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.inquiryScope > span:first-child { margin-right: 2px; color: var(--dsw-alias-label-secondary); font-size: 12px; }
+.inquiryScopeToken { max-width: 100%; overflow: hidden; padding: 4px 8px; border: 0.5px solid var(--dsw-alias-border-l2); border-radius: var(--dsw-radius-sm); background: var(--dsw-alias-interactive-bg-hover); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .inquiryForm label { font-size: 12px; color: var(--dsw-alias-label-secondary); }
 .inquiryForm textarea { min-height: 84px; max-height: 180px; resize: vertical; padding: 10px 11px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; color: inherit; background: var(--dsw-alias-bg-base); font: inherit; font-size: 13px; }
-.inquiryForm button { justify-self: end; padding: 8px 15px; border: 0; border-radius: 8px; color: white; background: var(--dsw-alias-interactive-bg-active); cursor: pointer; }
-.inquiryForm button:disabled { opacity: .5; cursor: default; }
+.inquiryForm button { justify-self: end; padding: 8px 15px; border: 0; border-radius: var(--dsw-radius-sm); color: var(--dsw-alias-label-primary-foreground); background: var(--dsw-alias-button-primary-fill); cursor: pointer; }
+.inquiryForm button:hover:not(:disabled) { background: var(--dsw-alias-button-primary-hover); }
+.inquiryForm button:disabled { color: var(--dsw-alias-label-secondary); background: var(--dsw-alias-button-primary-dimmed); cursor: default; }
 .inquiryForm [role='alert'] { margin: 0; color: var(--dsw-alias-state-error-primary); font-size: 12px; }
 .launch { display: grid; max-width: 900px; margin: 28px auto 0; gap: 12px; }
 .launch label { font-weight: 500; }

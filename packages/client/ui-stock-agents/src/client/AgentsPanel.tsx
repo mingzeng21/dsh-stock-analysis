@@ -215,7 +215,7 @@ export function AgentsPanel({
     setInquiryError(false)
     setHotHistory(null)
     setDashboardFocus(null)
-    setDashboardScope(kind === 'dragon' ? { kind, board: 'all' } : kind === 'hot' ? { kind, board: 'hot', period: 'day' } : { kind, sector: initialSector ?? '' })
+    setDashboardScope(kind === 'dragon' ? { kind, board: 'all' } : kind === 'hot' ? { kind, board: 'hot', period: 'day' } : { kind, sector: initialSector ?? '', windowDays: 120 })
     clearActiveSession()
     setSelected(null)
     setHistoryVisible(false)
@@ -351,12 +351,19 @@ export function AgentsPanel({
       currentData !== lastInquiryData || JSON.stringify(dashboardScope) !== lastInquiryScope
       || (dashboardKind === 'hot' && hotHistory !== lastInquiryHistory)
     )
-    const scopeLabel = dashboardScope.kind === 'dragon'
-      ? `${dashboardScope.board === 'all' ? t('dragon.boardAll') : dashboardScope.board === 'org' ? t('dragon.boardOrg') : t('dragon.boardHot')}${dashboardScope.stock === undefined ? '' : ` · ${dashboardScope.stock}`}${dashboardScope.seat === undefined ? '' : ` · ${dashboardScope.seat}`}`
-      : dashboardScope.kind === 'sector' ? `${sectorData?.sector.name ?? dashboardScope.sector}${dashboardScope.stock === undefined ? '' : ` · ${dashboardScope.stock}`}`
-        : `${dashboardScope.board === 'hot'
+    const scopeTokens = dashboardScope.kind === 'dragon'
+      ? [dashboardScope.board === 'all' ? t('dragon.boardAll') : dashboardScope.board === 'org' ? t('dragon.boardOrg') : t('dragon.boardHot'),
+        dashboardScope.stock, dashboardScope.seat]
+      : dashboardScope.kind === 'sector'
+        ? [sectorData?.sector.name ?? selectedSector?.name ?? t('inquiry.noSector'),
+          selectedSector === null ? undefined : t(`sector.days${dashboardScope.windowDays}`), dashboardScope.stock]
+        : [dashboardScope.board === 'hot'
           ? dashboardScope.period === 'day' ? t('hot.day') : t('hot.hour')
-          : dashboardScope.period === 'day' ? t('hot.surgeDay') : t('hot.surgeHour')}${dashboardScope.stock === undefined ? '' : ` · ${dashboardScope.stock}`}`
+          : dashboardScope.period === 'day' ? t('hot.surgeDay') : t('hot.surgeHour'), dashboardScope.stock]
+    const inquiryExamples = dashboardKind === 'dragon'
+      ? [t('inquiry.dragonExample1'), t('inquiry.dragonExample2')]
+      : dashboardKind === 'hot' ? [t('inquiry.hotExample1'), t('inquiry.hotExample2')]
+        : [t('inquiry.sectorExample1'), t('inquiry.sectorExample2')]
     return <main className={css.panel}>
       {historyRail}
       <section className={css.detail}>
@@ -389,7 +396,8 @@ export function AgentsPanel({
                   }} onSelect={(sector) => {
                     setSelectedSector(sector)
                     setDashboardFocus(null)
-                    setDashboardScope({ kind: 'sector', sector: sector.thscode })
+                    setDashboardScope(current => ({ kind: 'sector', sector: sector.thscode,
+                      windowDays: current.kind === 'sector' ? current.windowDays : 120 }))
                     setSectorData(null)
                     refreshSector(sector)
                   }} onScopeChange={setDashboardScope} focus={dashboardFocus} t={t} />}
@@ -397,30 +405,34 @@ export function AgentsPanel({
           <aside id="stock-dashboard-inquiry" className={css.inquiry} aria-label={t('inquiry.title')} hidden={!inquiryOpen}>
             <header className={css.inquiryHeader}>
               <h2>{t('inquiry.title')}</h2>
-              <p>{t('inquiry.scope')}: {scopeLabel}</p>
             </header>
             {inquiryStale && <p className={css.inquiryNotice}>{t('inquiry.stale')}</p>}
             {dashboardReference === null ? <div className={css.inquiryIntro}>
-              <p>{t('inquiry.intro')}</p>
-              <div className={css.inquiryExamples}>
-                {(dashboardKind === 'dragon'
-                  ? [t('inquiry.dragonExample1'), t('inquiry.dragonExample2')]
-                  : dashboardKind === 'hot' ? [t('inquiry.hotExample1'), t('inquiry.hotExample2')]
-                    : [t('inquiry.sectorExample1'), t('inquiry.sectorExample2')]).map(example =>
-                  <button type="button" key={example} onClick={() => { setInquiryQuery(example) }}>{example}</button>)}
-              </div>
+              <p>{dashboardKind === 'sector' && selectedSector === null ? t('inquiry.selectSector') : t('inquiry.intro')}</p>
+              {currentData !== null && <div className={css.inquiryExamples}>
+                {inquiryExamples.map(example => <button type="button" key={example}
+                  onClick={() => { setInquiryQuery(example) }}>{example}</button>)}
+              </div>}
             </div> : <div className={css.inquiryTranscript}>
               <SessionProvider session={dashboardReference}>
                 {renderSlot('stock-agents.conversation', {
                   ...(currentData === null ? {} : { dashboardData: currentData }),
                   onFocus: (code) => { setDashboardFocus(current => ({ code, sequence: (current?.sequence ?? 0) + 1 })) },
+                  suggestions: inquiryExamples,
+                  onSuggest: setInquiryQuery,
                 })}
               </SessionProvider>
             </div>}
             <form className={css.inquiryForm} onSubmit={(event) => { event.preventDefault(); submitInquiry() }}>
+              <div className={css.inquiryScope} role="group" aria-label={t('inquiry.scope')}>
+                <span>{t('inquiry.scope')}</span>
+                {scopeTokens.filter((token): token is string => token !== undefined).map((token, index) =>
+                  <span className={css.inquiryScopeToken} key={`${index}-${token}`}>{token}</span>)}
+              </div>
               <label htmlFor="stock-dashboard-query">{t('inquiry.query')}</label>
               <textarea id="stock-dashboard-query" value={inquiryQuery}
-                onChange={(event) => { setInquiryQuery(event.target.value) }} placeholder={t('inquiry.placeholder')} />
+                onChange={(event) => { setInquiryQuery(event.target.value) }}
+                placeholder={dashboardKind === 'sector' ? t('inquiry.sectorPlaceholder') : t('inquiry.placeholder')} />
               <button type="submit" disabled={currentData === null || dashboardLoading || inquiryBusy || inquiryQuery.trim() === ''}>
                 {inquiryBusy ? t('inquiry.sending') : t('inquiry.send')}
               </button>

@@ -48,7 +48,7 @@ it('logs the selected sector, current membership, and index observations', () =>
     ] },
   }
   const prompt = dashboardInquiryPrompt({ kind: 'sector', data,
-    scope: { kind: 'sector', sector: '886001.TI', stock: '600001.SH' } }, '当前成分与指数如何？')
+    scope: { kind: 'sector', sector: '886001.TI', windowDays: 120, stock: '600001.SH' } }, '当前成分与指数如何？')
   expect(prompt).toMatchInlineSnapshot(`
     "用户问题：当前成分与指数如何？
 
@@ -59,6 +59,27 @@ it('logs the selected sector, current membership, and index observations', () =>
 
     看板快照（JSON；truncated 为 true 时只含前段记录，不能推断未展示记录）：
 
-    {"dashboard":"sector","selection":{"kind":"sector","sector":"886001.TI","stock":"600001.SH"},"sector":{"thscode":"886001.TI","name":"机器人概念","kind":"concept"},"constituentsTruncated":false,"selectedStock":{"thscode":"600001.SH","ticker":"600001","name":"甲公司"},"constituents":[{"thscode":"600001.SH","ticker":"600001","name":"甲公司"}],"historyTruncated":false,"candles":[{"date":1780000000000,"close":101,"high":102,"low":99}]}"
+    {"dashboard":"sector","selection":{"kind":"sector","sector":"886001.TI","windowDays":120,"stock":"600001.SH"},"sector":{"thscode":"886001.TI","name":"机器人概念","kind":"concept"},"constituentsTruncated":false,"selectedStock":{"thscode":"600001.SH","ticker":"600001","name":"甲公司"},"constituents":[{"thscode":"600001.SH","ticker":"600001","name":"甲公司"}],"historyTruncated":false,"candles":[{"date":1780000000000,"close":101,"high":102,"low":99}]}"
   `)
+})
+
+it('uses the visible calendar-day window for sector history', () => {
+  const day = 24 * 60 * 60 * 1000
+  const data: SectorDashboard = {
+    sector: { thscode: '886001.TI', name: '机器人概念', kind: 'concept' },
+    constituents: [], constituentsTruncated: false,
+    history: { thscode: '886001.TI', interval: '1d', truncated: false, candles: [
+      { time: 0, open: 1, high: 1, low: 1, close: 1, volume: 1, turnover: 1 },
+      { time: 20 * day, open: 2, high: 2, low: 2, close: 2, volume: 1, turnover: 1 },
+      { time: 50 * day, open: 3, high: 3, low: 3, close: 3, volume: 1, turnover: 1 },
+    ] },
+  }
+  const prompt = dashboardInquiryPrompt({ kind: 'sector', data,
+    scope: { kind: 'sector', sector: '886001.TI', windowDays: 30 } }, '所选区间如何？')
+  const payload = JSON.parse(prompt.split('看板快照（JSON；truncated 为 true 时只含前段记录，不能推断未展示记录）：\n\n')[1] ?? '') as {
+    selection: { windowDays: number }
+    candles: { close: number }[]
+  }
+  expect(payload.selection.windowDays).toBe(30)
+  expect(payload.candles.map(bar => bar.close)).toEqual([2, 3])
 })

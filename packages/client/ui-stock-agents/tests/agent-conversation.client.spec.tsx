@@ -11,10 +11,12 @@ afterEach(cleanup)
 
 it('offers a focus button for a stock mentioned in the latest answer', () => {
   const onFocus = vi.fn()
+  const onSuggest = vi.fn()
+  let running = false
   const unused = () => { throw new Error('unneeded global slot prop') }
   const props = {
     sessionId: 'agent-run' as SessionId,
-    useSession: () => ({ openState: 'active' }),
+    useSession: () => ({ openState: 'active', running }),
     useConversation: () => '甲公司 600001.SH 的机构净额较高',
     renderFactorySlot: () => <div>回答内容</div>,
     dashboardData: {
@@ -22,6 +24,8 @@ it('offers a focus button for a stock mentioned in the latest answer', () => {
         stocks: [{ thscode: '600001.SH', name: '甲公司', netValue: 10_000_000 }], seats: [] }],
     },
     onFocus,
+    suggestions: ['继续比较机构与游资净额'],
+    onSuggest,
     t: makeTranslate(zh),
     usePanelInfo: unused,
     useSessions: unused,
@@ -30,7 +34,12 @@ it('offers a focus button for a stock mentioned in the latest answer', () => {
     useWorkspaces: unused,
     useResource: unused,
   } as React.ComponentProps<typeof AgentConversation>
-  render(<AgentConversation {...props} />)
+  const { rerender } = render(<AgentConversation {...props} />)
   fireEvent.click(screen.getByRole('button', { name: '甲公司' }))
   expect(onFocus).toHaveBeenCalledWith('600001.SH')
+  fireEvent.click(screen.getByRole('button', { name: '继续比较机构与游资净额' }))
+  expect(onSuggest).toHaveBeenCalledWith('继续比较机构与游资净额')
+  running = true
+  rerender(<AgentConversation {...props} />)
+  expect(screen.queryByText('继续提问')).toBeNull()
 })

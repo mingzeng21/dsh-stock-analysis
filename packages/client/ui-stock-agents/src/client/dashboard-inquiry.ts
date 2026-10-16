@@ -7,7 +7,7 @@ import type {
 export type DashboardScope =
   | { readonly kind: 'dragon'; readonly board: 'all' | 'org' | 'hot_money'; readonly stock?: string; readonly seat?: string }
   | { readonly kind: 'hot'; readonly board: 'hot' | 'surge'; readonly period: 'day' | 'hour'; readonly stock?: string }
-  | { readonly kind: 'sector'; readonly sector: string; readonly stock?: string }
+  | { readonly kind: 'sector'; readonly sector: string; readonly windowDays: 30 | 60 | 120; readonly stock?: string }
 
 /** The data read and visible selection used for one question. */
 export type DashboardInquiryContext =
@@ -54,13 +54,16 @@ function hotContext({ data, scope, history }: Extract<DashboardInquiryContext, {
 }
 
 function sectorContext({ data, scope }: Extract<DashboardInquiryContext, { kind: 'sector' }>) {
+  const latestTime = data.history.candles.at(-1)?.time
+  const candles = latestTime === undefined ? [] : data.history.candles.filter(bar =>
+    bar.time >= latestTime - scope.windowDays * 24 * 60 * 60 * 1000)
   return {
     dashboard: 'sector', selection: scope, sector: data.sector,
     constituentsAsOf: data.constituentsAsOf, constituentsTruncated: data.constituentsTruncated,
     selectedStock: data.constituents.find(stock => stock.thscode === scope.stock),
     constituents: data.constituents.slice(0, 100),
     historyAsOf: data.history.asOf, historyTruncated: data.history.truncated,
-    candles: data.history.candles.slice(-120).map(bar => ({ date: bar.time, close: bar.close, high: bar.high, low: bar.low })),
+    candles: candles.map(bar => ({ date: bar.time, close: bar.close, high: bar.high, low: bar.low })),
   }
 }
 
