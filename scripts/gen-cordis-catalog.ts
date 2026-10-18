@@ -146,6 +146,7 @@ export const SERVICE_PAGE: Record<string, string> = {
   stockController: 'stock.md',
   stockAgentsController: 'stock.md',
   watchlistController: 'storage.md',
+  researchController: 'research.md',
 }
 
 /**
@@ -752,6 +753,15 @@ export const LINK_MAP: Readonly<Record<string, string>> = {
   UserQuestionProvider: 'user-questions.md',
   WebFetchProvider: 'web.md',
   WebFetchRequest: 'web.md',
+  AddResearchReportRequest: 'research.md',
+  AddResearchSourceRequest: 'research.md',
+  ResearchPageId: 'research.md',
+  ResearchPageKind: 'research.md',
+  ResearchSnapshot: 'research.md',
+  ResearchReportReceipt: 'research.md',
+  ResearchSourceId: 'research.md',
+  SaveResearchPageRequest: 'research.md',
+  SaveResearchStudyRequest: 'research.md',
   StockCatalogQuery: 'stock.md',
   StockEndpoint: 'stock.md',
   StockMeta: 'stock.md',

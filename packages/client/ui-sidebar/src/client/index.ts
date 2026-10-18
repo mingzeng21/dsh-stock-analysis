@@ -54,7 +54,7 @@ export function apply(ctx: ClientContext, presentation: SidebarPresentation = { 
   const panels = createSnapshotStore<readonly SidebarPanelMetadata[]>([])
   const syncPanels = (): void => {
     const next = ctx.slots.entriesOfSlot('sidebar.panellist').filter(({ options }) =>
-      !presentation.stockResearchHome || options.id === 'conversation' || options.id === 'stock-agents' || options.id === 'watchlist',
+      !presentation.stockResearchHome || options.id === 'conversation' || options.id === 'stock-agents' || options.id === 'watchlist' || options.id === 'research',
     ).map(({ options }) => {
       // The list registration requires an id; StoredEntry erases the slot kind.
       const id = options.id as MainPanelId

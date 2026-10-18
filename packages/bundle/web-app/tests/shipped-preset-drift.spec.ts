@@ -78,7 +78,7 @@ describe('shipped stock-analysis preset', () => {
     }
 
     const extra = [...stockAnalysis.keys()].filter(id => !standard.has(id)).sort()
-    expect(extra).toEqual(['tool-stock'])
+    expect(extra).toEqual(['tool-research', 'tool-stock'])
     expect(stockAnalysis.get('skill-filesystem')).toMatchObject({ inject: ['stockAgentSkillDir'] })
     expect(stockAnalysis.get('persona')).toMatchObject({ name: '@deepseek-ai/dsh-persona' })
   })

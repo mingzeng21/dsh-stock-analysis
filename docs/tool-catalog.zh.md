@@ -41,6 +41,7 @@
 | `@deepseek-ai/dsh-tool-ralph` | `ralph` | `ctx.tools`、`ctx.workflowEngine`、`ctx.subagents`、`ctx.systemPrompt`、`a calling Agent (exec.agent parents every fresh round)` | `tool/call`、`tool/result`、`workflow and child session events during execution` | - | 固定的前台工作流会在每个 Round 启动一个全新的结构化子级；模型只能选择不可变目标和可选的 Round 上限。 |
 | `@deepseek-ai/dsh-tool-skill` | `skill` | `ctx.tools`、`ctx.agents`、`ctx.skills` | `tool/call`、`tool/result`、`user/message replacement catalogs via agent.inject()` | - | - |
 | `@deepseek-ai/dsh-tool-stock` | `fund_backtest_indicators`, `fund_backtest_result`, `fund_companies_detail`, `fund_corporate_actions_dividends`, `fund_diagnostics_detail`, `fund_financials_balance_sheets`, `fund_financials_income_statements`, `fund_financials_indicators`, `fund_holders_detail`, `fund_holders_top`, `fund_indicators_line`, `fund_indicators_table`, `fund_managers_detail`, `fund_managers_experience`, `fund_managers_investment_style`, `fund_managers_performance`, `fund_market_historical`, `fund_market_snapshot`, `fund_news_article_list`, `fund_offerings_list`, `fund_performance_drawdowns`, `fund_performance_indicators_historical`, `fund_performance_nav`, `fund_performance_returns`, `fund_portfolio_asset_allocation`, `fund_portfolio_bond_history`, `fund_portfolio_bond_report_dates`, `fund_portfolio_holdings`, `fund_portfolio_industry_allocation`, `fund_portfolio_stock_history`, `fund_portfolio_stock_report_dates`, `fund_profile_detail`, `fund_quota_list`, `fund_quota_summary`, `futures_basis_historical`, `futures_basis_main_continuous_latest`, `futures_calendar_trading_schedule`, `futures_contracts_detail`, `futures_positions_company_list`, `futures_positions_company_variety_daily`, `futures_positions_contract_daily`, `futures_positions_contract_historical`, `futures_positions_variety_daily`, `futures_prices_daily`, `futures_prices_intraday`, `futures_varieties_list`, `futures_warehouse_receipts_historical`, `iwencai_announcement_search`, `iwencai_astock_selector`, `iwencai_basicinfo_query`, `iwencai_business_query`, `iwencai_event_query`, `iwencai_fund_selector`, `iwencai_hkstock_selector`, `iwencai_industry_query`, `iwencai_insresearch_query`, `iwencai_macro_query`, `iwencai_management_query`, `iwencai_news_search`, `iwencai_report_search`, `iwencai_sector_selector`, `iwencai_usstock_selector`, `options_contracts_detail`, `options_prices_daily`, `options_prices_intraday`, `options_varieties_list`, `stock_adjustment_factors`, `stock_anomaly_analysis`, `stock_anomaly_analysis_list`, `stock_auction_benchmark`, `stock_auction_snapshot`, `stock_dragon_tiger_list`, `stock_financials_balance`, `stock_financials_cashflow`, `stock_financials_income`, `stock_financials_indicators`, `stock_hot_list`, `stock_hot_list_history`, `stock_hot_rank_trend`, `stock_index_catalog`, `stock_index_constituents`, `stock_index_kline`, `stock_index_quote`, `stock_kline`, `stock_limit_break_pool`, `stock_limit_down_pool`, `stock_limit_up_ladder`, `stock_limit_up_pool`, `stock_quote`, `stock_skyrocket_list`, `stock_symbol_list`, `stock_symbol_search`, `stock_trading_calendar`, `stock_valuation` | `ctx.tools`, `ctx.stock` | `tool/call`, `tool/result` | - | Every registered stock capability is one native tool. The `stock-analysis` preset is the only shipped composition that mounts this package, so the schema cost stays out of `standard` and `ptc`. |
+| `@deepseek-ai/dsh-tool-research` | `research_propose`, `research_read`, `research_search` | `ctx.tools`, `ctx.researchController` | `tool/call`, `tool/result` | - | - |
 | `@deepseek-ai/dsh-tool-session-query` | `session_event_read`、`session_event_search`、`session_event_trace`、`session_search`、`session_trace` | `ctx.tools`、`ctx.systemPrompt`、`ctx.sessionQuery`、`a calling Agent for workspace authority` | `tool/call`、`tool/result` | - | 这 5 个只读工具会隐藏提供方游标，并根据不可变的调用 agent 会话为每个结果授权。该包需要选择启用；需要强制截止时间或限制行内输出的组合还会挂载通用超时或 spill 策略。 |
 | `@deepseek-ai/dsh-tool-subagent` | `list_subagent_models`、`subagent` | `ctx.tools`、`ctx.subagents`、`ctx.systemPrompt`、`用于模型发现和所选路由校验的 ctx.llm` | `tool/call`、`tool/result`、`child session events through the chosen provider` | `subagent`、`subagent_fork` | 注册的委派工具名称取决于加载时 `toolName` 配置（默认为 `subagent`）；上述默认 schema 关闭模型选择，而发现 schema 则展示为已启用 Session 中可用的固定配套工具。Web preset 会在每个新顶层 Session 创建时读取插件页偏好，并为其子 Session 保留该决定；`subagent_fork` 始终使用固定路由。每个实例通过 `modelSelectionSettings`、`backgroundMode` 与 `enableRunInBackground` 独立控制是否读取模型选择设置及其后台行为。 |
 | `@deepseek-ai/dsh-tool-subagent-control` | `interrupt_agent`、`list_agents`、`send_message` | `ctx.tools`、`ctx.subagents`、`ctx.agents and ctx.sessionProjections (list_agents only)` | `tool/call`、`tool/result`、`child session events through ctx.subagents` | - | 这些是控制可继续后台 subagent 的全局命名工具：绑定提供方的 `tool-subagent` 实例注册不同的委派工具；本包注册一次 `send_message` 和 `interrupt_agent`，另由 `list_agents` 通过单独加载的 `/list-agents` 插件提供，其目录行使用 sessionProjections 和实时 Agent 注册表。 |
@@ -5376,3 +5377,115 @@ A股近一年交易日序列，固定窗口为[今日-1年, 今日]（Asia/Shang
 来源：[`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
 
 每个已注册的股票能力都是一个原生工具。`stock-analysis` preset 是唯一挂载本包的随产品发布的组合，因此 schema 成本不会进入 `standard` 与 `ptc`。
+
+<a id="deepseek-aidsh-tool-research"></a>
+
+## `@deepseek-ai/dsh-tool-research`
+
+### `research_propose`
+
+提交 Wiki 页面修改供用户审阅；不会直接发布或替换页面。引用已保存的来源 ID，并区分披露事实与推断。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "pageId": {
+      "type": "string",
+      "description": "Existing page id to revise; omit to create a page."
+    },
+    "kind": {
+      "type": "string",
+      "description": "Wiki page category.",
+      "enum": [
+        "entity",
+        "concept",
+        "topic",
+        "source"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "description": "Page title."
+    },
+    "summary": {
+      "type": "string",
+      "description": "One-line page summary."
+    },
+    "markdown": {
+      "type": "string",
+      "description": "Complete proposed Markdown page."
+    },
+    "sourceIds": {
+      "type": "array",
+      "description": "Saved source ids supporting this page.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "links": {
+      "type": "array",
+      "description": "Existing wiki page ids linked by this page.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "kind",
+    "title",
+    "summary",
+    "markdown",
+    "sourceIds",
+    "links"
+  ]
+}
+```
+
+来源： [`packages/stock/tool-research/src/index.ts`](../packages/stock/tool-research/src/index.ts)
+
+### `research_read`
+
+通过 ID 读取个人 Wiki 页面或原始文本资料。内容较长时，传入返回的 nextOffset 继续读取。只有网址或文件元数据的记录并不等于已核实的全文。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Exact page or source id."
+    },
+    "offset": {
+      "type": "number",
+      "description": "Zero-based character offset. Defaults to 0; use nextOffset to continue."
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+来源： [`packages/stock/tool-research/src/index.ts`](../packages/stock/tool-research/src/index.ts)
+
+### `research_search`
+
+分析相关股票或主题前，搜索个人研究所 Wiki 与资料目录。结果包含稳定 ID；随后读取有用的命中项。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Company, concept, or research topic."
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+来源： [`packages/stock/tool-research/src/index.ts`](../packages/stock/tool-research/src/index.ts)

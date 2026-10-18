@@ -1,0 +1,4 @@
+.root { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 12px 0; color: var(--dsw-alias-label-secondary); font-size: 12px; }
+.root button { border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; padding: 7px 11px; color: var(--dsw-alias-label-primary); background: transparent; cursor: pointer; font: inherit; }
+.root button:hover { background: var(--dsw-alias-interactive-bg-hover); }
+.root button:disabled { opacity: .5; cursor: default; }

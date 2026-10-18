@@ -354,6 +354,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     occupants: [
       'client-ui-deliverables DeliverablesTail id \'@deepseek-ai/dsh-client-ui-deliverables\'',
       'client-ui-plan PlanCards',
+      'client-ui-research ResearchReportAction id \'research-report-import\'',
       'client-ui-schedule ScheduleTurnCard id \'schedule-created\'',
     ],
     replaceRisk: 'none',
@@ -1761,6 +1762,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     occupants: [
       'client-ui-conversation ConversationPanel',
       'client-ui-plugin-manager PluginManagerPage',
+      'client-ui-research ResearchPanel',
       'client-ui-schedule TaskManagerPage',
       'client-ui-stock-agents AgentsPanel',
       'client-ui-watchlist WatchlistPanel',
@@ -3087,6 +3089,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     occupants: [
       'client-ui-conversation ConversationPanelIcon',
       'client-ui-plugin-manager PluginsPanelIcon',
+      'client-ui-research ResearchIcon',
       'client-ui-schedule TaskManagerIcon',
       'client-ui-stock-agents StockAgentsIcon',
       'client-ui-watchlist WatchlistPanelIcon',
@@ -4007,6 +4010,7 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     ownerProps: [
       '/** Three boards aligned to the latest available trading date. */\nexport interface DragonTigerDashboard {\n  readonly tradeDate: string\n  readonly asOf?: number\n  readonly boards: readonly DragonTigerBoard[]\n}',
       '/** Four independent current attention lists. */\nexport interface HotRankDashboard {\n  readonly boards: readonly HotRankBoard[]\n}',
+      '/** Daily industry index histories aligned against one benchmark history. */\nexport interface IndustryMatrix {\n  readonly industries: readonly { readonly sector: SectorMatch; readonly history: CandleSeries }[]\n  readonly benchmark: CandleSeries\n  readonly catalogTruncated: boolean\n  readonly industriesTruncated: boolean\n  readonly unavailableCount: number\n}',
       '/** Recent trading days, oldest first, from the 30-day ladder window. */\nexport interface LimitUpPulseDashboard {\n  readonly asOf?: number\n  readonly days: readonly LimitUpPulseDay[]\n}',
       '/** Index history and current constituents are independent observations. */\nexport interface SectorDashboard {\n  readonly sector: SectorMatch\n  readonly constituents: readonly SectorConstituent[]\n  readonly constituentsTruncated: boolean\n  readonly constituentsAsOf?: number\n  readonly history: CandleSeries\n}',
     ],

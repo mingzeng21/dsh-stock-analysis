@@ -161,6 +161,9 @@
     - id: watchlist-controller
       name: '@deepseek-ai/dsh-api-watchlist-controller'
 
+    - id: research-controller
+      name: '@deepseek-ai/dsh-api-research-controller'
+
     - id: stock-agents-controller
       name: '@deepseek-ai/dsh-api-stock-agents-controller'
       inject: [stockAgentSkillDir]
@@ -365,6 +368,9 @@
     # surface for the selected instrument, over the stock and watchlist Remotes.
     - id: ui-watchlist
       name: '@deepseek-ai/dsh-client-ui-watchlist'
+
+    - id: ui-research
+      name: '@deepseek-ai/dsh-client-ui-research'
 
     - id: ui-stock-mentions
       name: '@deepseek-ai/dsh-client-ui-stock-mentions'

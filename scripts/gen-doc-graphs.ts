@@ -316,6 +316,13 @@ const SERVICE_ROLES: ServiceRole[] = [
     note: 'Owns the ordered personal instrument list as one storage-domain value and serves its list, add, remove, and reorder operations.',
   },
   {
+    key: 'researchController',
+    pkg: 'api-research-controller',
+    title: 'Durable personal research library and Remote controller',
+    mode: 'core',
+    note: 'Publishes original sources, reviewed wiki pages, studies, templates, and activity through one storage-domain snapshot; model-authored pages wait for human review.',
+  },
+  {
     key: 'workspaceChanges',
     pkg: 'workspace-changes',
     title: 'Host per-turn changed-file summaries',

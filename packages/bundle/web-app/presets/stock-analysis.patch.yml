@@ -59,3 +59,5 @@
             disabled: true
           - id: tool-stock
             name: '@deepseek-ai/dsh-tool-stock'
+          - id: tool-research
+            name: '@deepseek-ai/dsh-tool-research'

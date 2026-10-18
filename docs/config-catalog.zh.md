@@ -220,6 +220,29 @@ export interface Config {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-api-job-controller -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-api-research-controller -->
+<a id="deepseek-aidsh-api-research-controller"></a>
+
+## `@deepseek-ai/dsh-api-research-controller`
+
+- `inject`: `storageDomain` · `attachments`
+- `source`: [`packages/api/research-controller/src/index.ts:28`](../packages/api/research-controller/src/index.ts)
+
+```ts config-catalog
+/** Deployment bounds on admitted and retained research content. */
+export interface Config {
+  /** Maximum original file bytes accepted by one browser call. */
+  readonly maxFileBytes: number
+  /** Maximum text characters in one source or page. */
+  readonly maxTextChars: number
+  /** Maximum published pages. */
+  readonly maxPages: number
+  /** Maximum original sources. */
+  readonly maxSources: number
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-api-research-controller -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-api-session-controller -->
 <a id="deepseek-aidsh-api-session-controller"></a>
 
@@ -3884,6 +3907,25 @@ export interface Config {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-tool-ralph -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-tool-research -->
+<a id="deepseek-aidsh-tool-research"></a>
+
+## `@deepseek-ai/dsh-tool-research`
+
+- `inject`: `tools` · `researchController`
+- `source`: [`packages/stock/tool-research/src/index.ts:15`](../packages/stock/tool-research/src/index.ts)
+
+```ts config-catalog
+/** Bounds on complete model-visible results. */
+export interface Config {
+  /** Maximum characters returned by one search or read call. */
+  readonly maxResultChars: number
+  /** Maximum hits per content category in a search call. */
+  readonly maxSearchResults: number
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-tool-research -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-tool-session-query -->
 <a id="deepseek-aidsh-tool-session-query"></a>
 
@@ -4509,6 +4551,7 @@ export interface Config {
 | `@deepseek-ai/dsh-client-ui-plan` | — | [`packages/client/ui-plan/src/index.ts`](../packages/client/ui-plan/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-reference` | — | [`packages/client/ui-reference/src/index.ts`](../packages/client/ui-reference/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-renderer` | — | [`packages/client/ui-renderer/src/index.ts`](../packages/client/ui-renderer/src/index.ts) |
+| `@deepseek-ai/dsh-client-ui-research` | — | [`packages/client/ui-research/src/index.ts`](../packages/client/ui-research/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-schedule` | — | [`packages/client/ui-schedule/src/index.ts`](../packages/client/ui-schedule/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-session` | — | [`packages/client/ui-session/src/index.ts`](../packages/client/ui-session/src/index.ts) |
 | `@deepseek-ai/dsh-client-ui-settings` | — | [`packages/client/ui-settings/src/index.ts`](../packages/client/ui-settings/src/index.ts) |

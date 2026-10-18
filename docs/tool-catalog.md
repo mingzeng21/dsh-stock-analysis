@@ -46,6 +46,7 @@ This table connects model-visible tool names to the plugin package and service s
 | `@deepseek-ai/dsh-tool-workspace-dependencies` | `load_workspace_dependencies` | `ctx.tools` | `tool/call`, `tool/result` | - | - |
 | `@deepseek-ai/dsh-tool-web` | `web_fetch`, `web_search` | `ctx.tools`, `ctx.web`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | web_search and web_fetch keep provider selection behind ctx.web so model-visible schemas stay stable across backend swaps. |
 | `@deepseek-ai/dsh-tool-stock` | `fund_backtest_indicators`, `fund_backtest_result`, `fund_companies_detail`, `fund_corporate_actions_dividends`, `fund_diagnostics_detail`, `fund_financials_balance_sheets`, `fund_financials_income_statements`, `fund_financials_indicators`, `fund_holders_detail`, `fund_holders_top`, `fund_indicators_line`, `fund_indicators_table`, `fund_managers_detail`, `fund_managers_experience`, `fund_managers_investment_style`, `fund_managers_performance`, `fund_market_historical`, `fund_market_snapshot`, `fund_news_article_list`, `fund_offerings_list`, `fund_performance_drawdowns`, `fund_performance_indicators_historical`, `fund_performance_nav`, `fund_performance_returns`, `fund_portfolio_asset_allocation`, `fund_portfolio_bond_history`, `fund_portfolio_bond_report_dates`, `fund_portfolio_holdings`, `fund_portfolio_industry_allocation`, `fund_portfolio_stock_history`, `fund_portfolio_stock_report_dates`, `fund_profile_detail`, `fund_quota_list`, `fund_quota_summary`, `futures_basis_historical`, `futures_basis_main_continuous_latest`, `futures_calendar_trading_schedule`, `futures_contracts_detail`, `futures_positions_company_list`, `futures_positions_company_variety_daily`, `futures_positions_contract_daily`, `futures_positions_contract_historical`, `futures_positions_variety_daily`, `futures_prices_daily`, `futures_prices_intraday`, `futures_varieties_list`, `futures_warehouse_receipts_historical`, `iwencai_announcement_search`, `iwencai_astock_selector`, `iwencai_basicinfo_query`, `iwencai_business_query`, `iwencai_event_query`, `iwencai_fund_selector`, `iwencai_hkstock_selector`, `iwencai_industry_query`, `iwencai_insresearch_query`, `iwencai_macro_query`, `iwencai_management_query`, `iwencai_news_search`, `iwencai_report_search`, `iwencai_sector_selector`, `iwencai_usstock_selector`, `options_contracts_detail`, `options_prices_daily`, `options_prices_intraday`, `options_varieties_list`, `stock_adjustment_factors`, `stock_anomaly_analysis`, `stock_anomaly_analysis_list`, `stock_auction_benchmark`, `stock_auction_snapshot`, `stock_dragon_tiger_list`, `stock_financials_balance`, `stock_financials_cashflow`, `stock_financials_income`, `stock_financials_indicators`, `stock_hot_list`, `stock_hot_list_history`, `stock_hot_rank_trend`, `stock_index_catalog`, `stock_index_constituents`, `stock_index_kline`, `stock_index_quote`, `stock_kline`, `stock_limit_break_pool`, `stock_limit_down_pool`, `stock_limit_up_ladder`, `stock_limit_up_pool`, `stock_quote`, `stock_skyrocket_list`, `stock_symbol_list`, `stock_symbol_search`, `stock_trading_calendar`, `stock_valuation` | `ctx.tools`, `ctx.stock` | `tool/call`, `tool/result` | - | Every registered stock capability is one native tool. The `stock-analysis` preset is the only shipped composition that mounts this package, so the schema cost stays out of `standard` and `ptc`. |
+| `@deepseek-ai/dsh-tool-research` | `research_propose`, `research_read`, `research_search` | `ctx.tools`, `ctx.researchController` | `tool/call`, `tool/result` | - | - |
 
 <a id="deepseek-aidsh-plugin-manager"></a>
 
@@ -5366,3 +5367,115 @@ Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/
 Source: [`packages/stock/tool-stock/src/index.ts`](../packages/stock/tool-stock/src/index.ts)
 
 Every registered stock capability is one native tool. The `stock-analysis` preset is the only shipped composition that mounts this package, so the schema cost stays out of `standard` and `ptc`.
+
+<a id="deepseek-aidsh-tool-research"></a>
+
+## `@deepseek-ai/dsh-tool-research`
+
+### `research_propose`
+
+Propose a wiki page edit for human review. This does not publish or replace a page. Cite saved source ids and distinguish disclosed facts from inference.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "pageId": {
+      "type": "string",
+      "description": "Existing page id to revise; omit to create a page."
+    },
+    "kind": {
+      "type": "string",
+      "description": "Wiki page category.",
+      "enum": [
+        "entity",
+        "concept",
+        "topic",
+        "source"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "description": "Page title."
+    },
+    "summary": {
+      "type": "string",
+      "description": "One-line page summary."
+    },
+    "markdown": {
+      "type": "string",
+      "description": "Complete proposed Markdown page."
+    },
+    "sourceIds": {
+      "type": "array",
+      "description": "Saved source ids supporting this page.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "links": {
+      "type": "array",
+      "description": "Existing wiki page ids linked by this page.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "kind",
+    "title",
+    "summary",
+    "markdown",
+    "sourceIds",
+    "links"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-research/src/index.ts`](../packages/stock/tool-research/src/index.ts)
+
+### `research_read`
+
+Read a personal wiki page or original text source by id. For long content, pass the returned nextOffset to read subsequent chunks. URL-only and file-only records contain metadata, not verified full text.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Exact page or source id."
+    },
+    "offset": {
+      "type": "number",
+      "description": "Zero-based character offset. Defaults to 0; use nextOffset to continue."
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-research/src/index.ts`](../packages/stock/tool-research/src/index.ts)
+
+### `research_search`
+
+Search the personal research wiki and source catalog before analyzing a related stock or topic. Results include stable ids; read useful hits next.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Company, concept, or research topic."
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Source: [`packages/stock/tool-research/src/index.ts`](../packages/stock/tool-research/src/index.ts)

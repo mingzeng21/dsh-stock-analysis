@@ -84,6 +84,8 @@ flowchart LR
   svc_stockAgentsController["ctx.stockAgentsController<br/>Stock research Agent catalog and Session identity"]
   pkg_api_watchlist_controller["api-watchlist-controller"]
   svc_watchlistController["ctx.watchlistController<br/>Durable watchlist Remote controller"]
+  pkg_api_research_controller["api-research-controller"]
+  svc_researchController["ctx.researchController<br/>Durable personal research library and Remote controller"]
   pkg_workspace_changes["workspace-changes"]
   svc_workspaceChanges["ctx.workspaceChanges<br/>Host per-turn changed-file summaries"]
   pkg_api_terminal_controller["api-terminal-controller"]
@@ -292,6 +294,7 @@ flowchart LR
   pkg_agent_preset_registry --> svc_agentPresets
   pkg_api_gateway --> svc_typertGateway
   pkg_api_job_controller --> svc_jobController
+  pkg_api_research_controller --> svc_researchController
   pkg_api_session_controller --> svc_sessionController
   pkg_api_session_controller --> svc_sessionFileReferences
   pkg_api_session_controller --> svc_sessionSkillCatalog
@@ -620,6 +623,7 @@ flowchart LR
 | `ctx.stockController` | `core` | [`api-stock-controller`](../packages/api/stock-controller) | - | - | - | Serves four reads over the stock seam — symbol search, a quote batch, a candle series, and research documents — and resolves the vendor's row fields, encodings, and search vocabulary once on the Host. |
 | `ctx.stockAgentsController` | `core` | [`api-stock-agents-controller`](../packages/api/stock-agents-controller) | - | - | - | Lists bundled specialist skills without loading their bodies, records each Session's specialist identity, and loads the current skill on follow-up turns. |
 | `ctx.watchlistController` | `core` | [`api-watchlist-controller`](../packages/api/watchlist-controller) | - | - | - | Owns the ordered personal instrument list as one storage-domain value and serves its list, add, remove, and reorder operations. |
+| `ctx.researchController` | `core` | [`api-research-controller`](../packages/api/research-controller) | - | - | - | Publishes original sources, reviewed wiki pages, studies, templates, and activity through one storage-domain snapshot; model-authored pages wait for human review. |
 | `ctx.workspaceChanges` | `core` | [`workspace-changes`](../packages/deliverables/workspace-changes) | - | - | - | Serves the summary each workspace/changes event announced and each listed file's turn-start and turn-end comparison, by Session and event sequence, until that Session is disposed; the log carries only the turn. |
 | `ctx.terminalController` | `core` | [`api-terminal-controller`](../packages/api/terminal-controller) | - | - | - | Owns user terminal processes, default shell resolution and bounded screen recovery through the subprocess provider and typed Remote transport. |
 | `ctx.workspaceController` | `core` | [`api-workspace-controller`](../packages/api/workspace-controller) | - | - | - | Owns Workspace commands and reconnect-safe Workspace state delivery through the generated Remote namespace. |

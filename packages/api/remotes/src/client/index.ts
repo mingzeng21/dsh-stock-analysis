@@ -25,6 +25,7 @@ import subagentsRemote from '@deepseek-ai/dsh-subagent/remote'
 import sessionRemote from '@deepseek-ai/dsh-api-session-controller/remote'
 import stockRemote from '@deepseek-ai/dsh-api-stock-controller/remote'
 import watchlistRemote from '@deepseek-ai/dsh-api-watchlist-controller/remote'
+import researchRemote from '@deepseek-ai/dsh-api-research-controller/remote'
 import stockAgentsRemote from '@deepseek-ai/dsh-api-stock-agents-controller/remote'
 import jobRemote from '@deepseek-ai/dsh-api-job-controller/remote'
 import workspaceRemote from '@deepseek-ai/dsh-api-workspace-controller/remote'
@@ -65,6 +66,8 @@ export type {} from '@deepseek-ai/dsh-api-stock-controller/remote'
 export type * from '@deepseek-ai/dsh-api-stock-controller/types'
 export type {} from '@deepseek-ai/dsh-api-watchlist-controller/remote'
 export type * from '@deepseek-ai/dsh-api-watchlist-controller/types'
+export type {} from '@deepseek-ai/dsh-api-research-controller/remote'
+export type * from '@deepseek-ai/dsh-api-research-controller/types'
 export type {} from '@deepseek-ai/dsh-api-stock-agents-controller/remote'
 export type * from '@deepseek-ai/dsh-api-stock-agents-controller/types'
 export type {} from '@deepseek-ai/dsh-api-job-controller/remote'
@@ -192,7 +195,7 @@ export async function apply(ctx: Context): Promise<() => Promise<void>> {
       goalsRemote, llmRemote, dynamicRemote, scheduleRemote,
       pluginInventoryRemote, pluginManagerRemote, pluginRegistryProbeRemote,
       messageFeedbackRemote, sessionFeedbackRemote, fileUploadsRemote, sessionReferencesRemote,
-      permissionPresetsRemote, subagentsRemote, sessionRemote, stockRemote, watchlistRemote, stockAgentsRemote, jobRemote,
+      permissionPresetsRemote, subagentsRemote, sessionRemote, stockRemote, watchlistRemote, researchRemote, stockAgentsRemote, jobRemote,
       workspaceRemote, workspaceFilesRemote, terminalRemote, officeToPdfRemote, userQuestionsRemote,
     ]) {
       disposers.push(await ctx.remote.$mount(contribution))

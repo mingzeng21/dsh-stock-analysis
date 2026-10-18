@@ -76,6 +76,8 @@ import type { StockProvider } from '@deepseek-ai/dsh-stock'
 import { STOCK_ENDPOINTS } from '@deepseek-ai/dsh-stock-hithink'
 import { IWENCAI_ENDPOINTS } from '@deepseek-ai/dsh-stock-iwencai'
 import * as ToolStock from '@deepseek-ai/dsh-tool-stock'
+import type ResearchController from '@deepseek-ai/dsh-api-research-controller'
+import * as ToolResearch from '@deepseek-ai/dsh-tool-research'
 import WorkflowEngine from '@deepseek-ai/dsh-workflow'
 import type { WorkflowRun, WorkflowStartRequest } from '@deepseek-ai/dsh-workflow'
 import * as ToolRalph from '@deepseek-ai/dsh-tool-ralph'
@@ -717,6 +719,17 @@ const TOOL_PACKAGES: ToolPackage[] = [
     },
     note:
       'Every registered stock capability is one native tool. The `stock-analysis` preset is the only shipped composition that mounts this package, so the schema cost stays out of `standard` and `ptc`.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-tool-research',
+    dir: 'tool-research',
+    source: 'packages/stock/tool-research/src/index.ts',
+    requires: ['ctx.tools', 'ctx.researchController'],
+    writes: ['tool/call', 'tool/result'],
+    async mount(ctx) {
+      ctx.provide('researchController', {} as ResearchController)
+      await ctx.plugin(ToolResearch)
+    },
   },
 ]
 

@@ -69,6 +69,8 @@ When you launch `dsh --profile web` over SSH, the URL line still prints but the 
 
 New browser sessions use the only shipped preset, `stock-analysis`, for A-share research and market data tools. The stock preset has a research persona, requires Simplified Chinese replies, and omits inherited coding tools. Its sidebar lists marked skills from this package's `skills/` directory: hot-topic analysis, key announcements, limit-up streak analysis, and post-market summary start on card selection, while stock screening accepts conditions, company analysis accepts a stock name or code, and sector analysis accepts a sector name first. Each card starts a new stock-analysis Session. The preset selection row is hidden and the deployment fixes `stock-analysis` as the new-session default; the Web profile can still override its child plugins. First-use research files live under `$DSH_HOME/workspaces/stock-analysis`, and an existing Workspace keeps its recorded path. Creator's plugin-management tool is enabled only when the Host provides an editable profile.
 
+The fourth global sidebar row opens [Personal Research Lab](../../client/ui-research/README.md). Its directory keeps original sources, reviewed wiki pages, templates, and a derived index and log; topic studies launch a stock-analysis Session, and the knowledge graph follows explicit page links. The [research controller](../../api/research-controller/README.md) persists the library under the Host storage root. Agent page changes wait for user review.
+
 -----
 
 <a id="understand-the-implementation"></a>

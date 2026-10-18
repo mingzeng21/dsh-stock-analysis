@@ -18,6 +18,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | `@deepseek-ai/dsh-api-gateway` | yes | Typert Remote Host dispatcher and Client API endpoint |
 | `@deepseek-ai/dsh-api-job-controller` | yes | Job Remote observation stream and the reference-counted client job-output service |
 | `@deepseek-ai/dsh-api-remotes` | no | Remote BFF assembly for application-selected Host capabilities |
+| `@deepseek-ai/dsh-api-research-controller` | yes | Durable personal research library and Remote controller |
 | `@deepseek-ai/dsh-api-session-controller` | yes | Session Remote commands, cold reads, and live control transport |
 | `@deepseek-ai/dsh-api-settings-controller` | yes | Remote owner for the configuration surfaces over the settings-domain seams |
 | `@deepseek-ai/dsh-api-stock-agents-controller` | no | Browser-facing catalog and durable session identity for skill-backed stock research Agents |
@@ -90,6 +91,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | `@deepseek-ai/dsh-client-ui-plugin-manager` | yes | Plugin management for the dsh web client: the sidebar Plugins panel installs, enables, disables, retries, and composes installed plugin packages |
 | `@deepseek-ai/dsh-client-ui-reference` | no | Unified Web @file and @session reference source |
 | `@deepseek-ai/dsh-client-ui-renderer` | no | Browser UI renderer: React slot bindings, ctx.uiRenderer, and the assembled application root |
+| `@deepseek-ai/dsh-client-ui-research` | no | Personal research library, L1-L5 topic reports, and linked wiki graph |
 | `@deepseek-ai/dsh-client-ui-schedule` | no | Host task management page and Session reminder catalog |
 | `@deepseek-ai/dsh-client-ui-session` | no | Session Controller adapter for React and session-scoped slots |
 | `@deepseek-ai/dsh-client-ui-settings` | no | Settings domain base plugin: shared configuration forms and the canonical settings slot-type contract |
@@ -431,6 +433,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | `@deepseek-ai/dsh-stock` | yes | Abstract stock-market data capability seam (ctx.stock) for the DeepSeek Harness — provider registry, endpoint vocabulary, canonical market-data types, and the StockError taxonomy |
 | `@deepseek-ai/dsh-stock-hithink` | yes | Hithink (同花顺) financial-data provider for the DeepSeek Harness stock capability seam (ctx.stock) — credentialed REST transport, vendor envelope classification, retry and concurrency policy, and wire normalization for the published capabilities |
 | `@deepseek-ai/dsh-stock-iwencai` | yes | 问财 (iwencai) OpenAPI gateway provider for the DeepSeek Harness stock capability seam: document search and natural-language research queries, with the gateway's per-skill identity headers |
+| `@deepseek-ai/dsh-tool-research` | yes | Model-facing personal research search, reading, and page proposals |
 | `@deepseek-ai/dsh-tool-stock` | yes | Model-facing stock-market data tools over the DeepSeek Harness stock capability seam (ctx.stock) — one tool per capability in the generated vendor registry |
 
 ## storage

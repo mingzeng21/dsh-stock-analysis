@@ -84,6 +84,9 @@
       "path": "../stock-agents-controller/tsconfig.client.json"
     },
     {
+      "path": "../research-controller/tsconfig.client.json"
+    },
+    {
       "path": "../workspace-files/tsconfig.client.json"
     },
     {

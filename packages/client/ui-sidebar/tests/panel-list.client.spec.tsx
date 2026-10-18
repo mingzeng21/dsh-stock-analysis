@@ -23,6 +23,7 @@ const ALPHA = 'sidebar-test-alpha' as MainPanelId
 const BETA = 'sidebar-test-beta' as MainPanelId
 const STOCK_AGENTS = 'stock-agents' as MainPanelId
 const WATCHLIST = 'watchlist' as MainPanelId
+const RESEARCH = 'research' as MainPanelId
 const runtimes = new Set<SlotTestRuntime>()
 
 afterEach(async () => {
@@ -126,7 +127,7 @@ async function mountPanels(runtime: SlotTestRuntime, locale: LocaleRuntime, beta
 }
 
 describe('sidebar global panels', () => {
-  it('shows only the three product panels in stock research mode', async () => {
+  it('shows the four product panels in stock research mode', async () => {
     const { runtime, locale, view } = await bench(false, true)
     await mountPanels(runtime, locale)
     await runtime.mount({ inject: ['slots'], apply(ctx: Context) {
@@ -134,10 +135,10 @@ describe('sidebar global panels', () => {
         name: 'sidebar.panellist', id: 'conversation', label: 'conversation', order: 0,
       }, () => <span />))
     } })
-    for (const id of [STOCK_AGENTS, WATCHLIST]) await mountPanel(runtime, { id, heading: id, label: id })
+    for (const id of [STOCK_AGENTS, WATCHLIST, RESEARCH]) await mountPanel(runtime, { id, heading: id, label: id })
     const navigation = await view.findByRole('navigation', { name: 'Global panels' })
     expect(within(navigation).getAllByRole('button').map(button => button.getAttribute('aria-label')))
-      .toEqual(['conversation', 'stock-agents', 'watchlist'])
+      .toEqual(['conversation', 'stock-agents', 'watchlist', 'research'])
     expect(view.queryByRole('button', { name: 'New Session' })).toBeNull()
   })
   it('adds late registrations, removes each plugin contribution, and leaves no empty panel-list DOM', async () => {

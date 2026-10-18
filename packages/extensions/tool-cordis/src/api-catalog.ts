@@ -1817,6 +1817,85 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'researchController',
+    summary: 'Durable research state and the review gate for model-authored pages.',
+    description: 'Durable research state and the review gate for model-authored pages.',
+    methods: [
+      {
+        signature: 'current(): ResearchSnapshot',
+        description: 'Read the authoritative published research state.',
+        parameters: [],
+        returns: 'Current state, including pending proposals.',
+      },
+      {
+        signature: '@Remote snapshot(signal: AbortSignal): Promise<ResearchSnapshot>',
+        description: 'Return the full library to an authorized browser.',
+        parameters: [{ name: 'signal', description: 'Caller cancellation.' }],
+        returns: 'The published state and pending proposals.',
+      },
+      {
+        signature: '@Remote async addSource(request: AddResearchSourceRequest, signal: AbortSignal): Promise<ResearchSnapshot>',
+        description: 'Admit immutable original material.',
+        parameters: [{ name: 'request', description: 'Original text, URL, or file.' }, { name: 'signal', description: 'Caller cancellation.' }],
+        returns: 'State after the source is stored.',
+      },
+      {
+        signature: '@Remote addReport(request: AddResearchReportRequest, signal: AbortSignal): Promise<ResearchReportReceipt>',
+        description: 'Retain a completed research report once per Session Turn before wiki extraction.',
+        parameters: [{ name: 'request', description: 'Exact published report and its Session Turn.' }, { name: 'signal', description: 'Caller cancellation.' }],
+        returns: 'Stable original source id and current library.',
+      },
+      {
+        signature: '@Remote async sourceFile(sourceId: ResearchSourceId, signal: AbortSignal): Promise<string>',
+        description: 'Read exact saved original file bytes.',
+        parameters: [{ name: 'sourceId', description: 'Stored original source.' }, { name: 'signal', description: 'Caller cancellation.' }],
+        returns: 'Original file encoded as base64.',
+      },
+      {
+        signature: '@Remote savePage(request: SaveResearchPageRequest, signal: AbortSignal): Promise<ResearchSnapshot>',
+        description: 'Publish a user-authored page revision after checking its predecessor.',
+        parameters: [{ name: 'request', description: 'Page content and expected predecessor revision.' }, { name: 'signal', description: 'Caller cancellation.' }],
+        returns: 'State with the published page.',
+      },
+      {
+        signature: '@Remote restorePage(pageId: ResearchPageId, revision: number, signal: AbortSignal): Promise<ResearchSnapshot>',
+        description: 'Restore a saved page version as a new revision.',
+        parameters: [{ name: 'pageId', description: 'Published page.' }, { name: 'revision', description: 'Saved version to restore.' }, { name: 'signal', description: 'Caller cancellation.' }],
+        returns: 'State with the restored content published.',
+      },
+      {
+        signature: '@Remote saveStudy(request: SaveResearchStudyRequest, signal: AbortSignal): Promise<ResearchSnapshot>',
+        description: 'Save a user-directed topic study and its current stage.',
+        parameters: [{ name: 'request', description: 'Topic study fields.' }, { name: 'signal', description: 'Caller cancellation.' }],
+        returns: 'State with the saved study.',
+      },
+      {
+        signature: '@Remote saveTemplate(kind: ResearchPageKind, markdown: string, signal: AbortSignal): Promise<ResearchSnapshot>',
+        description: 'Replace one page template.',
+        parameters: [{ name: 'kind', description: 'Template category.' }, { name: 'markdown', description: 'Replacement template.' }, { name: 'signal', description: 'Caller cancellation.' }],
+        returns: 'State with the saved template.',
+      },
+      {
+        signature: 'propose(request: SaveResearchPageRequest): Promise<ResearchSnapshot>',
+        description: 'Stage a model-authored page for human review without publishing it.',
+        parameters: [{ name: 'request', description: 'Proposed complete page.' }],
+        returns: 'State with the pending proposal.',
+      },
+      {
+        signature: '@Remote acceptProposal(proposalId: string, signal: AbortSignal): Promise<ResearchSnapshot>',
+        description: 'Publish a reviewed proposal if its predecessor is current.',
+        parameters: [{ name: 'proposalId', description: 'Pending proposal to publish.' }, { name: 'signal', description: 'Caller cancellation.' }],
+        returns: 'State with the proposed page published.',
+      },
+      {
+        signature: '@Remote rejectProposal(proposalId: string, signal: AbortSignal): Promise<ResearchSnapshot>',
+        description: 'Discard a pending proposal without changing published pages.',
+        parameters: [{ name: 'proposalId', description: 'Pending proposal to discard.' }, { name: 'signal', description: 'Caller cancellation.' }],
+        returns: 'State without the proposal.',
+      },
+    ],
+  },
+  {
     key: 'sandbox',
     summary: 'Abstract process-sandbox service.',
     description: 'Abstract process-sandbox service. confine must return enforcing argv or fail closed at wrap or runner-execution time; silent unconfined passthrough is forbidden. Functional probes arbitrate multi-runner chains and may be skipped for a sole candidate, whose own refusal remains the fail-closed end.',
@@ -4596,6 +4675,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface AdapterRegistrationHandle {\n    (): void;\n    replace(providers: string[]): void;\n}',
   },
   {
+    name: 'AddResearchReportRequest',
+    declaration: 'export interface AddResearchReportRequest {\n    readonly title: string;\n    readonly markdown: string;\n    readonly sessionId: SessionId;\n    readonly turn: number;\n}',
+  },
+  {
+    name: 'AddResearchSourceRequest',
+    declaration: 'export interface AddResearchSourceRequest {\n    readonly title: string;\n    readonly text?: string;\n    readonly url?: string;\n    readonly publishedAt?: string;\n    readonly fileName?: string;\n    readonly fileBase64?: string;\n}',
+  },
+  {
     name: 'AdmittedPromptContentPart',
     declaration: 'export type AdmittedPromptContentPart = {\n    readonly type: \'text\';\n    readonly text: string;\n} | {\n    readonly type: \'image\';\n    readonly attachment: ImageAttachmentRef;\n} | {\n    readonly type: \'file\';\n    readonly attachment: FileAttachmentRef;\n};',
   },
@@ -6476,6 +6563,54 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface RequestUserInput {\n    readonly role: \'user\';\n    readonly content: UserMessage[\'content\'];\n    readonly id?: never;\n    readonly source?: never;\n}',
   },
   {
+    name: 'ResearchActivity',
+    declaration: 'export interface ResearchActivity {\n    readonly id: string;\n    readonly at: number;\n    readonly action: \'source\' | \'page\' | \'study\' | \'proposal\';\n    readonly title: string;\n}',
+  },
+  {
+    name: 'ResearchPage',
+    declaration: 'export interface ResearchPage {\n    readonly id: ResearchPageId;\n    readonly kind: ResearchPageKind;\n    readonly title: string;\n    readonly summary: string;\n    readonly markdown: string;\n    readonly sourceIds: readonly ResearchSourceId[];\n    readonly links: readonly ResearchPageId[];\n    readonly revision: number;\n    readonly createdAt: number;\n    readonly updatedAt: number;\n}',
+  },
+  {
+    name: 'ResearchPageId',
+    declaration: 'export type ResearchPageId = Branded<\'ResearchPageId\'>;',
+  },
+  {
+    name: 'ResearchPageKind',
+    declaration: 'export type ResearchPageKind = \'entity\' | \'concept\' | \'topic\' | \'source\';',
+  },
+  {
+    name: 'ResearchProposal',
+    declaration: 'export interface ResearchProposal {\n    readonly id: string;\n    readonly pageId?: ResearchPageId | undefined;\n    readonly expectedRevision?: number | undefined;\n    readonly kind: ResearchPageKind;\n    readonly title: string;\n    readonly summary: string;\n    readonly markdown: string;\n    readonly sourceIds: readonly ResearchSourceId[];\n    readonly links: readonly ResearchPageId[];\n    readonly createdAt: number;\n}',
+  },
+  {
+    name: 'ResearchReportReceipt',
+    declaration: 'export interface ResearchReportReceipt {\n    readonly sourceId: ResearchSourceId;\n    readonly snapshot: ResearchSnapshot;\n}',
+  },
+  {
+    name: 'ResearchSnapshot',
+    declaration: 'export interface ResearchSnapshot {\n    readonly sources: readonly ResearchSource[];\n    readonly pages: readonly ResearchPage[];\n    readonly history: readonly ResearchPage[];\n    readonly studies: readonly ResearchStudy[];\n    readonly proposals: readonly ResearchProposal[];\n    readonly activity: readonly ResearchActivity[];\n    readonly templates: Readonly<Record<ResearchPageKind, string>>;\n}',
+  },
+  {
+    name: 'ResearchSource',
+    declaration: 'export interface ResearchSource {\n    readonly id: ResearchSourceId;\n    readonly title: string;\n    readonly createdAt: number;\n    readonly publishedAt?: string | undefined;\n    readonly url?: string | undefined;\n    readonly text?: string | undefined;\n    readonly file?: {\n        readonly attachmentId: string;\n        readonly name: string;\n        readonly bytes: number;\n    } | undefined;\n    readonly report?: {\n        readonly sessionId: SessionId;\n        readonly turn: number;\n    } | undefined;\n}',
+  },
+  {
+    name: 'ResearchSourceId',
+    declaration: 'export type ResearchSourceId = Branded<\'ResearchSourceId\'>;',
+  },
+  {
+    name: 'ResearchStage',
+    declaration: 'export type ResearchStage = \'question\' | \'chain\' | \'bottleneck\' | \'evidence\' | \'falsifiers\' | \'memo\';',
+  },
+  {
+    name: 'ResearchStudy',
+    declaration: 'export interface ResearchStudy {\n    readonly id: ResearchStudyId;\n    readonly title: string;\n    readonly question: string;\n    readonly stage: ResearchStage;\n    readonly notes: string;\n    readonly sessionId?: string | undefined;\n    readonly createdAt: number;\n    readonly updatedAt: number;\n}',
+  },
+  {
+    name: 'ResearchStudyId',
+    declaration: 'export type ResearchStudyId = Branded<\'ResearchStudyId\'>;',
+  },
+  {
     name: 'ResolvedAlwaysRetryPolicy',
     declaration: 'export interface ResolvedAlwaysRetryPolicy extends ResolvedRetryBackoff {\n    readonly mode: \'always\';\n}',
   },
@@ -6546,6 +6681,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'SaveImageAttachment',
     declaration: 'export interface SaveImageAttachment {\n    data: Uint8Array;\n    mediaType: ImageMediaType;\n    name?: string;\n}',
+  },
+  {
+    name: 'SaveResearchPageRequest',
+    declaration: 'export interface SaveResearchPageRequest {\n    readonly id?: ResearchPageId;\n    readonly expectedRevision?: number;\n    readonly kind: ResearchPageKind;\n    readonly title: string;\n    readonly summary: string;\n    readonly markdown: string;\n    readonly sourceIds: readonly ResearchSourceId[];\n    readonly links: readonly ResearchPageId[];\n}',
+  },
+  {
+    name: 'SaveResearchStudyRequest',
+    declaration: 'export interface SaveResearchStudyRequest {\n    readonly id?: ResearchStudyId;\n    readonly title: string;\n    readonly question: string;\n    readonly stage: ResearchStage;\n    readonly notes: string;\n    readonly sessionId?: string;\n}',
   },
   {
     name: 'SaveTextSpill',
