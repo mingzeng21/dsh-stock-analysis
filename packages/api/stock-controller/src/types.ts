@@ -187,6 +187,22 @@ export interface SectorDashboard {
   readonly history: CandleSeries
 }
 
+/** Daily industry index histories aligned against one benchmark history. */
+export interface IndustryMatrix {
+  readonly industries: readonly { readonly sector: SectorMatch; readonly history: CandleSeries }[]
+  readonly benchmark: CandleSeries
+  readonly catalogTruncated: boolean
+  readonly industriesTruncated: boolean
+  readonly unavailableCount: number
+}
+
+/** Current industry membership and a bounded quote sample for the selected row. */
+export interface IndustryDetail {
+  readonly board: SectorDashboard
+  readonly quotes: QuoteBatch
+  readonly quotedCount: number
+}
+
 /** One closing-limit stock returned for a trading date. Money amounts are yuan. */
 export interface LimitUpPulseStock {
   readonly thscode: string

@@ -33,7 +33,7 @@ function rank(value: number, values: readonly number[]): number {
   return value === 0 || values.length === 0 ? 0 : values.filter(item => item <= value).length / values.length * 100
 }
 
-function money(value: number): string { return `${(value / 100_000_000).toFixed(1)}亿` }
+function money(value: number, unit: string): string { return `${(value / 100_000_000).toFixed(1)}${unit}` }
 
 function reasonsOf(stocks: readonly LimitUpPulseStock[]): readonly { name: string; count: number }[] {
   const counts = new Map<string, number>()
@@ -154,7 +154,7 @@ export function LimitUpPulseDashboard({ data, loading, error, onRetry, onScopeCh
       <div><span>{t('pulse.continuous')}</span><strong>{current === undefined ? '—' : `${selected?.poolTruncated ? '≥' : ''}${current.continuous}`}</strong></div>
       <div><span>{t('pulse.highest')}</span><strong>{current?.highest === undefined || current.highest === 0 ? '—' : `${current.highest} ${t('pulse.boards')}`}</strong></div>
       <div><span>{t('pulse.totalSeal')}</span><strong>{current?.seal === null || current === undefined ? '—'
-        : `${selected?.poolTruncated || current.sealIncomplete ? '≥' : ''}${money(current.seal)}`}</strong></div>
+        : `${selected?.poolTruncated || current.sealIncomplete ? '≥' : ''}${money(current.seal, t('pulse.hundredMillion'))}`}</strong></div>
     </section>
     <div className={css.mainGrid}>
       <section className={css.panel} aria-label={t('pulse.trend')}>
@@ -186,8 +186,11 @@ export function LimitUpPulseDashboard({ data, loading, error, onRetry, onScopeCh
                 {(index % Math.max(1, Math.ceil(days.length / 6)) === 0 || index === days.length - 1) &&
                   <text className={css.dateLabel} x={x + cellWidth / 2} y={555} textAnchor="middle">{day.date.slice(5)}</text>}
                 <rect className={css.hitArea} x={x} y={CHART.top - 10} width={cellWidth} height={CHART.sealBottom - CHART.top + 25}
-                  onClick={() => { selectDay(day) }}>
-                  <title>{day.date} · {t('pulse.limitCount')} ${day.poolTruncated ? '≥' : ''}${item.count} · {t('pulse.continuous')} ${item.continuous}</title>
+                  role="button" tabIndex={0} aria-pressed={selectedColumn}
+                  aria-label={`${day.date} · ${t('pulse.limitCount')} ${day.poolTruncated ? '≥' : ''}${item.count} · ${t('pulse.continuous')} ${item.continuous}`}
+                  onClick={() => { selectDay(day) }}
+                  onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectDay(day) } }}>
+                  <title>{day.date} · {t('pulse.limitCount')} {day.poolTruncated ? '≥' : ''}{item.count} · {t('pulse.continuous')} {item.continuous}</title>
                 </rect>
               </g>
             })}
@@ -211,7 +214,7 @@ export function LimitUpPulseDashboard({ data, loading, error, onRetry, onScopeCh
             const matched = selected?.stocks.find(item => item.thscode === stock.thscode || item.name === stock.name)
             return matched === undefined
               ? <span key={`${stock.name}-${index}`}>{stock.name}</span>
-              : <button type="button" key={matched.thscode} className={selectedStock === matched.thscode ? css.activeChip : undefined} onClick={() => { selectStock(matched) }}>{matched.name}<small>{matched.sealMoney === undefined ? t('pulse.unknown') : money(matched.sealMoney)}</small></button>
+              : <button type="button" key={matched.thscode} className={selectedStock === matched.thscode ? css.activeChip : undefined} onClick={() => { selectStock(matched) }}>{matched.name}<small>{matched.sealMoney === undefined ? t('pulse.unknown') : money(matched.sealMoney, t('pulse.hundredMillion'))}</small></button>
           })}{stocks.length > 4 && <small>{t('pulse.more')} {stocks.length - 4}</small>}</div>
           <b>{stocks.length}</b>
         </div>)}</div>

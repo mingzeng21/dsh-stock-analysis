@@ -15,6 +15,8 @@ const stock: IStockClient = {
   limitUpPulse: vi.fn(async () => { throw new Error('this spec never reads limit-up pulse') }),
   sectors: async () => { throw new Error('this spec never reads sectors') },
   sectorDashboard: async () => { throw new Error('this spec never reads sector dashboards') },
+  industryMatrix: async () => { throw new Error('this spec never reads industry matrices') },
+  industryDetail: async () => { throw new Error('this spec never reads industry details') },
   quotes: vi.fn(async () => ({ quotes: [{
     thscode: '600519.SH', last: 1252.57, change: -4.55, changePct: -0.36,
     open: 1259, high: 1259.95, low: 1250.8, prevClose: 1257.12, volume: 2_501_689, turnover: 3_135_910_000,

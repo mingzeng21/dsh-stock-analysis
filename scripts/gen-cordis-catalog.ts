@@ -967,6 +967,8 @@ export const TYPE_LINK_EXEMPTIONS: Readonly<Record<string, string>> = {
   WorkspaceFileStat: 'Host workspace file endpoint contract is owned by packages/api/workspace-files/README.md',
   WorkspaceFileText: 'Host workspace file endpoint contract is owned by packages/api/workspace-files/README.md',
   InstrumentMatch: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
+  IndustryMatrix: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
+  IndustryDetail: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   StockAgentCard: 'Stock Agent catalog fields are owned by packages/api/stock-agents-controller/README.md',
   Quote: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',
   QuoteBatch: 'Host stock endpoint contract is owned by packages/api/stock-controller/README.md',

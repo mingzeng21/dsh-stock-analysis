@@ -236,6 +236,21 @@ Host Remote reads over the stock capability seam.
 @Remote async sectorDashboard(sector: SectorMatch, signal: AbortSignal): Promise<SectorDashboard>
 
 /**
+ * Read bounded industry daily histories and a CSI 300 comparison series.
+ * @param signal - caller cancellation.
+ * @returns aligned index observations and catalog completeness.
+ */
+@Remote async industryMatrix(signal: AbortSignal): Promise<IndustryMatrix>
+
+/**
+ * Read the selected industry's current constituents and bounded quote sample.
+ * @param sector - selected industry catalog entry.
+ * @param signal - caller cancellation.
+ * @returns independent index, membership, and current quote observations.
+ */
+@Remote async industryDetail(sector: SectorMatch, signal: AbortSignal): Promise<IndustryDetail>
+
+/**
  * Read one instrument's candle series for a window.
  * @param request - instrument, period, adjustment, and the window.
  * @param signal - caller cancellation.

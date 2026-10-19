@@ -2976,6 +2976,18 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'independent current membership and history observations.',
       },
       {
+        signature: '@Remote async industryMatrix(signal: AbortSignal): Promise<IndustryMatrix>',
+        description: 'Read bounded industry daily histories and a CSI 300 comparison series.',
+        parameters: [{ name: 'signal', description: 'caller cancellation.' }],
+        returns: 'aligned index observations and catalog completeness.',
+      },
+      {
+        signature: '@Remote async industryDetail(sector: SectorMatch, signal: AbortSignal): Promise<IndustryDetail>',
+        description: 'Read the selected industry\'s current constituents and bounded quote sample.',
+        parameters: [{ name: 'sector', description: 'selected industry catalog entry.' }, { name: 'signal', description: 'caller cancellation.' }],
+        returns: 'independent index, membership, and current quote observations.',
+      },
+      {
         signature: '@Remote async candles(request: CandleRequest, signal: AbortSignal): Promise<CandleSeries>',
         description: 'Read one instrument\'s candle series for a window.',
         parameters: [{ name: 'request', description: 'instrument, period, adjustment, and the window.' }, { name: 'signal', description: 'caller cancellation.' }],
@@ -5665,6 +5677,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'IndexInjectionPlacement',
     declaration: 'export type IndexInjectionPlacement = \'head\' | \'body\';',
+  },
+  {
+    name: 'IndustryDetail',
+    declaration: 'export interface IndustryDetail {\n    readonly board: SectorDashboard;\n    readonly quotes: QuoteBatch;\n    readonly quotedCount: number;\n}',
+  },
+  {
+    name: 'IndustryMatrix',
+    declaration: 'export interface IndustryMatrix {\n    readonly industries: readonly {\n        readonly sector: SectorMatch;\n        readonly history: CandleSeries;\n    }[];\n    readonly benchmark: CandleSeries;\n    readonly catalogTruncated: boolean;\n    readonly industriesTruncated: boolean;\n    readonly unavailableCount: number;\n}',
   },
   {
     name: 'InspectOptions',

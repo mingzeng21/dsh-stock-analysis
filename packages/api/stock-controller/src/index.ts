@@ -28,7 +28,8 @@ import { Remote, RemoteError, TypertRemoteService } from '@deepseek-ai/dsh-typer
 import z from '@deepseek-ai/schemastery'
 import type {
   Candle, CandleRequest, CandleSeries, DocumentKind, DocumentRow, DocumentsRequest, DragonTigerDashboard,
-  HotRankDashboard, HotRankHistory, InstrumentMatch, LimitUpPulseDashboard, Quote, QuoteBatch, SectorCatalog, SectorDashboard, SectorMatch,
+  HotRankDashboard, HotRankHistory, IndustryDetail, IndustryMatrix, InstrumentMatch, LimitUpPulseDashboard,
+  Quote, QuoteBatch, SectorCatalog, SectorDashboard, SectorMatch,
 } from './types.ts'
 import { toDragonTigerBoard } from './dragon-tiger.ts'
 import { toHotRankBoard, toHotRankHistory } from './hot-rank.ts'
@@ -140,6 +141,10 @@ export interface Config {
   readonly maxDragonTigerSeatStocks: number
   /** Maximum 200-row pool pages read per trading date in the pulse dashboard. */
   readonly maxLimitUpPagesPerDay: number
+  /** Maximum industry histories returned for the cross-section matrix. */
+  readonly maxIndustryMatrixIndices: number
+  /** Concurrent index-history reads in the matrix. */
+  readonly industryMatrixConcurrency: number
 }
 
 /**
@@ -218,6 +223,8 @@ export class StockController extends TypertRemoteService {
     maxDragonTigerSeats: z.number().step(1).min(1).default(60),
     maxDragonTigerSeatStocks: z.number().step(1).min(1).default(30),
     maxLimitUpPagesPerDay: z.number().step(1).min(1).default(5),
+    maxIndustryMatrixIndices: z.number().step(1).min(1).default(40),
+    industryMatrixConcurrency: z.number().step(1).min(1).default(4),
   })
 
   /**
@@ -439,6 +446,72 @@ export class StockController extends TypertRemoteService {
       history: { thscode, interval: '1d', ...asOfOf(history.meta.asOf), truncated: history.meta.truncated,
         candles: history.rows.map(row => toCandle(row, bars)) },
     }
+  }
+
+  /**
+   * Read bounded industry daily histories and a CSI 300 comparison series.
+   * @param signal - caller cancellation.
+   * @returns aligned index observations and catalog completeness.
+   */
+  @Remote
+  async industryMatrix(signal: AbortSignal): Promise<IndustryMatrix> {
+    const catalog = await this.seam(
+      () => this.ctx.stock.call(SECTOR_CATALOG_ENDPOINT, { tag: 'industry' }, signal), SECTOR_CATALOG_ENDPOINT, undefined,
+    )
+    const entries = catalog.rows.map(row => ({
+      thscode: readString(row, 'thscode', { endpoint: SECTOR_CATALOG_ENDPOINT }),
+      name: readString(row, 'name', { endpoint: SECTOR_CATALOG_ENDPOINT }),
+      kind: 'industry' as const,
+    }))
+    const selected = entries.slice(0, this.config.maxIndustryMatrixIndices)
+    const end = Date.now()
+    const start = end - 120 * 24 * 60 * 60 * 1000
+    const readHistory = async (thscode: string): Promise<CandleSeries> => {
+      const result = await this.seam(
+        () => this.ctx.stock.call(SECTOR_HISTORY_ENDPOINT, { thscode, interval: '1d', start, end }, signal),
+        SECTOR_HISTORY_ENDPOINT, thscode,
+      )
+      return { thscode, interval: '1d', ...asOfOf(result.meta.asOf), truncated: result.meta.truncated,
+        candles: result.rows.map(row => toCandle(row, { endpoint: SECTOR_HISTORY_ENDPOINT, thscode })) }
+    }
+    const benchmark = await readHistory('000300.SH')
+    const histories: ({ sector: SectorMatch; history: CandleSeries } | null)[] = Array.from({ length: selected.length }, () => null)
+    let unavailableCount = 0
+    let next = 0
+    await Promise.all(Array.from({ length: Math.min(this.config.industryMatrixConcurrency, selected.length) }, async () => {
+      while (next < selected.length) {
+        const index = next++
+        const sector = selected[index]
+        if (sector === undefined || signal.aborted) return
+        try {
+          histories[index] = { sector, history: await readHistory(sector.thscode) }
+        } catch (error: unknown) {
+          if (error instanceof RemoteError && (error.code === 'stock/no-data' || error.code === 'stock/not-found')) {
+            unavailableCount += 1
+            continue
+          }
+          throw error
+        }
+      }
+    }))
+    return { benchmark, industries: histories.filter((item): item is { sector: SectorMatch; history: CandleSeries } => item !== null),
+      unavailableCount, catalogTruncated: catalog.meta.truncated,
+      industriesTruncated: entries.length > selected.length }
+  }
+
+  /**
+   * Read the selected industry's current constituents and bounded quote sample.
+   * @param sector - selected industry catalog entry.
+   * @param signal - caller cancellation.
+   * @returns independent index, membership, and current quote observations.
+   */
+  @Remote
+  async industryDetail(sector: SectorMatch, signal: AbortSignal): Promise<IndustryDetail> {
+    if (sector.kind !== 'industry') throw new RemoteError('gateway/bad-request', 'industry sector is required', {})
+    const board = await this.sectorDashboard(sector, signal)
+    const codes = board.constituents.slice(0, this.config.maxQuotes).map(item => item.thscode)
+    const quotes = codes.length === 0 ? { quotes: [] } : await this.quotes(codes, signal)
+    return { board, quotes, quotedCount: codes.length }
   }
 
   /**

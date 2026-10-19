@@ -48,6 +48,8 @@ it('reads four distinct lists without merging their observations', async () => {
     maxQuotes: 50, maxDocuments: 30, maxSummaryChars: 400, maxSymbolMatches: 20,
     maxDragonTigerStocks: 200, maxDragonTigerSeats: 60, maxDragonTigerSeatStocks: 30,
     maxLimitUpPagesPerDay: 5,
+    maxIndustryMatrixIndices: 40,
+    industryMatrixConcurrency: 4,
   })
   const dashboard = await service.hotRank(SIGNAL)
   expect(dashboard.boards.map(board => [board.kind, board.period])).toEqual([
@@ -71,6 +73,8 @@ it('requests the selected stock over a 30-day calendar window', async () => {
     maxQuotes: 50, maxDocuments: 30, maxSummaryChars: 400, maxSymbolMatches: 20,
     maxDragonTigerStocks: 200, maxDragonTigerSeats: 60, maxDragonTigerSeatStocks: 30,
     maxLimitUpPagesPerDay: 5,
+    maxIndustryMatrixIndices: 40,
+    industryMatrixConcurrency: 4,
   })
   const history = await service.hotRankHistory('600001.SH', SIGNAL)
   expect(history.points).toEqual([{ date: '2026-10-12', rank: 1740 }])

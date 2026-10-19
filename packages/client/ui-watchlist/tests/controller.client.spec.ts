@@ -90,6 +90,8 @@ function stockStub(quotes: readonly Quote[] = [], asOf?: number): IStockClient {
     limitUpPulse: async () => { throw new Error('this spec never reads limit-up pulse') },
     sectors: async () => { throw new Error('this spec never reads sectors') },
     sectorDashboard: async () => { throw new Error('this spec never reads sector dashboards') },
+    industryMatrix: async () => { throw new Error('this spec never reads industry matrices') },
+    industryDetail: async () => { throw new Error('this spec never reads industry details') },
     searchSymbols: async () => [{ thscode: '600519.SH', ticker: '600519', name: '贵州茅台' }],
     quotes: async (): Promise<QuoteBatch> => ({
       quotes,

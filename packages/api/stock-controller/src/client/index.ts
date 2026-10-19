@@ -20,7 +20,8 @@ import type {} from '@deepseek-ai/dsh-api-stock-controller/remote'
 import type { RemoteResult, TypertRemoteNamespaceMap } from '@deepseek-ai/dsh-typert-protocol'
 import type {
   CandleRequest, CandleSeries, DocumentRow, DocumentsRequest, DragonTigerDashboard,
-  HotRankDashboard, HotRankHistory, InstrumentMatch, LimitUpPulseDashboard, QuoteBatch, SectorCatalog, SectorDashboard, SectorMatch,
+  HotRankDashboard, HotRankHistory, IndustryDetail, IndustryMatrix, InstrumentMatch, LimitUpPulseDashboard,
+  QuoteBatch, SectorCatalog, SectorDashboard, SectorMatch,
 } from '../types.ts'
 
 export type {
@@ -28,6 +29,7 @@ export type {
   DocumentKind, DocumentRow, DocumentsRequest,
   DragonTigerBoard, DragonTigerBoardType, DragonTigerDashboard, DragonTigerSeat, DragonTigerSeatStock, DragonTigerStock,
   HotRankBoard, HotRankDashboard, HotRankHistory, HotRankPoint, HotRankStock,
+  IndustryDetail, IndustryMatrix,
   LimitUpPulseDashboard, LimitUpPulseDay, LimitUpPulseLevel, LimitUpPulseStock,
   InstrumentMatch, Quote, QuoteBatch, SectorCatalog, SectorConstituent, SectorDashboard, SectorMatch,
 } from '../types.ts'
@@ -79,6 +81,17 @@ export interface IStockClient {
    * @returns current constituents and the past 120 calendar days of daily index bars.
    */
   sectorDashboard(sector: SectorMatch, signal?: AbortSignal): Promise<SectorDashboard>
+  /** Read bounded industry histories and the benchmark for the strength matrix.
+   * @param signal - Caller cancellation.
+   * @returns Industry histories and the comparison benchmark.
+   */
+  industryMatrix(signal?: AbortSignal): Promise<IndustryMatrix>
+  /** Read current membership and a bounded quote sample for one industry.
+   * @param sector - Selected industry.
+   * @param signal - Caller cancellation.
+   * @returns Industry membership, history, and current quote sample.
+   */
+  industryDetail(sector: SectorMatch, signal?: AbortSignal): Promise<IndustryDetail>
   /**
    * Resolve a name, bare code, or thscode fragment to complete instruments.
    * @param query - user-facing search text.
@@ -159,6 +172,14 @@ export class StockClient extends Service implements IStockClient {
   /** {@inheritDoc IStockClient.sectorDashboard} */
   async sectorDashboard(sector: SectorMatch, signal?: AbortSignal): Promise<SectorDashboard> {
     return unwrap(await this.namespace.sectorDashboard(sector, signal))
+  }
+  /** {@inheritDoc IStockClient.industryMatrix} */
+  async industryMatrix(signal?: AbortSignal): Promise<IndustryMatrix> {
+    return unwrap(await this.namespace.industryMatrix(signal))
+  }
+  /** {@inheritDoc IStockClient.industryDetail} */
+  async industryDetail(sector: SectorMatch, signal?: AbortSignal): Promise<IndustryDetail> {
+    return unwrap(await this.namespace.industryDetail(sector, signal))
   }
 
   /** {@inheritDoc IStockClient.searchSymbols} */

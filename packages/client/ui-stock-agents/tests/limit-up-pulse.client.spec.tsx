@@ -45,3 +45,16 @@ it('changes the synchronized date and selected stock used by the inquiry', () =>
   fireEvent.click(screen.getByRole('button', { name: '30日分位' }))
   expect(screen.getByRole('button', { name: '30日分位' }).getAttribute('aria-pressed')).toBe('true')
 })
+
+it('selects a chart date with the keyboard', () => {
+  const onScopeChange = vi.fn()
+  render(<LimitUpPulseDashboard data={data} loading={false} error={false} onRetry={vi.fn()}
+    onScopeChange={onScopeChange} focus={null} t={makeTranslate(zh)} />)
+  const date = screen.getByRole('button', { name: /2026-10-14.*涨停/ })
+  expect(date.getAttribute('tabindex')).toBe('0')
+  fireEvent.keyDown(date, { key: 'Enter' })
+  expect(onScopeChange).toHaveBeenLastCalledWith({ kind: 'pulse', date: '2026-10-14' })
+  expect(date.getAttribute('aria-pressed')).toBe('true')
+  fireEvent.keyDown(date, { key: ' ' })
+  expect(onScopeChange).toHaveBeenLastCalledWith({ kind: 'pulse', date: '2026-10-14' })
+})

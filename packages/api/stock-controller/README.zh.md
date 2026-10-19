@@ -25,7 +25,7 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
-把本包与 `dsh-stock` 及一个 provider 一起挂载。Client 调用 `remote.stock.searchSymbols(query, limit)`、`quotes(thscodes)`、`candles(request)`、`documents(request)`、`dragonTiger()`、`hotRank()`、`hotRankHistory(thscode)`、`sectors()`、`sectorDashboard(sector)` 或 `limitUpPulse()`；没有任何方法接收 Session，因为行情数据不属于任何 Session。
+把本包与 `dsh-stock` 及一个 provider 一起挂载。Client 调用 `remote.stock.searchSymbols(query, limit)`、`quotes(thscodes)`、`candles(request)`、`documents(request)`、`dragonTiger()`、`hotRank()`、`hotRankHistory(thscode)`、`sectors()`、`sectorDashboard(sector)` 、`industryMatrix()` 或 `industryDetail(sector)`、`limitUpPulse()`；没有任何方法接收 Session，因为行情数据不属于任何 Session。
 
 | 方法 | 返回 | 用途 |
 |---|---|---|
@@ -38,6 +38,8 @@ kind: "package-reference"
 | `hotRankHistory(thscode)` | `HotRankHistory` | 指定 A 股近 30 个自然日的日线名次点位，包含 Top 30 以外名次 |
 | `sectors()` | `SectorCatalog` | 供用户选择的概念与行业板块目录 |
 | `sectorDashboard(sector)` | `SectorDashboard` | 当前成分股与近 120 个自然日的指数日线 |
+| `industryMatrix()` | `IndustryMatrix` | 有上限的行业指数日线与沪深300对照日线，标注目录和历史缺口 |
+| `industryDetail(sector)` | `IndustryDetail` | 所选行业的当前成分与有上限的股票行情样本 |
 | `limitUpPulse()` | `LimitUpPulseDashboard` | 天梯最近交易日的涨停池，并标出未取全的日期 |
 
 ### 归一化
@@ -97,6 +99,8 @@ seam 有意在其行上保留 vendor 自己的字段名，因为其 94 个能力
 | `maxDragonTigerStocks` | `200` | 发送给浏览器的每榜股票行数上限 |
 | `maxDragonTigerSeats` | `60` | 发送给浏览器的每榜活跃席位上限 |
 | `maxDragonTigerSeatStocks` | `30` | 发送给浏览器的每个席位关联股票上限 |
+| `maxIndustryMatrixIndices` | `40` | 行业矩阵最多读取的行业指数数量 |
+| `industryMatrixConcurrency` | `4` | 行业指数历史读取并发数 |
 | `maxLimitUpPagesPerDay` | `5` | 每个交易日最多读取的 200 行涨停池分页数 |
 
 生成的[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-api-stock-controller)是每个可接受字段及其 JSDoc 的完整来源。

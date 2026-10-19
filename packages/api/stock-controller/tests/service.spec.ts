@@ -57,6 +57,8 @@ function harness(overrides: Partial<Config> = {}): Harness {
       maxDragonTigerSeats: 60,
       maxDragonTigerSeatStocks: 30,
       maxLimitUpPagesPerDay: 5,
+      maxIndustryMatrixIndices: 40,
+      industryMatrixConcurrency: 4,
       ...overrides,
     }),
     calls,

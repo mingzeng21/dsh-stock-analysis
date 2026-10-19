@@ -65,6 +65,8 @@ describe('stockController.dragonTiger', () => {
         maxQuotes: 50, maxDocuments: 30, maxSummaryChars: 400, maxSymbolMatches: 20,
         maxDragonTigerStocks: 200, maxDragonTigerSeats: 60, maxDragonTigerSeatStocks: 30,
         maxLimitUpPagesPerDay: 5,
+        maxIndustryMatrixIndices: 40,
+        industryMatrixConcurrency: 4,
       }),
     }
   }

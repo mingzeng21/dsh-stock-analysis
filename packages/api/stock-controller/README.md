@@ -25,7 +25,7 @@ Use this package when a browser surface needs market data. It reads symbols, quo
 <a id="use-this-package"></a>
 ## Use this package
 
-Mount the package beside `dsh-stock` and one provider. A Client calls `remote.stock.searchSymbols(query, limit)`, `quotes(thscodes)`, `candles(request)`, `documents(request)`, `dragonTiger()`, `hotRank()`, `hotRankHistory(thscode)`, `sectors()`, `sectorDashboard(sector)`, or `limitUpPulse()`; no method takes a Session, because market data belongs to no Session.
+Mount the package beside `dsh-stock` and one provider. A Client calls `remote.stock.searchSymbols(query, limit)`, `quotes(thscodes)`, `candles(request)`, `documents(request)`, `dragonTiger()`, `hotRank()`, `hotRankHistory(thscode)`, `sectors()`, `sectorDashboard(sector)`, `industryMatrix()`, `industryDetail(sector)`, or `limitUpPulse()`; no method takes a Session, because market data belongs to no Session.
 
 | Method | Returns | Purpose |
 |---|---|---|
@@ -38,6 +38,8 @@ Mount the package beside `dsh-stock` and one provider. A Client calls `remote.st
 | `hotRankHistory(thscode)` | `HotRankHistory` | Selected A-share's daily rank points for the last 30 calendar days, including ranks outside Top 30 |
 | `sectors()` | `SectorCatalog` | Concept and industry board names for user selection |
 | `sectorDashboard(sector)` | `SectorDashboard` | Current constituents and 120-calendar-day daily index history |
+| `industryMatrix()` | `IndustryMatrix` | Bounded industry index histories and CSI 300 comparison, with catalog and history gaps disclosed |
+| `industryDetail(sector)` | `IndustryDetail` | Selected industry current membership and bounded stock-quote sample |
 | `limitUpPulse()` | `LimitUpPulseDashboard` | Closing-limit pools for the ladder's recent trading dates, with incomplete dates marked |
 
 ### Normalization
@@ -97,6 +99,8 @@ Announcements, reports, and news come from the 问财 gateway, whose search take
 | `maxDragonTigerStocks` | `200` | Stock rows per board sent to the browser |
 | `maxDragonTigerSeats` | `60` | Active seats per board sent to the browser |
 | `maxDragonTigerSeatStocks` | `30` | Linked stocks per seat sent to the browser |
+| `maxIndustryMatrixIndices` | `40` | Maximum industry index histories in one matrix read |
+| `industryMatrixConcurrency` | `4` | Concurrent index-history reads for the matrix |
 | `maxLimitUpPagesPerDay` | `5` | Maximum 200-row closing-limit pool pages read per trading date |
 
 The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-api-stock-controller) is the exhaustive source for every accepted field and its JSDoc.

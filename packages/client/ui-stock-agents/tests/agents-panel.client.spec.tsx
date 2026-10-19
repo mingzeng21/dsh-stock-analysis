@@ -2,7 +2,7 @@
 /** The Agents panel keeps specialist output and history inside its own main entry. */
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import type { StockAgentCard } from '@deepseek-ai/dsh-api-stock-agents-controller/types'
-import type { DragonTigerDashboard, HotRankDashboard, SectorCatalog, SectorDashboard, SectorMatch } from '@deepseek-ai/dsh-api-stock-controller/client'
+import type { DragonTigerDashboard, HotRankDashboard, IndustryDetail, IndustryMatrix, SectorCatalog, SectorDashboard, SectorMatch } from '@deepseek-ai/dsh-api-stock-controller/client'
 import type { SessionListState, SessionReference } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { LocaleSnapshot } from '@deepseek-ai/dsh-client-locale/client'
 import type { ConversationSnapshot } from '@deepseek-ai/dsh-client-ui-conversation/client'
@@ -60,6 +60,20 @@ const HOT_RANK: HotRankDashboard = { boards: [
   { kind: 'surge', period: 'day', stocks: [] },
   { kind: 'surge', period: 'hour', stocks: [] },
 ] }
+const INDUSTRY_SECTOR: SectorMatch = { thscode: '881101.TI', name: '半导体', kind: 'industry' }
+const industryBars = Array.from({ length: 70 }, (_, index) => ({ time: index * 86_400_000,
+  open: 100 + index, high: 101 + index, low: 99 + index, close: 100 + index, volume: 100, turnover: 1_000 + index }))
+const INDUSTRY_MATRIX: IndustryMatrix = { industries: [{ sector: INDUSTRY_SECTOR,
+  history: { thscode: INDUSTRY_SECTOR.thscode, interval: '1d', truncated: false, candles: industryBars } }],
+benchmark: { thscode: '000300.SH', interval: '1d', truncated: false,
+  candles: industryBars.map(bar => ({ ...bar, close: 100 })) },
+catalogTruncated: false, industriesTruncated: false, unavailableCount: 0 }
+const INDUSTRY_DETAIL: IndustryDetail = { board: { sector: INDUSTRY_SECTOR, constituents: [
+  { thscode: '600001.SH', ticker: '600001', name: '甲公司' }], constituentsTruncated: false,
+history: INDUSTRY_MATRIX.industries[0]!.history }, quotedCount: 1, quotes: { quotes: [{
+  thscode: '600001.SH', last: 11, change: 1, changePct: 10, open: 10, high: 11, low: 10,
+  prevClose: 10, volume: 100, turnover: 1_000,
+}] } }
 
 afterEach(cleanup)
 
@@ -99,6 +113,8 @@ function mount(history: boolean | 'dragon' | 'hot' | 'sector' = false, cards: re
   const loadDragonTiger = vi.fn(async () => DASHBOARD)
   const loadHotRank = vi.fn(async () => HOT_RANK)
   const loadLimitUpPulse = vi.fn(async () => ({ days: [] }))
+  const loadIndustryMatrix = vi.fn(async () => INDUSTRY_MATRIX)
+  const loadIndustryDetail = vi.fn(async () => INDUSTRY_DETAIL)
   const loadSectors = vi.fn(async () => SECTORS)
   const loadSectorDashboard = vi.fn(async (_sector: SectorMatch, _signal: AbortSignal) => SECTOR_DASHBOARD)
   const loadHotRankHistory = vi.fn(async () => ({ thscode: '600001.SH', points: [
@@ -118,6 +134,8 @@ function mount(history: boolean | 'dragon' | 'hot' | 'sector' = false, cards: re
     loadCatalog: vi.fn(),
     start,
     startDashboard,
+    loadIndustryMatrix,
+    loadIndustryDetail,
     continueDashboard,
     loadDragonTiger,
     loadHotRank,
@@ -137,6 +155,7 @@ function mount(history: boolean | 'dragon' | 'hot' | 'sector' = false, cards: re
   return {
     start, startDashboard, continueDashboard, release, openSession, renderSlot,
     loadDragonTiger, loadHotRank, loadHotRankHistory, loadSectors, loadSectorDashboard,
+    loadIndustryMatrix, loadIndustryDetail,
   }
 }
 
@@ -205,6 +224,25 @@ it('opens the native dragon-tiger dashboard without starting a Session', async (
   expect(screen.getByRole('region', { name: '记录详情' })).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: '返回Agents' }))
   expect(screen.getByRole('button', { name: /龙虎榜观察/ })).toBeTruthy()
+})
+
+it('links the industry matrix, current quote sample, and selected window inquiry', async () => {
+  const { startDashboard, loadIndustryMatrix, loadIndustryDetail } = mount()
+  fireEvent.click(screen.getByRole('button', { name: /行业强度矩阵/ }))
+  await waitFor(() => { expect(loadIndustryDetail).toHaveBeenCalledWith(INDUSTRY_SECTOR, expect.any(AbortSignal)) })
+  expect(loadIndustryMatrix).toHaveBeenCalledTimes(1)
+  expect(screen.getByRole('group', { name: '行业强度 × 加速度' })).toBeTruthy()
+  expect(screen.getByRole('heading', { name: '当前成分当日涨跌' })).toBeTruthy()
+  fireEvent.click(screen.getByRole('button', { name: '问看板' }))
+  fireEvent.click(screen.getByRole('button', { name: '5D' }))
+  fireEvent.change(screen.getByLabelText('你的问题'), { target: { value: '哪些行业加速？' } })
+  fireEvent.click(screen.getByRole('button', { name: '发送问题' }))
+  await waitFor(() => { expect(startDashboard).toHaveBeenCalledTimes(1) })
+  const prompt = startDashboard.mock.calls[0]?.[0]
+  expect(prompt).toContain('dashboard-session:industry')
+  expect(prompt).toContain('industry-code:881101.TI')
+  expect(prompt).toContain('"windowDays":5')
+  expect(prompt).toContain('600001.SH')
 })
 
 it('renders a newly launched Agent in the Agents panel and returns to its catalog', async () => {

@@ -301,6 +301,10 @@ export interface Config {
   readonly maxDragonTigerSeatStocks: number
   /** Maximum 200-row pool pages read per trading date in the pulse dashboard. */
   readonly maxLimitUpPagesPerDay: number
+  /** Maximum industry histories returned for the cross-section matrix. */
+  readonly maxIndustryMatrixIndices: number
+  /** Concurrent index-history reads in the matrix. */
+  readonly industryMatrixConcurrency: number
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-api-stock-controller -->

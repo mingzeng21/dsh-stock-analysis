@@ -9,7 +9,7 @@ function InquiryTargets({ response, dashboardData, onFocus, t }: Pick<
   'dashboardData' | 'onFocus' | 't'
 > & { response: string }) {
   if (dashboardData === undefined || onFocus === undefined) return null
-  const stocks = 'boards' in dashboardData
+  const stocks = 'industries' in dashboardData ? [] : 'boards' in dashboardData
     ? dashboardData.boards.flatMap(board => board.stocks.map(stock => ({ code: stock.thscode, name: stock.name })))
     : 'constituents' in dashboardData
       ? dashboardData.constituents.map(stock => ({ code: stock.thscode, name: stock.name }))
