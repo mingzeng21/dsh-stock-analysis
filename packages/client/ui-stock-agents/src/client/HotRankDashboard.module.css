@@ -1,19 +1,19 @@
 .scroll { flex: 1; min-width: 0; overflow: auto; background: var(--dsw-alias-bg-base); }
-.dashboard { max-width: 1440px; margin: 0 auto; padding: 28px clamp(18px, 3vw, 48px) 44px; color: var(--dsw-alias-label-primary); }
-.hero { display: flex; align-items: end; justify-content: space-between; gap: 24px; min-height: 175px; padding: 28px 32px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 16px; background: linear-gradient(135deg, var(--dsw-alias-interactive-bg-hover), var(--dsw-alias-bg-base) 70%); }
-.eyebrow { color: var(--dsw-alias-label-secondary); font-size: 12px; letter-spacing: .12em; }
-.hero h1 { margin: 12px 0 10px; font-size: clamp(28px, 3vw, 40px); font-weight: 500; letter-spacing: -.03em; }
-.hero p { max-width: 600px; margin: 0; color: var(--dsw-alias-label-secondary); font-size: 14px; line-height: 1.55; }
-.timeCard { display: grid; flex: none; gap: 8px; min-width: 185px; padding: 18px 20px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 12px; background: var(--dsw-alias-bg-base); }
+.dashboard { max-width: 1440px; margin: 0 auto; padding: 22px clamp(18px, 3vw, 48px) 36px; color: var(--dsw-alias-label-primary); }
+.hero { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding: 0 0 16px; border-bottom: 1px solid var(--dsw-alias-border-l2); }
+.eyebrow { color: var(--dsw-alias-label-secondary); font-size: 12px; }
+.hero h1 { margin: 5px 0 4px; font-size: 24px; font-weight: 500; letter-spacing: -.02em; }
+.hero p { max-width: 600px; margin: 0; color: var(--dsw-alias-label-secondary); font-size: 13px; line-height: 1.5; }
+.timeCard { display: grid; flex: none; gap: 3px; min-width: 185px; text-align: right; }
 .timeCard span, .metrics span, .metrics small, .listPanel header small, .chartPanel p, .chartPanel small, .context p { color: var(--dsw-alias-label-secondary); font-size: 12px; }
-.timeCard strong { font-size: 17px; font-weight: 500; font-variant-numeric: tabular-nums; }
-.tabs { display: flex; flex-wrap: wrap; gap: 6px; width: fit-content; margin: 22px 0 16px; padding: 4px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 10px; }
+.timeCard strong { font-size: 14px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; width: fit-content; margin: 14px 0; padding: 4px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 10px; }
 .tabs button { padding: 9px 16px; border: 0; border-radius: 7px; color: var(--dsw-alias-label-secondary); background: transparent; font: inherit; font-size: 13px; cursor: pointer; }
 .tabs button:hover, .tabs button:focus-visible, .tabs .active { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-interactive-bg-hover); }
 .tabs .active { font-weight: 500; }
-.metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.metrics > div { display: flex; flex-direction: column; gap: 8px; min-height: 112px; padding: 17px 19px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 12px; }
-.metrics strong { margin-top: auto; overflow: hidden; font-size: 26px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--dsw-alias-border-l2); border-left: 1px solid var(--dsw-alias-border-l2); }
+.metrics > div { display: flex; flex-direction: column; gap: 4px; min-height: 78px; padding: 10px 14px; border-right: 1px solid var(--dsw-alias-border-l2); border-bottom: 1px solid var(--dsw-alias-border-l2); }
+.metrics strong { margin-top: auto; overflow: hidden; font-size: 22px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .grid { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(300px, 1fr); align-items: start; gap: 14px; margin-top: 14px; }
 .listPanel, .chartPanel, .context { min-width: 0; padding: 22px 24px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 14px; }
 .listPanel header { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
@@ -31,8 +31,6 @@
 .listPanel td button:focus-visible { outline: 2px solid var(--dsw-alias-interactive-bg-active); }
 .heat { display: grid; justify-items: end; gap: 5px; min-width: 80px; font-variant-numeric: tabular-nums; }
 .heat i { display: block; height: 4px; max-width: 100%; border-radius: 4px; background: var(--dsw-alias-interactive-bg-active); }
-.up { color: var(--dsw-alias-state-error-primary); }
-.down { color: var(--dsw-alias-state-success-primary); }
 .trend { display: block; margin-top: 4px; color: var(--dsw-alias-label-secondary); font-size: 11px; }
 .side { display: grid; gap: 14px; }
 .chartPanel p { margin: 10px 0 16px; }
@@ -49,8 +47,10 @@
 .chartFacts strong { font-size: 20px; font-weight: 500; }
 .chartPanel > small { display: block; margin-top: 14px; line-height: 1.5; }
 .chartState, .center { display: flex; align-items: center; justify-content: center; min-height: 210px; color: var(--dsw-alias-label-secondary); font-size: 13px; }
-.center { flex: 1; }
-.center button, .notice button { padding: 6px 9px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; color: inherit; background: transparent; cursor: pointer; }
+.center { justify-content: flex-start; min-height: 112px; gap: 10px; }
+.chartState { gap: 10px; }
+.chartPanel .historyNotice { margin: 8px 0 12px; padding: 9px 11px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; }
+.center button, .notice button, .chartState button, .historyNotice button { padding: 6px 9px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; color: inherit; background: transparent; cursor: pointer; }
 .context p { margin: 12px 0 0; line-height: 1.6; }
 .empty { color: var(--dsw-alias-label-secondary); font-size: 13px; }
 .notice { margin-top: 14px; padding: 10px 12px; border: 1px solid var(--dsw-alias-state-error-primary); border-radius: 8px; font-size: 13px; }
@@ -58,4 +58,4 @@
 .spinner { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (max-width: 1050px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid { grid-template-columns: minmax(0, 1fr); } }
-@media (max-width: 720px) { .dashboard { padding: 16px; } .hero { align-items: stretch; flex-direction: column; padding: 22px; } .timeCard { min-width: 0; } .listPanel, .chartPanel, .context { padding: 17px; } }
+@media (max-width: 720px) { .dashboard { padding: 16px; } .hero { align-items: stretch; flex-direction: column; gap: 8px; } .timeCard { min-width: 0; text-align: left; } .tabs { width: 100%; flex-wrap: nowrap; overflow-x: auto; } .tabs button { flex: none; } .listPanel, .chartPanel, .context { padding: 17px; } }

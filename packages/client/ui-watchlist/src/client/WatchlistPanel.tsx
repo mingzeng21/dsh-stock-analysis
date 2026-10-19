@@ -155,7 +155,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   )
 }
 
-/** One summary card with its calculation basis below the value. */
+/** One summary value with its calculation basis below. */
 function SummaryCard({ label, value, note, direction }: {
   label: string
   value: string
@@ -290,28 +290,33 @@ function DocumentRowItem({ row, t }: { row: DocumentRow; t: WatchlistPanelProps[
 }
 
 /** One document channel: its rows, its own failure, and its own retry. */
-function DocumentList({ state, t, onRetry }: {
+function DocumentList({ state, name, kind, t, onRetry }: {
   state: DocumentsSnapshot
+  name: string
+  kind: DocumentKind
   t: WatchlistPanelProps['t']
   onRetry: () => void
 }) {
-  if (state.phase === 'failed') {
-    return (
-      <p className={css.failure}>
+  // A tab or instrument switch renders before its new effect starts.
+  if (state.phase === 'idle' || state.name !== name || state.kind !== kind) {
+    return <p className={css.note}>{t('documents.loading')}</p>
+  }
+  const rows = state.rows ?? []
+  return (
+    <>
+      {state.phase === 'failed' && <p className={css.failure} role="alert">
+        {rows.length > 0 && <span>{t('documents.retainedFailure')}</span>}
         {t('failure.withCode', { code: state.failure })}
         <button type="button" className={css.retry} onClick={onRetry}>{t('quotes.retry')}</button>
-      </p>
-    )
-  }
-  // `idle` is the render before the effect that starts the first read.
-  if (state.phase !== 'ready') return <p className={css.note}>{t('documents.loading')}</p>
-  if (state.rows.length === 0) return <p className={css.note}>{t('documents.empty')}</p>
-  return (
-    <ul className={css.documentRows}>
-      {state.rows.map(row => (
-        <DocumentRowItem key={`${row.kind}:${row.publishedAt}:${row.title}`} row={row} t={t} />
-      ))}
-    </ul>
+      </p>}
+      {state.phase === 'loading' && <p className={css.note} role="status">
+        {rows.length > 0 ? t('documents.refreshingRetained') : t('documents.loading')}
+      </p>}
+      {state.phase === 'ready' && rows.length === 0 && <p className={css.note}>{t('documents.empty')}</p>}
+      {rows.length > 0 && <ul className={css.documentRows}>
+        {rows.map(row => <DocumentRowItem key={`${row.kind}:${row.publishedAt}:${row.title}`} row={row} t={t} />)}
+      </ul>}
+    </>
   )
 }
 
@@ -448,7 +453,10 @@ export function WatchlistPanel({
   }, [analysisSession, resumeAnalysis, actions])
 
   const selectedQuote = selected === null ? undefined : quotes.byCode[selected]
-  const quoteTime = quotes.asOf === undefined ? undefined : new Date(quotes.asOf)
+  const quoteTime = quotes.asOf === undefined ? undefined : new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+    hour12: false, timeZone: 'Asia/Shanghai',
+  }).format(quotes.asOf)
   const currentBars = useMemo(
     () => candles.thscode === selected && candles.interval === interval ? candles.bars : [],
     [candles, selected, interval],
@@ -552,6 +560,9 @@ export function WatchlistPanel({
           <div className={css.empty}>
             <p className={css.emptyTitle}>{t('list.empty')}</p>
             <p className={css.emptyHint}>{t('list.emptyHint')}</p>
+            <button type="button" className={css.emptyAction} onClick={() => { setAdding(true) }}>
+              {t('list.emptyAction')}
+            </button>
           </div>
         )}
 
@@ -564,11 +575,17 @@ export function WatchlistPanel({
                   type="button"
                   className={clsx(css.row, entry.thscode === selected && css.rowActive)}
                   aria-current={entry.thscode === selected || undefined}
-                  onClick={() => { actions.select(entry.thscode) }}
+                  onClick={() => {
+                    actions.select(entry.thscode)
+                    if (window.innerWidth <= 720) window.requestAnimationFrame(() => {
+                      const top = railRef.current?.offsetHeight ?? 0
+                      if (panelRef.current !== null) panelRef.current.scrollTop = top
+                    })
+                  }}
                 >
                   <span className={css.rowName}>{entry.name}</span>
                   <span className={css.rowCode}>{entry.thscode}</span>
-                  <span className={clsx(css.rowPrice, directionOf(quote))}>
+                  <span className={css.rowPrice}>
                     {quote === undefined ? '—' : quote.last.toFixed(2)}
                   </span>
                   <span className={clsx(css.rowChange, directionOf(quote))}>
@@ -630,14 +647,35 @@ export function WatchlistPanel({
           >
             <header className={css.quoteHead}>
               <div className={css.quoteIdentity}>
-                <h2 className={css.quoteName}>{selectedEntry.name}</h2>
-                <span className={css.quoteCode}>{selectedEntry.thscode}</span>
+                <div className={css.quoteTitle}>
+                  <h2 className={css.quoteName}>{selectedEntry.name}</h2>
+                  <span className={css.quoteCode}>{selectedEntry.thscode}</span>
+                </div>
+                {selectedQuote !== undefined && (
+                  <div className={css.quotePrice}>
+                    <span className={css.quoteLast}>{selectedQuote.last.toFixed(2)}</span>
+                    <span className={clsx(css.quoteChange, directionOf(selectedQuote))}>{changeText(selectedQuote, t)}</span>
+                  </div>
+                )}
+                {quoteTime !== undefined && (
+                  <p className={css.asOf}>
+                    {t('quotes.asOf', {
+                      time: quoteTime,
+                    })}
+                  </p>
+                )}
+                {selectedQuote !== undefined && quotes.phase !== 'ready' && quotes.phase !== 'idle' && (
+                  <div className={css.quoteStatus} role="status">
+                    <span>{quotes.phase === 'failed' ? t('quotes.retainedFailure') : t('quotes.refreshingRetained')}</span>
+                    {quotes.phase === 'failed' && <button type="button" className={css.retry}
+                      onClick={() => { refreshQuotes() }}>{t('quotes.retry')}</button>}
+                  </div>
+                )}
               </div>
               <button type="button" className={css.analysisJump} onClick={focusAnalysis}>
                 {t('analysis.jump')}
               </button>
             </header>
-            <p className={css.chartNote}>{t('chart.adjust.forward')}</p>
             <section className={css.summary} aria-label={t('summary.aria')}>
               <SummaryCard
                 label={t('summary.latestClose')}
@@ -647,16 +685,15 @@ export function WatchlistPanel({
               <SummaryCard
                 label={t('summary.periodReturn')}
                 value={overview.returnPct === undefined ? '—' : percentText(overview.returnPct, t)}
+                direction={directionOfPercent(overview.returnPct)}
                 note={overview.first === undefined || overview.latest === undefined
                   ? t('summary.unavailable')
                   : t('summary.dateRange', { start: tradingDate(overview.first.time), end: tradingDate(overview.latest.time) })}
-                direction={directionOfPercent(overview.returnPct)}
               />
               <SummaryCard
                 label={t(`summary.drawdown.${interval}`)}
                 value={overview.drawdown60Pct === undefined ? '—' : percentText(overview.drawdown60Pct, t)}
                 note={overview.drawdown60Pct === undefined ? t('summary.insufficient60') : t('summary.adjustedClose')}
-                direction={directionOfPercent(overview.drawdown60Pct)}
               />
               <SummaryCard
                 label={t(`summary.averageTurnover.${interval}`)}
@@ -668,8 +705,8 @@ export function WatchlistPanel({
               <p className={css.failure}>
                 {quotes.phase === 'failed'
                   ? t('failure.withCode', { code: quotes.failure })
-                  : t('quotes.loading')}
-                {quotes.phase === 'failed' && (
+                  : quotes.phase === 'ready' ? t('quotes.missing') : t('quotes.loading')}
+                {(quotes.phase === 'failed' || quotes.phase === 'ready') && (
                   <button type="button" className={css.retry} onClick={() => { refreshQuotes() }}>
                     {t('quotes.retry')}
                   </button>
@@ -679,10 +716,6 @@ export function WatchlistPanel({
               <section className={css.snapshot} aria-label={t('detail.snapshot')}>
                 <div className={css.snapshotHead}>
                   <h3 className={css.sectionTitle}>{t('detail.snapshot')}</h3>
-                  <div className={css.snapshotPrice}>
-                    <span className={clsx(css.quoteLast, directionOf(selectedQuote))}>{selectedQuote.last.toFixed(2)}</span>
-                    <span className={clsx(css.quoteChange, directionOf(selectedQuote))}>{changeText(selectedQuote, t)}</span>
-                  </div>
                 </div>
                 <div className={css.metrics}>
                   <Metric label={t('detail.open')} value={selectedQuote.open.toFixed(2)} />
@@ -692,13 +725,6 @@ export function WatchlistPanel({
                   <Metric label={t('detail.volume')} value={volumeText(selectedQuote.volume, t)} />
                   <Metric label={t('detail.turnover')} value={amountText(selectedQuote.turnover, t)} />
                 </div>
-                {quoteTime !== undefined && (
-                  <p className={css.asOf}>
-                    {t('quotes.asOf', {
-                      time: `${quoteTime.getFullYear()}-${pad2(quoteTime.getMonth() + 1)}-${pad2(quoteTime.getDate())} ${pad2(quoteTime.getHours())}:${pad2(quoteTime.getMinutes())}`,
-                    })}
-                  </p>
-                )}
               </section>
             )}
             <section className={css.chartSection} aria-label={t('chart.aria')}>
@@ -706,6 +732,7 @@ export function WatchlistPanel({
                 <div>
                   <h3 className={css.sectionTitle}>{t('chart.title')}</h3>
                   <p className={css.sectionNote}>{t('chart.legend')}</p>
+                  <p className={css.sectionNote}>{t('chart.adjust.forward')}</p>
                 </div>
                 <div className={css.chartControls}>
                   <div className={css.chartBar} role="group" aria-label={t('chart.periods')}>
@@ -845,6 +872,8 @@ export function WatchlistPanel({
               </div>
               <DocumentList
                 state={documents}
+                name={selectedEntry.name}
+                kind={documentKind}
                 t={t}
                 onRetry={() => { loadDocuments(selectedEntry.name, documentKind) }}
               />

@@ -21,6 +21,7 @@ import { zh } from '../src/client/locales.ts'
 import { createWatchlistStore } from '../src/client/store.ts'
 import { WatchlistPanelIcon } from '../src/client/PanelIcon.tsx'
 import { WatchlistPanel, type WatchlistPanelProps } from '../src/client/WatchlistPanel.tsx'
+import css from '../src/client/WatchlistPanel.module.css'
 import { installCanvas } from './support/canvas.ts'
 
 const MAOTAI: WatchlistEntry = { thscode: '600519.SH', name: '贵州茅台', addedAt: 1 }
@@ -72,7 +73,7 @@ interface Fixture {
 
 const READY_QUOTES: QuotesSnapshot = { phase: 'ready', byCode: { '600519.SH': quote(1252.57, -0.36) } }
 const READY_CANDLES: CandlesSnapshot = { phase: 'ready', interval: '1d', bars: [], truncated: false }
-const READY_DOCUMENTS: DocumentsSnapshot = { phase: 'ready', kind: 'report', rows: [] }
+const READY_DOCUMENTS: DocumentsSnapshot = { phase: 'ready', name: '贵州茅台', kind: 'report', rows: [] }
 
 /** One document row, overridable per test. */
 function documentRow(title: string, overrides: Partial<DocumentRow> = {}): DocumentRow {
@@ -215,6 +216,8 @@ describe('WatchlistPanel list', () => {
     mount({ entries: [] })
     expect(screen.getByText(zh['list.empty'])).toBeDefined()
     expect(screen.getByText(zh['list.emptyHint'])).toBeDefined()
+    fireEvent.click(screen.getByRole('button', { name: zh['list.emptyAction'] }))
+    expect(screen.getByLabelText(zh['add.placeholder'])).toBeDefined()
   })
 
   it('renders a failed list read as its code rather than an empty list', () => {
@@ -235,7 +238,7 @@ describe('WatchlistPanel list', () => {
       quotes: { phase: 'ready', asOf: 1789560797000, byCode: { '600519.SH': quote(1252.57, -0.36) } },
     })
     act(() => { fireEvent.click(rowButton(/贵州茅台/)) })
-    expect(screen.getByText(/^行情时间 \d{4}-\d{2}-\d{2} \d{2}:\d{2}$/)).toBeDefined()
+    expect(screen.getByText(/^行情更新：\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/)).toBeDefined()
   })
 
   it('says the batch is loading while a read is in flight', () => {
@@ -246,7 +249,21 @@ describe('WatchlistPanel list', () => {
   it('shows no readiness stamp when the vendor reports none', () => {
     mount({ quotes: { phase: 'ready', byCode: { '600519.SH': quote(1252.57, -0.36) } } })
     act(() => { fireEvent.click(rowButton(/贵州茅台/)) })
-    expect(screen.queryByText(/行情时间/)).toBeNull()
+    expect(screen.queryByText(/行情更新/)).toBeNull()
+  })
+
+  it('labels a retained quote while its refresh has failed', () => {
+    mount({ selection: '600519.SH', quotes: {
+      phase: 'failed', failure: 'stock/rate-limited', asOf: 1789560797000,
+      byCode: { '600519.SH': quote(1252.57, -0.36) },
+    } })
+    expect(screen.getByText(zh['quotes.retainedFailure'])).toBeDefined()
+    expect(screen.getByText(/^行情更新：/)).toBeDefined()
+  })
+
+  it('names a missing quote after a successful batch', () => {
+    mount({ selection: '600519.SH', quotes: { phase: 'ready', byCode: {} } })
+    expect(screen.getByText(zh['quotes.missing'])).toBeDefined()
   })
 
   it('refreshes the batch from the rail control', () => {
@@ -431,10 +448,23 @@ describe('WatchlistPanel chart', () => {
     expect(within(summary).getByText('最近收盘')).toBeDefined()
     expect(within(summary).getByText('区间收益')).toBeDefined()
     expect(within(summary).getAllByText('-10.00%')).toHaveLength(2)
+    expect(within(summary).getByText('区间收益').nextElementSibling?.className).toContain(css.down)
     expect(within(summary).getByText('2.00 亿')).toBeDefined()
     expect(within(screen.getByRole('region', { name: zh['recent.title'] })).getAllByRole('row')).toHaveLength(9)
     expect(screen.getByRole('region', { name: zh['analysis.aria'] })).toBeDefined()
     expect(screen.getByRole('region', { name: zh['documents.aria'] })).toBeDefined()
+  })
+
+  it('shows a positive period return in the A-share rise color', () => {
+    const bars = [100, 120].map((close, index) => ({
+      time: Date.UTC(2026, 0, index + 1), open: close, high: close, low: close,
+      close, volume: 100, turnover: 200_000_000,
+    }))
+    mount({ selection: '600519.SH', candles: { phase: 'ready', thscode: '600519.SH', interval: '1d', bars, truncated: false } })
+    const summary = screen.getByRole('region', { name: zh['summary.aria'] })
+    const value = within(summary).getByText('区间收益').nextElementSibling
+    expect(value?.textContent).toBe('+20.00%')
+    expect(value?.className).toContain(css.up)
   })
 
   it('reads the series for the selected instrument and the current period', () => {
@@ -554,19 +584,19 @@ describe('WatchlistPanel documents', () => {
   })
 
   it('says the channel is loading while its first read is in flight', () => {
-    mount({ selection: '600519.SH', documents: { phase: 'loading', kind: 'report' } })
+    mount({ selection: '600519.SH', documents: { phase: 'loading', name: '贵州茅台', kind: 'report' } })
     expect(screen.getByText(zh['documents.loading'])).toBeDefined()
   })
 
   it('says nothing is published once a read settles empty', () => {
-    mount({ selection: '600519.SH', documents: { phase: 'ready', kind: 'report', rows: [] } })
+    mount({ selection: '600519.SH', documents: { phase: 'ready', name: '贵州茅台', kind: 'report', rows: [] } })
     expect(screen.getByText(zh['documents.empty'])).toBeDefined()
   })
 
   it('renders each row with its date and excerpt while hiding the provider', () => {
     mount({
       selection: '600519.SH',
-      documents: { phase: 'ready', kind: 'report', rows: [documentRow('公司跟踪报告')] },
+      documents: { phase: 'ready', name: '贵州茅台', kind: 'report', rows: [documentRow('公司跟踪报告')] },
     })
     expect(screen.getByText('公司跟踪报告')).toBeDefined()
     expect(screen.getByText(/^\d{4}-\d{2}-\d{2}$/u)).toBeDefined()
@@ -579,6 +609,7 @@ describe('WatchlistPanel documents', () => {
       selection: '600519.SH',
       documents: {
         phase: 'ready',
+        name: '贵州茅台',
         kind: 'report',
         rows: [
           documentRow('有链接', { url: 'https://example.test/report' }),
@@ -596,7 +627,7 @@ describe('WatchlistPanel documents', () => {
   it('marks an excerpt the Host cut', () => {
     mount({
       selection: '600519.SH',
-      documents: { phase: 'ready', kind: 'report', rows: [documentRow('长摘要', { summaryTruncated: true })] },
+      documents: { phase: 'ready', name: '贵州茅台', kind: 'report', rows: [documentRow('长摘要', { summaryTruncated: true })] },
     })
     expect(screen.getByText(zh['documents.truncated'])).toBeDefined()
   })
@@ -604,12 +635,22 @@ describe('WatchlistPanel documents', () => {
   it('renders a failed channel as its code and re-reads on retry', () => {
     const { loadDocuments } = mount({
       selection: '600519.SH',
-      documents: { phase: 'failed', kind: 'report', failure: 'stock/rate-limited' },
+      documents: { phase: 'failed', name: '贵州茅台', kind: 'report', failure: 'stock/rate-limited' },
     })
     loadDocuments.mockClear()
     expect(screen.getByText('操作失败：stock/rate-limited')).toBeDefined()
     fireEvent.click(screen.getByRole('button', { name: zh['quotes.retry'] }))
     expect(loadDocuments.mock.calls[0]).toEqual(['贵州茅台', 'report'])
+  })
+
+  it('shows retained documents and their refresh failure together', () => {
+    mount({
+      selection: '600519.SH',
+      documents: { phase: 'failed', name: '贵州茅台', kind: 'report', failure: 'stock/rate-limited',
+        rows: [documentRow('仍可阅读的研报')] },
+    })
+    expect(screen.getByText('仍可阅读的研报')).toBeDefined()
+    expect(screen.getByText(zh['documents.retainedFailure'])).toBeDefined()
   })
 })
 

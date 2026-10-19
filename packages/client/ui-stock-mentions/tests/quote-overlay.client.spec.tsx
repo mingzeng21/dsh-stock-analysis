@@ -5,6 +5,7 @@ import type { IWatchlist } from '@deepseek-ai/dsh-api-watchlist-controller/clien
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import { describe, expect, it, vi } from 'vitest'
 import { QuoteOverlay } from '../src/client/QuotePanel.tsx'
+import css from '../src/client/QuotePanel.module.css'
 import { StockQuoteOverlay } from '../src/client/overlay.ts'
 import { WatchlistQuickAdd } from '../src/client/watchlist.ts'
 
@@ -33,8 +34,12 @@ const stock: IStockClient = {
 const copy: Record<string, string> = {
   title: '证券行情', quote: '行情', latest: '最新价', high: '最高', low: '最低', open: '今开',
   previous: '昨收', volume: '成交量', turnover: '成交额', marketSH: '上交所', marketSZ: '深交所',
-  close: '关闭行情', refresh: '刷新', retry: '重试', daily: '近期日 K 走势', news: '相关新闻',
-  loading: '行情加载中', failed: '行情暂时无法加载', empty: '暂无数据', asOf: '数据时间',
+  close: '关闭行情', refresh: '刷新', retry: '重试', daily: '近期日 K 走势', candleBasis: '颜色按收盘与开盘比较', news: '相关新闻',
+  loading: '行情加载中', failed: '行情暂时无法加载', empty: '暂无数据', asOf: '行情更新',
+  currencyUnit: '', volumeUnit: '手', smallUnit: ' 万', largeUnit: ' 亿',
+  quoteRefreshFailed: '行情刷新失败，仍显示上次数据。', chartFailed: 'K 线加载失败',
+  chartLoading: 'K 线加载中', chartRefreshing: 'K 线更新中', newsFailed: '资讯加载失败',
+  newsLoading: '资讯加载中', newsRefreshing: '资讯更新中',
 }
 
 const entries = createSnapshotStore<readonly []>([])
@@ -58,11 +63,34 @@ describe('global stock quote panel', () => {
     overlay.open({ thscode: '600519.SH', ticker: '600519', name: '贵州茅台' })
     await waitFor(() => { expect(screen.getByRole('dialog', { name: '贵州茅台 证券行情' })).toBeTruthy() })
     await waitFor(() => { expect(screen.getByText('1252.57')).toBeTruthy() })
-    expect(screen.getByRole('img', { name: '近期日 K 走势' })).toBeTruthy()
+    expect(screen.getByText('1252.57').className).toBe(css.currentPrice)
+    expect(screen.getByText('-4.55').parentElement?.className).toContain(css.downTone)
+    await waitFor(() => { expect(screen.getByRole('img', { name: '近期日 K 走势' })).toBeTruthy() })
     fireEvent.click(screen.getByRole('tab', { name: '相关新闻' }))
-    expect(screen.getByRole('link', { name: '公司公告' })).toBeTruthy()
+    await waitFor(() => { expect(screen.getByRole('link', { name: '公司公告' })).toBeTruthy() })
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
     await waitFor(() => { expect(screen.queryByRole('dialog')).toBeNull() })
+    view.unmount()
+  })
+  it('shows independent chart and news failures beside an available quote and retries them', async () => {
+    const overlay = new StockQuoteOverlay()
+    const candles = vi.fn(async (request: Parameters<IStockClient['candles']>[0], signal: AbortSignal) => stock.candles(request, signal))
+      .mockRejectedValueOnce(new Error('chart offline'))
+    const documents = vi.fn(async (request: Parameters<IStockClient['documents']>[0], signal: AbortSignal) => stock.documents(request, signal))
+      .mockRejectedValueOnce(new Error('news offline'))
+    const view = render(<QuoteOverlay overlay={overlay} stock={{ ...stock, candles, documents }} nameOf={() => '贵州茅台'}
+      watchlist={watchlist} add={add} toast={toast} dismissToast={() => {}}
+      t={(key: string) => copy[key] ?? key} />)
+    overlay.open({ thscode: '600519.SH', ticker: '600519', name: '贵州茅台' })
+    await waitFor(() => { expect(screen.getByText('1252.57')).toBeTruthy() })
+    await waitFor(() => { expect(screen.getByRole('alert').textContent).toContain('K 线加载失败') })
+    fireEvent.click(screen.getByRole('tab', { name: '相关新闻' }))
+    await waitFor(() => { expect(screen.getByRole('alert').textContent).toContain('资讯加载失败') })
+    fireEvent.click(screen.getByRole('button', { name: '重试' }))
+    await waitFor(() => { expect(screen.getByRole('link', { name: '公司公告' })).toBeTruthy() })
+    fireEvent.click(screen.getByRole('tab', { name: '近期日 K 走势' }))
+    fireEvent.click(screen.getByRole('button', { name: '重试' }))
+    await waitFor(() => { expect(screen.getByRole('img', { name: '近期日 K 走势' })).toBeTruthy() })
     view.unmount()
   })
 })

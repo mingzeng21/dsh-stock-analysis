@@ -38,6 +38,7 @@ export function apply(ctx: Context, config: Config): void {
     parameters: { query: { type: 'string', required: true, description: 'Company, concept, or research topic.' } },
     output: TEXT_OUTPUT,
     isConcurrencySafe: () => true,
+    // oxlint-disable-next-line typescript/require-await -- Tool execution returns a Promise and keeps read errors as rejections.
     execute: async (args) => {
       const query = args.query.trim().toLocaleLowerCase()
       if (query === '') return 'Search query is empty.'
@@ -66,6 +67,7 @@ export function apply(ctx: Context, config: Config): void {
     },
     output: TEXT_OUTPUT,
     isConcurrencySafe: () => true,
+    // oxlint-disable-next-line typescript/require-await -- Tool execution returns a Promise and keeps read errors as rejections.
     execute: async (args) => {
       const state = ctx.researchController.current()
       const page = state.pages.find(item => item.id === args.id)

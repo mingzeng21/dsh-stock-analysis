@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import type { CandleSeries, IndustryMatrix, SectorMatch } from '@deepseek-ai/dsh-api-stock-controller/client'
+import type { CandleSeries, IndustryDetail, IndustryMatrix, SectorMatch } from '@deepseek-ai/dsh-api-stock-controller/client'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import { afterEach, expect, it, vi } from 'vitest'
 import { IndustryMatrixDashboard } from '../src/client/IndustryMatrixDashboard.tsx'
+import css from '../src/client/IndustryMatrixDashboard.module.css'
 import { zh } from '../src/client/locales.ts'
 
 function series(code: string, closes: readonly number[]): CandleSeries {
@@ -39,4 +40,17 @@ it('exposes industry bubbles to keyboard selection and heat values to assistive 
   const heat = screen.getByRole('button', { name: /甲行业 · 横截面强度.*从早到晚的标准分/ })
   expect(heat.getAttribute('aria-label')).toContain('20/20:')
   expect(heat.getAttribute('aria-pressed')).toBe('true')
+})
+
+it('keeps an unchanged constituent quote neutral', () => {
+  const detail: IndustryDetail = {
+    board: { sector: alpha, constituents: [{ thscode: '600001.SH', ticker: '600001', name: '甲公司' }],
+      constituentsTruncated: false, history: series(alpha.thscode, [100]) },
+    quotes: { quotes: [{ thscode: '600001.SH', last: 100, change: 0, changePct: 0, open: 100, high: 100,
+      low: 100, prevClose: 100, volume: 100, turnover: 10_000 }] }, quotedCount: 1,
+  }
+  render(<IndustryMatrixDashboard data={data} detail={detail} selected={alpha.thscode} window={20}
+    loading={false} detailLoading={false} error={false} detailError={false}
+    onSelect={vi.fn()} onStock={vi.fn()} onWindowChange={vi.fn()} onRetry={vi.fn()} t={makeTranslate(zh)} />)
+  expect(screen.getByRole('button', { name: /甲公司/ }).querySelector('b')?.className).toBe(css.flat)
 })

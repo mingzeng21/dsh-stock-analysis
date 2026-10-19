@@ -5,6 +5,7 @@ import { IconLoadingOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import css from './HotRankDashboard.module.css'
 import type { DashboardScope } from './dashboard-inquiry.ts'
+import { marketTime } from './market-format.ts'
 
 interface Props {
   readonly data: DashboardData | null
@@ -33,7 +34,7 @@ function changeLabel(change: number | undefined, t: Props['t']): string {
 
 function dateLabel(timestamp: number | undefined, t: Props['t']): string {
   return timestamp === undefined ? t('hot.unknown')
-    : new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Shanghai' }).format(timestamp)
+    : marketTime(timestamp)
 }
 
 /** Render four independently observed lists and a stock's daily rank chart. */
@@ -43,6 +44,7 @@ export function HotRankDashboard({ data, loading, error, onRetry, loadHistory, t
   const [history, setHistory] = useState<HotRankHistory | null>(null)
   const [historyLoading, setHistoryLoading] = useState(false)
   const [historyError, setHistoryError] = useState(false)
+  const [historyRevision, retryHistory] = useState(0)
   useEffect(() => {
     if (data === null || focus === null || focus === undefined) return
     const contains = (item: (typeof VIEWS)[number]) => data.boards.some(board =>
@@ -60,8 +62,7 @@ export function HotRankDashboard({ data, loading, error, onRetry, loadHistory, t
   useEffect(() => {
     if (code === undefined) return
     const request = new AbortController()
-    setHistory(null)
-    onHistoryChange?.(null)
+    setHistory(previous => previous?.thscode === code ? previous : null)
     setHistoryLoading(true)
     setHistoryError(false)
     void loadHistory(code, request.signal).then((value) => {
@@ -72,12 +73,15 @@ export function HotRankDashboard({ data, loading, error, onRetry, loadHistory, t
       if (!request.signal.aborted) setHistoryLoading(false)
     })
     return () => { request.abort() }
-  }, [code, data, loadHistory, onHistoryChange])
+  }, [code, data, loadHistory, onHistoryChange, historyRevision])
 
-  if (data === null) return <div className={css.center}>
-    {loading ? <IconLoadingOutlineRegular className={css.spinner} size={24} />
-      : <div role="alert">{t('hot.loadFailure')} <button type="button" onClick={onRetry}>{t('hot.retry')}</button></div>}
-  </div>
+  if (data === null) return <div className={css.scroll}><div className={css.dashboard}>
+    <header className={css.hero}><div><span className={css.eyebrow}>{t('hot.eyebrow')}</span><h1>{t('hot.title')}</h1><p>{t('hot.subtitle')}</p></div></header>
+    <div className={css.center} role={loading ? 'status' : 'alert'}>
+      {loading ? <><IconLoadingOutlineRegular className={css.spinner} size={24} />{t('hot.loading')}</>
+        : <>{t('hot.loadFailure')} <button type="button" onClick={onRetry}>{t('hot.retry')}</button></>}
+    </div>
+  </div></div>
   if (board === undefined) return <div className={css.center} role="alert">{t('hot.loadFailure')}</div>
 
   const top = board.stocks[0]
@@ -92,7 +96,8 @@ export function HotRankDashboard({ data, loading, error, onRetry, loadHistory, t
       <div><span className={css.eyebrow}>{t('hot.eyebrow')}</span><h1>{t('hot.title')}</h1><p>{t('hot.subtitle')}</p></div>
       <div className={css.timeCard}><span>{t('hot.observedAt')}</span><strong>{dateLabel(board.asOf, t)}</strong></div>
     </header>
-    {error && <div className={css.notice} role="alert">{t('hot.refreshFailure')} <button type="button" onClick={onRetry}>{t('hot.retry')}</button></div>}
+    {loading && <div className={css.notice} role="status">{t('market.refreshing')}</div>}
+    {error && <div className={css.notice} role="alert">{t('hot.refreshFailure')}{board.asOf !== undefined && ` · ${t('market.updated', { time: marketTime(board.asOf) })}`} <button type="button" onClick={onRetry}>{t('hot.retry')}</button></div>}
     <nav className={css.tabs} aria-label={t('hot.views')}>
       {VIEWS.map(item => <button key={item.key} type="button" className={view.key === item.key ? css.active : undefined}
         aria-current={view.key === item.key ? 'page' : undefined} onClick={() => {
@@ -118,8 +123,7 @@ export function HotRankDashboard({ data, loading, error, onRetry, loadHistory, t
               onScopeChange?.({ kind: 'hot', board: view.kind, period: view.period, stock: item.thscode })
             }} aria-pressed={item.thscode === stock?.thscode}><strong>{item.name}</strong><small>{item.ticker}</small></button></td>
             <td><div className={css.heat}><span>{item.heat}</span><i style={{ width: `${Number(item.heat) / heatMax * 100}%` }} /></div></td>
-            <td className={item.rankChange === undefined ? undefined
-              : item.rankChange > 0 ? css.up : item.rankChange < 0 ? css.down : undefined}>
+            <td>
               {changeLabel(item.rankChange, t)}
               <small className={css.trend}>{item.rankTrend === 'up' ? t('hot.trendUp')
                 : item.rankTrend === 'down' ? t('hot.trendDown')
@@ -133,10 +137,12 @@ export function HotRankDashboard({ data, loading, error, onRetry, loadHistory, t
         <section className={css.chartPanel} aria-label={t('hot.history')}>
           <span className={css.eyebrow}>{t('hot.chartEyebrow')}</span><h2>{t('hot.history')}</h2>
           <p>{stock === undefined ? t('hot.select') : `${stock.name} · ${stock.thscode}`}</p>
-          {historyLoading && <div className={css.chartState}><IconLoadingOutlineRegular className={css.spinner} size={22} /></div>}
-          {!historyLoading && historyError && <div className={css.chartState} role="alert">{t('hot.historyFailure')}</div>}
+          {historyLoading && (points.length === 0
+            ? <div className={css.chartState} role="status"><IconLoadingOutlineRegular className={css.spinner} size={22} />{t('hot.historyLoading')}</div>
+            : <p className={css.historyNotice} role="status">{t('market.refreshing')}</p>)}
+          {!historyLoading && historyError && <div className={points.length === 0 ? css.chartState : css.historyNotice} role="alert">{t('hot.historyFailure')} <button type="button" onClick={() => { retryHistory(value => value + 1) }}>{t('hot.retry')}</button></div>}
           {!historyLoading && !historyError && points.length === 0 && <div className={css.chartState}>{t('hot.noHistory')}</div>}
-          {!historyLoading && points.length > 0 && <>
+          {points.length > 0 && <>
             <div className={css.chart}><span>{t('hot.bestRank')}</span><svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label={t('hot.history')}>
               <line x1="0" y1="12" x2="100" y2="12" /><line x1="0" y1="88" x2="100" y2="88" />
               <polyline points={chartPoints} />

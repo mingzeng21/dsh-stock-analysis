@@ -53,10 +53,12 @@ describe('research model tools', () => {
   it('returns long pages in successive bounded chunks', async () => {
     const { call } = await mount()
     const first = await call('research_read', { id: 'page-1' })
-    const firstValue = JSON.parse(String(first.value)) as { content: string; nextOffset: number }
+    if (typeof first.value !== 'string') throw new Error('research_read must return JSON text')
+    const firstValue = JSON.parse(first.value) as { content: string; nextOffset: number }
     expect(firstValue.nextOffset).toBeGreaterThan(0)
     const second = await call('research_read', { id: 'page-1', offset: firstValue.nextOffset })
-    const secondValue = JSON.parse(String(second.value)) as { content: string; nextOffset: null }
+    if (typeof second.value !== 'string') throw new Error('research_read must return JSON text')
+    const secondValue = JSON.parse(second.value) as { content: string; nextOffset: null }
     expect(firstValue.content + secondValue.content).toBe('证据'.repeat(10_000))
     expect(secondValue.nextOffset).toBeNull()
   })

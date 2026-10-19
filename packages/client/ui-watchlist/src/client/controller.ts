@@ -71,14 +71,14 @@ const DOCUMENT_LIMIT = 10
 /**
  * The published document channel. Every arm but the first names the channel its
  * state belongs to, so a switch that lands during a read cannot render one
- * channel's rows under another channel's tab, and the failed arm carries its
- * code the way every other read here does.
+ * channel's or instrument's rows under another selection. Loading and failure
+ * retain the last rows only for the same instrument and channel.
  */
 export type DocumentsSnapshot =
   | { readonly phase: 'idle' }
-  | { readonly phase: 'loading'; readonly kind: DocumentKind }
-  | { readonly phase: 'ready'; readonly kind: DocumentKind; readonly rows: readonly DocumentRow[] }
-  | { readonly phase: 'failed'; readonly kind: DocumentKind; readonly failure: string }
+  | { readonly phase: 'loading'; readonly name: string; readonly kind: DocumentKind; readonly rows?: readonly DocumentRow[] }
+  | { readonly phase: 'ready'; readonly name: string; readonly kind: DocumentKind; readonly rows: readonly DocumentRow[] }
+  | { readonly phase: 'failed'; readonly name: string; readonly kind: DocumentKind; readonly failure: string; readonly rows?: readonly DocumentRow[] }
 
 /** How much history each period asks for, in days. */
 const WINDOW_DAYS: Readonly<Record<CandleInterval, number>> = { '1d': 365, '1w': 1095, '1mo': 3650 }
@@ -266,25 +266,29 @@ export class WatchlistSurface {
 
   /**
    * Read one document channel for an instrument. Never rejects: a failure is
-   * published as a phase and a code, and a superseded read publishes nothing,
-   * so switching tabs twice leaves the last requested channel's state.
+   * published as a phase and a code, and a superseded read publishes nothing.
+   * A refresh retains rows only when its instrument and channel match.
    * @param name - instrument display name the channel is searched for.
    * @param kind - channel to read.
    * @returns completion of the read.
    */
   async loadDocuments(name: string, kind: DocumentKind): Promise<void> {
     const token = ++this.documentGeneration
-    this.documentStore.set({ phase: 'loading', kind })
+    const previous = this.documentStore.getSnapshot()
+    const retainedRows = previous.phase !== 'idle' && previous.name === name && previous.kind === kind
+      ? previous.rows : undefined
+    this.documentStore.set({ phase: 'loading', name, kind, ...(retainedRows === undefined ? {} : { rows: retainedRows }) })
     let rows
     try {
       rows = await this.stock.documents({ name, kind, size: DOCUMENT_LIMIT })
     } catch (error: unknown) {
       if (token !== this.documentGeneration) return
-      this.documentStore.set({ phase: 'failed', kind, failure: failureCode(error) })
+      this.documentStore.set({ phase: 'failed', name, kind, failure: failureCode(error),
+        ...(retainedRows === undefined ? {} : { rows: retainedRows }) })
       return
     }
     if (token !== this.documentGeneration) return
-    this.documentStore.set({ phase: 'ready', kind, rows })
+    this.documentStore.set({ phase: 'ready', name, kind, rows })
   }
 
   /**

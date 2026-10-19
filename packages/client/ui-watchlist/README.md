@@ -39,9 +39,9 @@ The row id and the main key are the same string by construction, because selecti
 
 The panel reads the list and its quote batch when it mounts, which is what returning to the panel does: the entry unmounts whenever another panel or the Conversation is selected. The rail's refresh control re-reads the batch, and the retry control on a failed batch does the same. There is no timer and no server push, because neither the watchlist nor the stock Remote publishes a subscription.
 
-The quote readiness stamp shows the local date and time. On desktop, drag the divider between the instrument list and detail to resize the list; the chosen width survives switching panels. The focused divider also supports Left and Right arrow keys, Home, and End. At narrow browser widths, the instrument list stacks above the detail and the panel scrolls vertically.
+The quote update stamp shows the Shanghai date and time. On desktop, drag the divider between the instrument list and detail to resize the list; the chosen width survives switching panels. The focused divider also supports Left and Right arrow keys, Home, and End. At narrow browser widths, the instrument list stacks above the detail and the panel scrolls vertically; selecting an instrument brings its detail into view.
 
-The rail shows the list count and highlights the selected instrument. The detail uses cards for the historical summary, quote snapshot, six quote metrics, documents, and analysis composer within one scrollable view. All surfaces use the client theme in light and dark mode.
+The rail shows the list count and highlights the selected instrument. The detail places the selected name, live price, change, and quote time together; historical summary values and six quote metrics use divided rows, while documents use a scan-friendly list within one scrollable view. Period return is red when positive, green when negative, and neutral at zero; drawdown remains a neutral risk metric. The analysis composer remains a distinct section. All surfaces use the client theme in light and dark mode.
 
 Every read is published with a phase, and a failed one carries the Remote failure code. A newer read supersedes an older one: a read that is no longer current publishes nothing, so a slow first read can never replace a fast second one.
 
@@ -65,7 +65,7 @@ Colors come from the same `--dsw-*` tokens the markup around the chart uses. A c
 
 ### Documents
 
-Three tabs — research, announcements, and news — list what the gateway publishes about the selected instrument. One read is issued per instrument and channel, and the controller drops a response a newer read has already superseded, so switching tabs quickly never renders one channel's rows under another's label. Each channel fails on its own: a failure renders its code and a retry inside that tab without emptying the chart beside it, and the last successful channel keeps its rows while a newer read is in flight.
+Three tabs — research, announcements, and news — list what the gateway publishes about the selected instrument. One read is issued per instrument and channel, and the controller drops a response a newer read has already superseded, so switching tabs quickly never renders one channel's rows under another's label. Each channel fails on its own: a failure renders its code and a retry inside that tab without emptying the chart beside it. The last successful rows remain visible during a refresh or failure only when the instrument and channel still match, with a notice that those rows are from the previous read.
 
 A row shows its title, publication date, and excerpt. The title links to the original document when the vendor supplied one; a channel that carries no links renders the same row as text rather than as a broken link. When the Host cut the excerpt at its configured bound, the row says so.
 

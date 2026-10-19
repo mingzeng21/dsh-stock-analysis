@@ -280,7 +280,7 @@ export interface SettingsControllerInternals {
 ## `@deepseek-ai/dsh-api-stock-controller`
 
 - `inject`: `stock`
-- `source`: [`packages/api/stock-controller/src/index.ts:126`](../packages/api/stock-controller/src/index.ts)
+- `source`: [`packages/api/stock-controller/src/index.ts:127`](../packages/api/stock-controller/src/index.ts)
 
 ```ts config-catalog
 /** Reads this service exposes and the caps a deployment applies to them. */

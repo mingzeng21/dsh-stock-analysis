@@ -50,16 +50,6 @@ async function encodeFile(file: File): Promise<string> {
   })
 }
 
-/** Generate the readable index view from published pages. */
-function indexMarkdown(state: ResearchSnapshot, heading: string, kindLabel: (kind: ResearchPageKind) => string): string {
-  const sections = KINDS.map((kind) => {
-    const rows = state.pages.filter(page => page.kind === kind)
-      .map(page => `- [[${page.title}]] — ${page.summary}`)
-    return `## ${kindLabel(kind)}\n${rows.join('\n') || '- '}`
-  })
-  return `${heading}\n\n${sections.join('\n\n')}`
-}
-
 /** Generate the chronological log view from committed activity. */
 function logMarkdown(state: ResearchSnapshot, heading: string): string {
   return `${heading}\n\n${[...state.activity].reverse().map(row =>
@@ -67,30 +57,56 @@ function logMarkdown(state: ResearchSnapshot, heading: string): string {
   ).join('\n\n')}`
 }
 
-/** Local link graph; clicking a node opens its page in the directory. */
-function Graph({ pages, active, onOpen, empty, limit }: {
+/** Avoid repeating a page title when its Markdown begins with the same heading. */
+function pageBody(page: ResearchPage): string {
+  const newline = page.markdown.indexOf('\n')
+  if (newline < 0 || page.markdown.slice(0, newline).trim() !== `# ${page.title}`) return page.markdown
+  return page.markdown.slice(newline + 1).trimStart()
+}
+
+/** Published page links, with a page list when no links have been recorded. */
+function Graph({ pages, active, onOpen, onCreate, kindLabel, empty, emptyTitle, createLabel, noLinks, limit }: {
   pages: readonly ResearchPage[]
   active?: string | undefined
   onOpen: (id: ResearchPageId) => void
+  onCreate: () => void
+  kindLabel: (kind: ResearchPageKind) => string
   empty: string
+  emptyTitle: string
+  createLabel: string
+  noLinks: string
   limit: string
 }) {
-  const visible = active === undefined ? pages.slice(0, 30) : pages.filter(page =>
-    page.id === active || page.links.includes(active as ResearchPageId)
-      || pages.find(item => item.id === active)?.links.includes(page.id),
-  ).slice(0, 30)
-  if (visible.length === 0) return <p className={css.empty}>{empty}</p>
+  const visible = pages.slice(0, 30)
+  if (visible.length === 0) return <div className={css.graphEmpty}>
+    <h2>{emptyTitle}</h2>
+    <p>{empty}</p>
+    <button type="button" onClick={onCreate}>{createLabel}</button>
+  </div>
   const points = new Map(visible.map((page, index) => {
     const angle = 2 * Math.PI * index / visible.length - Math.PI / 2
     return [page.id, { x: 400 + 270 * Math.cos(angle), y: 330 + 245 * Math.sin(angle) }] as const
   }))
+  const links = visible.flatMap(page => page.links.flatMap(target =>
+    points.has(target) ? [{ source: page.id, target }] : [],
+  ))
+  if (links.length === 0) return <div className={css.graphWrap}>
+    <p className={css.graphNote}>{noLinks}</p>
+    <div className={css.graphPageList}>
+      {visible.map(page => <button key={page.id} type="button" className={css.graphPage}
+        onClick={() => { onOpen(page.id) }}>
+        <span>{kindLabel(page.kind)}</span>
+        <strong>{page.title}</strong>
+      </button>)}
+    </div>
+  </div>
   return <div className={css.graphWrap}>
     <p>{limit}</p>
     <svg viewBox="0 0 800 660" className={css.graph} role="img" aria-label={limit}>
-      {visible.flatMap(page => page.links.map((target) => {
-        const from = points.get(page.id); const to = points.get(target)
-        return from && to ? <line key={`${page.id}-${target}`} x1={from.x} y1={from.y} x2={to.x} y2={to.y} className={css.edge} /> : null
-      }))}
+      {links.map(({ source, target }) => {
+        const from = points.get(source); const to = points.get(target)
+        return from && to ? <line key={`${source}-${target}`} x1={from.x} y1={from.y} x2={to.x} y2={to.y} className={css.edge} /> : null
+      })}
       {visible.map((page) => {
         const point = points.get(page.id)
         if (point === undefined) return null
@@ -113,6 +129,7 @@ export function ResearchPanel(props: ResearchPanelProps) {
   const phase = usePhase(value => value)
   const [tab, setTab] = useState<'directory' | 'study' | 'graph'>('directory')
   const [selection, setSelection] = useState<Selection>({ type: 'index' })
+  const [directoryOpen, setDirectoryOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [form, setForm] = useState<'source' | 'page' | 'template' | null>(null)
   const [title, setTitle] = useState('')
@@ -130,6 +147,7 @@ export function ResearchPanel(props: ResearchPanelProps) {
   useEffect(() => { void load() }, [load])
 
   const selectedPage = selection.type === 'page' ? state.pages.find(page => page.id === selection.id) : undefined
+  const libraryEmpty = state.pages.length === 0 && state.sources.length === 0 && state.proposals.length === 0
   const selectedSource = selection.type === 'source' ? state.sources.find(source => source.id === selection.id) : undefined
   const selectedTemplate = selection.type === 'template' ? KINDS.find(value => value === selection.id) : undefined
   const backlinks = selectedPage === undefined ? [] : state.pages.filter(page => page.links.includes(selectedPage.id))
@@ -144,6 +162,7 @@ export function ResearchPanel(props: ResearchPanelProps) {
   }
   const beginSource = () => { setTitle(''); setText(''); setUrl(''); setDate(''); setFile(null); setForm('source'); setError(null) }
   const beginTemplate = (value: ResearchPageKind) => { setKind(value); setText(state.templates[value]); setForm('template'); setError(null) }
+  const openSelection = (next: Selection) => { setSelection(next); setForm(null); setDirectoryOpen(false) }
   const perform = async (operation: () => Promise<void>): Promise<void> => {
     setBusy(true); setError(null)
     try { await operation(); setForm(null) } catch { setError(t('error.save')) } finally { setBusy(false) }
@@ -204,40 +223,55 @@ export function ResearchPanel(props: ResearchPanelProps) {
       <h1>{t('title')}</h1>
       <nav className={css.tabs} aria-label={t('title')}>
         {(['directory', 'study', 'graph'] as const).map(value => <button key={value} type="button"
-          aria-current={tab === value ? 'page' : undefined} onClick={() => { setTab(value); setForm(null) }}>
+          aria-current={tab === value ? 'page' : undefined} onClick={() => { setTab(value); setForm(null); setDirectoryOpen(false) }}>
           {t(`tab.${value}`)}
         </button>)}
       </nav>
     </header>
     {phase === 'loading' ? <p className={css.empty}>{t('loading')}</p> : phase === 'error' ?
       <div className={css.empty}><p>{t('error.load')}</p><button onClick={() => { void load() }}>{t('retry')}</button></div> :
-      tab === 'directory' ? <div className={css.workspace}>
-        <aside className={css.tree} aria-label={t('tab.directory')}>
+      tab === 'directory' && libraryEmpty && form === null ? <main className={css.libraryEmpty}>
+        <div className={css.emptyIntro}>
+          <h2>{t('library.emptyTitle')}</h2>
+          <p>{t('library.emptyBody')}</p>
+          <div className={css.emptyActions}>
+            <button type="button" className={css.primaryAction} onClick={beginSource}>{t('new.source')}</button>
+            <button type="button" onClick={() => { setTab('study') }}>{t('study.start')}</button>
+            <button type="button" onClick={() => { setSelection({ type: 'index' }); beginPage() }}>{t('new.page')}</button>
+          </div>
+        </div>
+      </main> : tab === 'directory' ? <div className={css.workspace}>
+        <div className={css.directoryToggle}>
+          <button type="button" aria-expanded={directoryOpen} aria-controls="research-directory"
+            onClick={() => { setDirectoryOpen(open => !open) }}>{t('dir.browse')}</button>
+        </div>
+        <aside id="research-directory" className={`${css.tree} ${directoryOpen ? css.treeOpen : ''}`} aria-label={t('tab.directory')}>
           <div className={css.treeActions}>
-            <button onClick={beginSource}>{t('new.source')}</button>
-            <button onClick={() => { setSelection({ type: 'index' }); beginPage() }}>{t('new.page')}</button>
+            <button onClick={() => { setDirectoryOpen(false); beginSource() }}>{t('new.source')}</button>
+            <button onClick={() => { setSelection({ type: 'index' }); setDirectoryOpen(false); beginPage() }}>{t('new.page')}</button>
           </div>
           <input aria-label={t('search')} placeholder={t('search')} value={search} onChange={(event) => { setSearch(event.target.value) }} />
           <h2>{t('dir.raw')}</h2>
-          <div className={css.folder}>{t('dir.rawSources')}</div>
           {state.sources.map(source => <button key={source.id} className={css.treeItem}
             aria-current={selection.id === source.id ? 'page' : undefined}
-            onClick={() => { setSelection({ type: 'source', id: source.id }); setForm(null) }}>{source.title}</button>)}
-          <div className={css.folder}>{t('dir.rawAssets')}</div>
+            onClick={() => { openSelection({ type: 'source', id: source.id }) }}>{source.title}</button>)}
+          {state.sources.some(source => source.file !== undefined) && <div className={css.folder}>{t('dir.rawAssets')}</div>}
           {state.sources.filter(source => source.file !== undefined).map(source => <button key={`asset-${source.id}`}
-            className={css.treeItem} onClick={() => { setSelection({ type: 'source', id: source.id }); setForm(null) }}>{source.file?.name}</button>)}
+            className={css.treeItem} onClick={() => { openSelection({ type: 'source', id: source.id }) }}>{source.file?.name}</button>)}
           <h2>{t('dir.wiki')}</h2>
-          <button className={css.treeItem} onClick={() => { setSelection({ type: 'index' }); setForm(null) }}>{t('dir.index')}</button>
-          <button className={css.treeItem} onClick={() => { setSelection({ type: 'log' }); setForm(null) }}>{t('dir.log')}</button>
+          <button className={css.treeItem} aria-current={selection.type === 'index' ? 'page' : undefined}
+            onClick={() => { openSelection({ type: 'index' }) }}>{t('dir.index')}</button>
+          <button className={css.treeItem} aria-current={selection.type === 'log' ? 'page' : undefined}
+            onClick={() => { openSelection({ type: 'log' }) }}>{t('dir.log')}</button>
           {KINDS.map(value => <div key={value}>
             <div className={css.folder}>{t(`dir.${value === 'entity' ? 'entities' : value === 'concept' ? 'concepts' : value === 'topic' ? 'topics' : 'sources'}`)}</div>
             {filtered.filter(page => page.kind === value).map(page => <button key={page.id} className={css.treeItem}
               aria-current={selection.id === page.id ? 'page' : undefined}
-              onClick={() => { setSelection({ type: 'page', id: page.id }); setForm(null) }}>{page.title}</button>)}
+              onClick={() => { openSelection({ type: 'page', id: page.id }) }}>{page.title}</button>)}
           </div>)}
           <h2>{t('dir.templates')}</h2>
           {KINDS.map(value => <button key={value} className={css.treeItem}
-            onClick={() => { setSelection({ type: 'template', id: value }); setForm(null) }}>{t('dir.templateFile', { kind: value })}</button>)}
+            onClick={() => { openSelection({ type: 'template', id: value }) }}>{t('dir.templateFile', { kind: t(`kind.${value}`) })}</button>)}
         </aside>
         <main className={css.content}>
           {state.proposals.length > 0 && <section className={css.proposals}>
@@ -250,20 +284,38 @@ export function ResearchPanel(props: ResearchPanelProps) {
             </div>)}
           </section>}
           {form === null ? <>
-            {selection.type === 'index' && <MarkdownText text={indexMarkdown(state, t('index.heading'), value => t(`kind.${value}`))} labels={markdownLabels} />}
+            {selection.type === 'index' && <div className={css.libraryIndex}>
+              <header className={css.indexHead}>
+                <h2>{t('index.title')}</h2>
+                <p>{t('index.count', { count: String(filtered.length) })}</p>
+              </header>
+              {KINDS.map((value) => {
+                const pages = filtered.filter(page => page.kind === value)
+                if (pages.length === 0) return null
+                return <section key={value} className={css.indexGroup}>
+                  <h3>{t(`kind.${value}`)} <span>{pages.length}</span></h3>
+                  {pages.map(page => <button key={page.id} type="button" className={css.indexRow}
+                    onClick={() => { openSelection({ type: 'page', id: page.id }) }}>
+                    <strong>{page.title}</strong>
+                    <span>{page.summary}</span>
+                  </button>)}
+                </section>
+              })}
+              {filtered.length === 0 && <p className={css.muted}>{t('index.noMatches')}</p>}
+            </div>}
             {selection.type === 'log' && <MarkdownText text={logMarkdown(state, t('log.heading'))} labels={markdownLabels} />}
             {selectedSource && <article>
               <h2>{selectedSource.title}</h2><p className={css.muted}>{t('source.immutable')}</p>
               {selectedSource.url && <p><a href={selectedSource.url} target="_blank" rel="noreferrer">{selectedSource.url}</a></p>}
               {selectedSource.text && <MarkdownText text={selectedSource.text} labels={markdownLabels} />}
-              {selectedSource.file && <p><button onClick={() => { downloadSource(selectedSource) }}>{t('source.file', { name: selectedSource.file?.name ?? '' })}</button></p>}
+              {selectedSource.file && <p><button onClick={() => { downloadSource(selectedSource) }}>{t('source.file', { name: selectedSource.file.name })}</button></p>}
               <button disabled={busy} onClick={() => { void perform(() => runSource(selectedSource)) }}>{t('source.compile')}</button>
               {!selectedSource.text && !selectedSource.file && <p>{t('source.urlOnly')}</p>}
             </article>}
             {selectedPage && <article>
               <div className={css.articleHead}><div><h2>{selectedPage.title}</h2><p className={css.muted}>{t('page.revision', { revision: String(selectedPage.revision) })} · {selectedPage.summary}</p></div>
                 <button onClick={() => { beginPage(selectedPage) }}>{t('page.edit')}</button></div>
-              <MarkdownText text={selectedPage.markdown} labels={markdownLabels} />
+              <MarkdownText text={pageBody(selectedPage)} labels={markdownLabels} />
               {state.history.filter(item => item.id === selectedPage.id).length > 0 && <details>
                 <summary>{t('page.history')}</summary>
                 {state.history.filter(item => item.id === selectedPage.id).map(item => <div key={`${item.id}-${item.revision}`}>
@@ -278,7 +330,7 @@ export function ResearchPanel(props: ResearchPanelProps) {
               <h3>{t('page.backlinks')}</h3>
               {backlinks.map(page => <button key={page.id} className={css.link} onClick={() => { setSelection({ type: 'page', id: page.id }) }}>{page.title}</button>)}
             </article>}
-            {selectedTemplate && <article><div className={css.articleHead}><h2>{t('dir.templateFile', { kind: selectedTemplate })}</h2><button onClick={() => { beginTemplate(selectedTemplate) }}>{t('form.template')}</button></div>
+            {selectedTemplate && <article><div className={css.articleHead}><h2>{t('dir.templateFile', { kind: t(`kind.${selectedTemplate}`) })}</h2><button onClick={() => { beginTemplate(selectedTemplate) }}>{t('form.template')}</button></div>
               <pre className={css.rawText}>{state.templates[selectedTemplate]}</pre></article>}
           </> : <form className={css.form} onSubmit={submit}>
             <h2>{t(form === 'source' ? 'new.source' : form === 'page' ? 'new.page' : 'form.template')}</h2>
@@ -324,6 +376,9 @@ export function ResearchPanel(props: ResearchPanelProps) {
             <button key={study.id} disabled={study.sessionId === undefined}
               onClick={() => { openStudy(study) }}>{study.title}</button>)}</div>}
       </main> : <Graph pages={state.pages} active={selection.type === 'page' ? selection.id : undefined}
-        onOpen={(id) => { setSelection({ type: 'page', id }); setTab('directory') }} empty={t('graph.empty')} limit={t('graph.limit')} />}
+        onOpen={(id) => { setSelection({ type: 'page', id }); setTab('directory') }}
+        onCreate={() => { setSelection({ type: 'index' }); setTab('directory'); beginPage() }}
+        kindLabel={value => t(`kind.${value}`)} noLinks={t('graph.noLinks')}
+        emptyTitle={t('graph.emptyTitle')} empty={t('graph.empty')} createLabel={t('new.page')} limit={t('graph.limit')} />}
   </section>
 }

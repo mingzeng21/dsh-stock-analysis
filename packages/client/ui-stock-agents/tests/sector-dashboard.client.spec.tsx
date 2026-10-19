@@ -5,6 +5,7 @@ import type { SectorCatalog, SectorDashboard as SectorData, SectorMatch } from '
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import { afterEach, expect, it, vi } from 'vitest'
 import { SectorDashboard } from '../src/client/SectorDashboard.tsx'
+import css from '../src/client/SectorDashboard.module.css'
 import { zh } from '../src/client/locales.ts'
 
 const sector: SectorMatch = { thscode: '886001.TI', name: '机器人概念', kind: 'concept' }
@@ -79,7 +80,7 @@ it('draws daily opening and closing candles with highs, lows, and volume', () =>
   expect(chart.querySelectorAll('rect')).toHaveLength(6)
   expect(chart.querySelectorAll('title')[0]?.textContent).toContain('开盘 98 · 最高 105 · 最低 97 · 收盘 103')
   expect(chart.querySelectorAll('title')[1]?.textContent).toContain('开盘 104 · 最高 106 · 最低 98 · 收盘 99')
-  expect(document.querySelector('[class*="chartLegend"]')?.textContent).toContain('上涨下跌成交量')
+  expect(document.querySelector('[class*="chartLegend"]')?.textContent).toContain('收高于开收低于开收平于开成交量')
 })
 
 it('keeps loading, failure, empty series, and capped members explicit', () => {
@@ -135,7 +136,10 @@ it('shows one flat point, a falling window, and an empty selected window', () =>
   const flat: SectorData = { ...data, history: { ...data.history,
     candles: [candle(1_780_000_000_000, 100)] } }
   const { rerender, props } = mount({ data: flat, selected: sector })
-  expect(screen.getByText('+0%')).toBeTruthy()
+  expect(screen.getByText('0%').className).toBe(css.flat)
+  const close = document.querySelector(`.${css.chartSummary} span:nth-child(5) b`)
+  expect(close?.className).toBe('')
+  expect(screen.getByRole('img', { name: '指数日 K 线' }).querySelector(`g.${css.flatCandle}`)).toBeTruthy()
   const falling: SectorData = { ...data, history: { ...data.history,
     candles: [candle(1_780_000_000_000, 103), candle(1_780_086_400_000, 100)] } }
   rerender(<SectorDashboard {...props} data={falling} selected={sector} />)

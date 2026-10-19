@@ -456,7 +456,7 @@ describe('WatchlistSurface.loadDocuments', () => {
     expect(surface.documents.getSnapshot()).toEqual({ phase: 'idle' })
     await surface.loadDocuments('贵州茅台', 'news')
     expect(requested).toEqual([{ name: '贵州茅台', kind: 'news', size: 10 }])
-    expect(surface.documents.getSnapshot()).toEqual({ phase: 'ready', kind: 'news', rows })
+    expect(surface.documents.getSnapshot()).toEqual({ phase: 'ready', name: '贵州茅台', kind: 'news', rows })
   })
 
   it('publishes a failed read as its Remote code, naming the channel it was for', async () => {
@@ -469,6 +469,29 @@ describe('WatchlistSurface.loadDocuments', () => {
     await surface.loadDocuments('贵州茅台', 'report')
     expect(failureOf(surface.documents.getSnapshot())).toBe('stock/rate-limited')
     expect(surface.documents.getSnapshot()).toMatchObject({ phase: 'failed', kind: 'report' })
+  })
+
+  it('keeps prior rows during a same-instrument refresh failure but clears them for another instrument', async () => {
+    const rows = [documentRow('report', '旧研报')]
+    const gate = deferred()
+    let reads = 0
+    const surface = new WatchlistSurface(watchlistStub(), {
+      ...stockStub(),
+      documents: async () => {
+        reads += 1
+        if (reads === 1) return rows
+        if (reads === 2) throw new RemoteError('stock/rate-limited', 'vendor throttled', { endpoint: 'iwencai.search.report' })
+        await gate.promise
+        return []
+      },
+    })
+    await surface.loadDocuments('贵州茅台', 'report')
+    await surface.loadDocuments('贵州茅台', 'report')
+    expect(surface.documents.getSnapshot()).toMatchObject({ phase: 'failed', name: '贵州茅台', rows })
+    const next = surface.loadDocuments('中国平安', 'report')
+    expect(surface.documents.getSnapshot()).toEqual({ phase: 'loading', name: '中国平安', kind: 'report' })
+    gate.resolve()
+    await next
   })
 
   it('publishes nothing when a superseded channel read then succeeds', async () => {
@@ -494,6 +517,7 @@ describe('WatchlistSurface.loadDocuments', () => {
     await current
     expect(surface.documents.getSnapshot()).toEqual({
       phase: 'ready',
+      name: '贵州茅台',
       kind: 'announcement',
       rows: [documentRow('announcement', '公告')],
     })

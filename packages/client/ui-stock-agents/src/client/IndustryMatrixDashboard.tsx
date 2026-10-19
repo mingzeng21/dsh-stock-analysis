@@ -1,9 +1,11 @@
 /** Industry cross-section, acceleration bubbles, heat strip, and selected membership. */
 import { useMemo, useState } from 'react'
 import type { IndustryDetail, IndustryMatrix, SectorMatch } from '@deepseek-ai/dsh-api-stock-controller/client'
+import { IconLoadingOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import { industryPoints } from './industry-strength.ts'
 import css from './IndustryMatrixDashboard.module.css'
+import { marketTime } from './market-format.ts'
 
 interface Props {
   readonly data: IndustryMatrix | null
@@ -64,9 +66,11 @@ export function IndustryMatrixDashboard({ data, detail, selected, loading, detai
       {([5, 20, 60] as const).map(days => <button type="button" key={days} aria-pressed={window === days}
         onClick={() => { onWindowChange(days) }}>{days}{t('industry.daySuffix')}</button>)}
     </div></header>
-    {error && <div className={css.notice} role="alert">{t('industry.loadFailure')} <button type="button" onClick={onRetry}>{t('industry.retry')}</button></div>}
-    {loading && data === null && <div className={css.empty}>{t('industry.loading')}</div>}
+    {loading && data !== null && <div className={css.notice} role="status">{t('market.refreshing')}</div>}
+    {error && <div className={css.notice} role="alert">{t('industry.loadFailure')}{data?.benchmark.asOf !== undefined && ` · ${t('market.updated', { time: marketTime(data.benchmark.asOf) })}`} <button type="button" onClick={onRetry}>{t('industry.retry')}</button></div>}
+    {loading && data === null && <div className={css.loading} role="status"><IconLoadingOutlineRegular className={css.spinner} size={24} />{t('industry.loading')}</div>}
     {data !== null && <>
+      {data.benchmark.asOf !== undefined && <p className={css.dataTime}>{t('market.updated', { time: marketTime(data.benchmark.asOf) })}</p>}
       <div className={css.metrics}>
         <div><span>{t('industry.strong')}</span><strong>{points.filter(point => point.strength >= 60).length}<small> / {points.length}</small></strong></div>
         <div><span>{t('industry.accelerating')}</span><strong>{points.filter(point => point.acceleration > 0).length}<small> / {points.length}</small></strong></div>
@@ -121,7 +125,7 @@ export function IndustryMatrixDashboard({ data, detail, selected, loading, detai
             <p className={css.note}>{t('industry.quoteCoverage')} {quotes.length} / {detail.board.constituents.length} · {t('industry.rising')} {gainers} · {t('industry.falling')} {losers}</p>
             <div className={css.stocks}>{selectedQuotes.map(quote => <button type="button" key={quote.thscode}
               onClick={() => { onStock(quote.thscode) }}><span>{names.get(quote.thscode) ?? quote.thscode}</span>
-              <b className={quote.changePct >= 0 ? css.up : css.down}>{quote.changePct >= 0 ? '+' : ''}{fmt.format(quote.changePct)}%</b></button>)}</div>
+              <b className={quote.changePct > 0 ? css.up : quote.changePct < 0 ? css.down : css.flat}>{quote.changePct > 0 ? '+' : ''}{fmt.format(quote.changePct)}%</b></button>)}</div>
           </>}
         </section>
       </div>
@@ -138,7 +142,7 @@ export function IndustryMatrixDashboard({ data, detail, selected, loading, detai
             if (sector) onSelect(sector)
           }}>
           <span>{point.name}</span><span>{fmt.format(point.strength)}</span><div>{point.heat.map((value, index) => <i key={index}
-            className={value === null ? css.missing : value >= 0 ? css.hot : css.cold}
+            className={value === null ? css.missing : value > 0 ? css.hot : value < 0 ? css.cold : css.flatHeat}
             title={`${index + 1}/${point.heat.length} · ${value === null ? t('industry.heatMissing') : fmt.format(value)}`}
             aria-hidden="true" style={value === null ? undefined : { opacity: .2 + Math.abs(value) / 2 * .8 }} />)}</div></button>)}</div></div>
       </section>

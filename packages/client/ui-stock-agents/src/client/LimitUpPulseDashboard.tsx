@@ -1,11 +1,13 @@
 /** Closing-limit market pulse with synchronized trend, ladder, and reason views. */
 import { useEffect, useState } from 'react'
 import type { LimitUpPulseDashboard as PulseData, LimitUpPulseDay, LimitUpPulseStock } from '@deepseek-ai/dsh-api-stock-controller/client'
+import { IconLoadingOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { DashboardScope } from './dashboard-inquiry.ts'
 import css from './LimitUpPulseDashboard.module.css'
-import type { StockAgentsKey } from './locales.ts'
+import { marketTime } from './market-format.ts'
+import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 
-type Translate = (key: StockAgentsKey) => string
+type Translate = TranslateNS<'stockAgents'>
 type Mode = 'absolute' | 'percentile'
 const LEVELS = [1, 2, 3, 4, 5, 6, 7] as const
 const CHART = { width: 1060, left: 67, right: 1030, top: 46, countBottom: 195, heatTop: 233, heatRow: 31, sealTop: 457, sealBottom: 528 }
@@ -84,10 +86,13 @@ export function LimitUpPulseDashboard({ data, loading, error, onRetry, onScopeCh
     setSelectedStock(stock.thscode)
     onScopeChange({ kind: 'pulse', date: selected.date, stock: stock.thscode })
   }
-  if (loading && data === null) return <div className={css.center}><span className={css.spinner} aria-label={t('pulse.loading')}>◌</span></div>
-  if (data === null) return <div className={css.center}>{error
-    ? <div className={css.empty}><p>{t('pulse.loadFailure')}</p><button type="button" onClick={onRetry}>{t('pulse.retry')}</button></div>
-    : t('pulse.empty')}</div>
+  if (data === null) return <div className={css.scroll}><div className={css.dashboard}>
+    <header className={css.hero}><div><span className={css.eyebrow}>{t('pulse.eyebrow')}</span><h1>{t('pulse.title')}</h1><p>{t('pulse.subtitle')}</p></div></header>
+    <div className={css.center} role={loading ? 'status' : error ? 'alert' : undefined}>{loading
+      ? <><IconLoadingOutlineRegular className={css.spinner} size={24} />{t('pulse.loading')}</>
+      : error ? <div className={css.empty}><p>{t('pulse.loadFailure')}</p><button type="button" onClick={onRetry}>{t('pulse.retry')}</button></div>
+        : t('pulse.empty')}</div>
+  </div></div>
   const facts = days.map(pulseFacts)
   const current = selected === undefined ? undefined : pulseFacts(selected)
   const previous = selected === undefined ? undefined : days[days.indexOf(selected) - 1]
@@ -141,16 +146,18 @@ export function LimitUpPulseDashboard({ data, loading, error, onRetry, onScopeCh
         onChange={(event) => { const day = days.find(item => item.date === event.target.value); if (day !== undefined) selectDay(day) }}>
         {days.map(day => <option key={day.date} value={day.date}>{day.date}</option>)}
       </select></label>
+      {data.asOf !== undefined && <small>{t('market.updated', { time: marketTime(data.asOf) })}</small>}
       <div className={css.mode} role="group" aria-label={t('pulse.displayMode')}>
         <button type="button" aria-pressed={mode === 'absolute'} onClick={() => { setMode('absolute') }}>{t('pulse.absolute')}</button>
         <button type="button" aria-pressed={mode === 'percentile'} onClick={() => { setMode('percentile') }}>{t('pulse.percentile')}</button>
       </div><button type="button" onClick={download}>{t('pulse.export')}</button></div>
     </header>
-    {error && <p className={css.notice} role="alert">{t('pulse.refreshFailure')}</p>}
+    {loading && <p className={css.notice} role="status">{t('market.refreshing')}</p>}
+    {error && <p className={css.notice} role="alert">{t('pulse.refreshFailure')} <button type="button" onClick={onRetry}>{t('pulse.retry')}</button></p>}
     <section className={css.metrics} aria-label={t('pulse.overview')}>
       <div><span>{t('pulse.mood')}</span><strong className={css.accent}>{mood}</strong><small>{previous === undefined ? t('pulse.noPrevious') : t('pulse.dayChange')}</small></div>
-      <div><span>{t('pulse.limitCount')}</span><strong className={css.rose}>{current === undefined ? '—' : `${selected?.poolTruncated ? '≥' : ''}${current.count}`}</strong></div>
-      <div><span>{t('pulse.retention')}</span><strong className={css.rose}>{current?.retention === null || current === undefined ? '—' : `${current.retention.toFixed(1)}%`}</strong><small>{t('pulse.returnedSample')}</small></div>
+      <div><span>{t('pulse.limitCount')}</span><strong>{current === undefined ? '—' : `${selected?.poolTruncated ? '≥' : ''}${current.count}`}</strong></div>
+      <div><span>{t('pulse.retention')}</span><strong>{current?.retention === null || current === undefined ? '—' : `${current.retention.toFixed(1)}%`}</strong><small>{t('pulse.returnedSample')}</small></div>
       <div><span>{t('pulse.continuous')}</span><strong>{current === undefined ? '—' : `${selected?.poolTruncated ? '≥' : ''}${current.continuous}`}</strong></div>
       <div><span>{t('pulse.highest')}</span><strong>{current?.highest === undefined || current.highest === 0 ? '—' : `${current.highest} ${t('pulse.boards')}`}</strong></div>
       <div><span>{t('pulse.totalSeal')}</span><strong>{current?.seal === null || current === undefined ? '—'
@@ -225,8 +232,8 @@ export function LimitUpPulseDashboard({ data, loading, error, onRetry, onScopeCh
       <section className={css.panel}><div className={css.panelHead}><div><h2>{t('pulse.change')}</h2><p>{t('pulse.changeDescription')}</p></div><strong className={css.accent}>{mood}</strong></div>
         {changes.length === 0 ? <p className={css.empty}>{previous === undefined ? t('pulse.noPrevious') : t('pulse.notComparable')}</p>
           : <div className={css.changes}>{changes.map(item => <div key={item.label}>
-            <span>{item.label}</span><div className={css.changeTrack}><i className={item.value >= 0 ? css.positive : css.negative} style={{ width: `${Math.abs(item.value) / maxChange * 50}%`, left: item.value >= 0 ? '50%' : `${50 - Math.abs(item.value) / maxChange * 50}%` }} /></div>
-            <strong>{item.value > 0 ? '+' : ''}{item.value.toFixed(item.suffix === '' ? 0 : 1)}{item.suffix}</strong>
+            <span>{item.label}</span><div className={css.changeTrack}>{item.value !== 0 && <i className={item.value > 0 ? css.positive : css.negative} style={{ width: `${Math.abs(item.value) / maxChange * 50}%`, left: item.value > 0 ? '50%' : `${50 - Math.abs(item.value) / maxChange * 50}%` }} />}</div>
+            <strong className={item.value > 0 ? css.positiveValue : item.value < 0 ? css.negativeValue : css.flatValue}>{item.value > 0 ? '+' : ''}{item.value.toFixed(item.suffix === '' ? 0 : 1)}{item.suffix}</strong>
           </div>)}</div>}
       </section>
       <section className={css.panel}><div className={css.panelHead}><div><h2>{t('pulse.reasons')}</h2><p>{t('pulse.reasonDescription')}</p></div></div>

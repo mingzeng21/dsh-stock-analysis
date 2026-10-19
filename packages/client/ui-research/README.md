@@ -23,11 +23,13 @@ This browser plugin registers the fourth global sidebar row, Personal Research L
 
 ## Use this package
 
-The directory shows immutable `raw/sources/` and `raw/assets/`, published pages under `wiki/entities/`, `wiki/concepts/`, `wiki/topics/`, and `wiki/sources/`, derived `wiki/index.md` and `wiki/log.md`, and editable page templates. Users can add text, URLs, and files; view source text; download the original file; create and revise pages; assign sources and links; inspect and restore earlier revisions; and review or discard Agent proposals. A proposal preview shows its complete Markdown before publication.
+The directory groups immutable sources, attachments, published entities, concepts, topics, source notes, an index, an activity log, and editable page templates under reader-facing labels. The index groups published pages by kind and opens each page directly. The underlying `raw/` and `wiki/` paths remain durable record views. Users can add text, URLs, and files; view source text; download the original file; create and revise pages; assign sources and links; inspect and restore earlier revisions; and review or discard Agent proposals. A proposal preview shows its complete Markdown before publication.
+
+An empty library opens with actions to add a source, start a topic study, or create a page. Once content exists, the directory becomes available. On narrow screens, readers can open the directory above a full-width article.
 
 Topic research starts from one topic field. The panel opens a `stock-analysis` Session and asks the Agent for a complete L1–L5 report: end demand, supply-chain stack, hard-to-replace bottlenecks, cross-checked evidence, then directional conclusions with risks, falsifiers, and monitoring points. Follow-up messages and corrections remain in that Session; the request tells the Agent to issue a revised complete report. A completed L1–L5 report in that Session shows **Add to knowledge base** beneath the answer. Clicking it retains the exact report as an immutable source once per Session Turn and queues a second Agent request to propose source, topic, and supported entity or concept pages with links. The Agent's page edits remain proposals until the user publishes them. Starting source compilation also asks the Agent to read the saved source and stage wiki changes.
 
-The graph displays up to 30 published pages and their explicit links. Selecting a node opens the page; a selected page narrows the graph to its neighboring pages. It does not infer unsupported relationships from prose.
+The graph displays up to 30 published pages and their explicit links. Selecting a node opens the page. When pages have no explicit links, it presents a page list instead of isolated nodes. It does not infer unsupported relationships from prose. When the graph has no pages, it offers a direct path to create one.
 
 ## Understand the implementation
 

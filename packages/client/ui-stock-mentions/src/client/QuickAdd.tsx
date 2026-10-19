@@ -15,7 +15,7 @@ export function StockAddToast({ notice, dismiss }: {
   notice: ObservableSnapshot<StockToastNotice | null>
   dismiss: (seq: number) => void
 }) {
-  const current = useSyncExternalStore(notice.subscribe, notice.getSnapshot, notice.getSnapshot)
+  const current = useSyncExternalStore(fn => notice.subscribe(fn), () => notice.getSnapshot())
   return current === null ? null : <Toast key={current.seq} text={current.text}
     {...current.success ? { tone: 'success' as const } : {}}
     onDone={() => { dismiss(current.seq) }} />
@@ -29,10 +29,8 @@ export function QuickAddButton({ hit, watchlist, add, t, compact = false }: {
   t: PropsLocale<'stockMentions'>['t']
   compact?: boolean
 }) {
-  const entries = useSyncExternalStore(watchlist.entries.subscribe,
-    watchlist.entries.getSnapshot, watchlist.entries.getSnapshot)
-  const pending = useSyncExternalStore(add.pending.subscribe,
-    add.pending.getSnapshot, add.pending.getSnapshot)
+  const entries = useSyncExternalStore(fn => watchlist.entries.subscribe(fn), () => watchlist.entries.getSnapshot())
+  const pending = useSyncExternalStore(fn => add.pending.subscribe(fn), () => add.pending.getSnapshot())
   const added = entries.some(entry => entry.thscode === hit.thscode)
   const busy = pending.has(hit.thscode)
   const label = t(added ? 'watchlist.inList' : busy ? 'watchlist.adding' : 'watchlist.add')

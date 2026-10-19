@@ -5,6 +5,7 @@ import { IconLoadingOutlineRegular } from '@deepseek-ai/dsh-client-ui-primitives
 import type { TranslateNS } from '@deepseek-ai/dsh-client-ui-slots'
 import type { DashboardScope } from './dashboard-inquiry.ts'
 import css from './SectorDashboard.module.css'
+import { marketTime } from './market-format.ts'
 
 interface Props {
   readonly catalog: SectorCatalog | null
@@ -109,15 +110,17 @@ export function SectorDashboard({ catalog, data, loading, error, selected, onSel
       </div>}
       {catalog?.truncated && <p className={css.note}>{t('sector.catalogTruncated')}</p>}
     </form>
-    {loading && <div className={css.center}><IconLoadingOutlineRegular className={css.spinner} size={24} /></div>}
-    {error && <div className={css.notice} role="alert">{data === null ? t('sector.loadFailure') : t('sector.refreshFailure')} <button type="button" onClick={onRetry}>{t('sector.retry')}</button></div>}
+    {loading && (data === null ? <div className={css.center}><IconLoadingOutlineRegular className={css.spinner} size={24} /></div>
+      : <div className={css.notice} role="status">{t('market.refreshing')}</div>)}
+    {error && <div className={css.notice} role="alert">{data === null ? t('sector.loadFailure') : t('sector.refreshFailure')}{data?.history.asOf !== undefined && ` · ${t('market.updated', { time: marketTime(data.history.asOf) })}`} <button type="button" onClick={onRetry}>{t('sector.retry')}</button></div>}
     {!loading && catalog !== null && selected === null && <div className={css.center}>{t('sector.choose')}</div>}
     {data !== null && <>
+      {data.history.asOf !== undefined && <p className={css.dataTime}>{t('market.updated', { time: marketTime(data.history.asOf) })}</p>}
       <section className={css.metrics} aria-label={t('sector.overview')}>
         <div><span>{t('sector.board')}</span><strong>{data.sector.name}</strong><small>{data.sector.thscode}</small></div>
         <div><span>{t('sector.members')}</span><strong>{data.constituents.length}{data.constituentsTruncated ? '+' : ''}</strong><small>{t('sector.current')}</small></div>
         <div><span>{t('sector.lastClose')}</span><strong>{last === undefined ? '—' : number.format(last.close)}</strong><small>{last === undefined ? t('sector.noHistory') : date.format(last.time)}</small></div>
-        <div><span>{t('sector.windowChange')}</span><strong className={change === null ? undefined : change >= 0 ? css.up : css.down}>{change === null ? '—' : `${change >= 0 ? '+' : ''}${number.format(change)}%`}</strong><small>{t('sector.selectedWindow')}</small></div>
+        <div><span>{t('sector.windowChange')}</span><strong className={change === null ? undefined : change > 0 ? css.up : change < 0 ? css.down : css.flat}>{change === null ? '—' : `${change > 0 ? '+' : ''}${number.format(change)}%`}</strong><small>{t('sector.selectedWindow')}</small></div>
         <div><span>{t('sector.volatility')}</span><strong>{volatility === null ? '—' : `${number.format(volatility)}%`}</strong><small>{t('sector.dailyReturns')}</small></div>
         <div><span>{t('sector.turnover')}</span><strong>{last === undefined ? '—' : compact.format(last.turnover)}</strong><small>{t('sector.latestDay')}</small></div>
       </section>
@@ -136,8 +139,8 @@ export function SectorDashboard({ catalog, data, loading, error, selected, onSel
               <span>{t('sector.open')} <b>{number.format(last.open)}</b></span>
               <span>{t('sector.high')} <b>{number.format(last.high)}</b></span>
               <span>{t('sector.low')} <b>{number.format(last.low)}</b></span>
-              <span>{t('sector.close')} <b className={last.close >= last.open ? css.up : css.down}>{number.format(last.close)}</b></span>
-              <span>{t('sector.volume')} <b>{compact.format(last.volume)}</b></span>
+              <span>{t('sector.close')} <b>{number.format(last.close)}</b></span>
+              <span>{t('sector.volume')} <b>{compact.format(last.volume / 100)} {t('sector.lots')}</b></span>
             </div>
             <div className={css.chartViewport}><svg className={css.chart} viewBox={`0 0 ${CHART.width} ${CHART.height}`} role="img" aria-label={t('sector.history')}>
               {ticks.map((value, index) => <g key={index} className={css.gridLine}>
@@ -149,14 +152,14 @@ export function SectorDashboard({ catalog, data, loading, error, selected, onSel
                 const x = CHART.left + (index + 0.5) * candleStep
                 const openY = priceY(bar.open)
                 const closeY = priceY(bar.close)
-                const rising = bar.close >= bar.open
+                const direction = bar.close > bar.open ? css.risingCandle : bar.close < bar.open ? css.fallingCandle : css.flatCandle
                 const bodyTop = Math.min(openY, closeY)
                 const volumeHeight = Math.max(1, bar.volume / maxVolume * (CHART.volumeBottom - CHART.volumeTop))
                 const tooltip = [date.format(bar.time),
                   `${t('sector.open')} ${number.format(bar.open)}`, `${t('sector.high')} ${number.format(bar.high)}`,
                   `${t('sector.low')} ${number.format(bar.low)}`, `${t('sector.close')} ${number.format(bar.close)}`,
-                  `${t('sector.volume')} ${compact.format(bar.volume)}`].join(' · ')
-                return <g key={bar.time} className={rising ? css.risingCandle : css.fallingCandle}>
+                  `${t('sector.volume')} ${compact.format(bar.volume / 100)} ${t('sector.lots')}`].join(' · ')
+                return <g key={bar.time} className={direction}>
                   <title>{tooltip}</title>
                   <line className={css.wick} x1={x} x2={x} y1={priceY(bar.high)} y2={priceY(bar.low)} />
                   <rect className={css.candleBody} x={x - bodyWidth / 2} y={bodyTop}
@@ -171,7 +174,7 @@ export function SectorDashboard({ catalog, data, loading, error, selected, onSel
                 {date.format(time)}
               </text>)}
             </svg></div>
-            <div className={css.chartLegend}><span className={css.upMarker} />{t('sector.rise')}<span className={css.downMarker} />{t('sector.fall')}<span className={css.volumeMarker} />{t('sector.volume')}</div>
+            <div className={css.chartLegend}><span className={css.upMarker} />{t('sector.rise')}<span className={css.downMarker} />{t('sector.fall')}<span className={css.flatMarker} />{t('sector.flat')}<span className={css.volumeMarker} />{t('sector.volume')}</div>
           </>}
           {data.history.truncated && <p className={css.note}>{t('sector.historyTruncated')}</p>}
         </section>

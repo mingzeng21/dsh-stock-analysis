@@ -27,6 +27,10 @@ Click a recognized A-share name or code where it appears in a completed assistan
 
 The Web composition mounts this plugin beside Chat, the stock and watchlist clients, and the root shell overlay. It has no plugin configuration. A name or code remains ordinary text while the answer streams, when search fails, or when search does not return one exact instrument. The fixed right-edge quote panel can open from Conversation and global pages such as Agents. The adjacent add action stays visible beside each recognized name or code. Existing entries show their membership; the Host list is authoritative for additions, and transient results appear in a toast.
 
+The latest price stays neutral; its change against the previous close is red when positive, green when negative, and neutral at zero. Daily candle colors compare close with open, as the chart label states.
+
+Turnover and volume use compact Chinese market units, while quote and document timestamps use Shanghai time. Quote, candle, and news reads settle independently: a failed section reports its own error and retry action, and a refresh retains the last available content.
+
 -----
 
 <a id="understand-the-implementation"></a>
