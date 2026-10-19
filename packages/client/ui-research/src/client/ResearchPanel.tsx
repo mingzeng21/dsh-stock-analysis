@@ -102,7 +102,7 @@ function Graph({ pages, active, onOpen, onCreate, kindLabel, empty, emptyTitle, 
   </div>
   return <div className={css.graphWrap}>
     <p>{limit}</p>
-    <svg viewBox="0 0 800 660" className={css.graph} role="img" aria-label={limit}>
+    <svg viewBox="0 0 800 660" className={css.graph} role="group" aria-label={limit}>
       {links.map(({ source, target }) => {
         const from = points.get(source); const to = points.get(target)
         return from && to ? <line key={`${source}-${target}`} x1={from.x} y1={from.y} x2={to.x} y2={to.y} className={css.edge} /> : null
@@ -111,6 +111,7 @@ function Graph({ pages, active, onOpen, onCreate, kindLabel, empty, emptyTitle, 
         const point = points.get(page.id)
         if (point === undefined) return null
         return <g key={page.id} role="button" tabIndex={0} aria-label={page.title}
+          aria-pressed={page.id === active}
           onClick={() => { onOpen(page.id) }}
           onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onOpen(page.id) } }}>
           <circle cx={point.x} cy={point.y} r="40" className={page.id === active ? css.nodeActive : css.node} />

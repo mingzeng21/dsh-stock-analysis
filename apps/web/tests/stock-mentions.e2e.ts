@@ -32,8 +32,8 @@ describe('web e2e: inline stock mentions', () => {
         open_price: 1259, high_price: 1259.95, low_price: 1250.8, prev_price: 1257.12,
         volume: 2501689, turnover: 3135910000,
       }] : endpointId === 'a-share.prices.historical' ? [
-        { date_ms: 1789516800000, open_price: 1250, high_price: 1260, low_price: 1240, close_price: 1252, volume: 10 },
-        { date_ms: 1789603200000, open_price: 1252, high_price: 1265, low_price: 1250, close_price: 1258, volume: 12 },
+        { date_ms: 1789516800000, open_price: 1250, high_price: 1260, low_price: 1240, close_price: 1252, volume: 10, turnover: 12_520 },
+        { date_ms: 1789603200000, open_price: 1252, high_price: 1265, low_price: 1250, close_price: 1258, volume: 12, turnover: 15_096 },
       ] : [],
       meta: { truncated: false, asOf: WEB_FIXTURE_TIME },
     }))
@@ -70,6 +70,14 @@ describe('web e2e: inline stock mentions', () => {
     expect(await quotePanel.evaluate(element => Math.round(element.getBoundingClientRect().width))).toBe(360)
     const aria = (await captureStableAria(page, '[class*="frame"]', scaffold.workspaceCwd)).split(SEED_ID).join('{{seededId}}')
     await compareOrRefreshGolden(EXPECTED, aria, MODE)
+    const dayTab = quotePanel.getByRole('tab', { name: 'Recent daily prices' })
+    const newsTab = quotePanel.getByRole('tab', { name: 'Related news' })
+    await dayTab.focus()
+    await page.keyboard.press('ArrowRight')
+    expect(await newsTab.getAttribute('aria-selected')).toBe('true')
+    expect(await quotePanel.getByRole('tabpanel').getAttribute('aria-labelledby')).toBe('quote-tab-news')
+    await page.keyboard.press('Home')
+    expect(await dayTab.getAttribute('aria-selected')).toBe('true')
     await page.getByRole('button', { name: 'Agents' }).click()
     await quotePanel.waitFor({ state: 'visible' })
     await quotePanel.getByRole('button', { name: 'Close quote' }).click()

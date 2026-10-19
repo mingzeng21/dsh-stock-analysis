@@ -29,7 +29,7 @@ The Web composition mounts this plugin beside Chat, the stock and watchlist clie
 
 The latest price stays neutral; its change against the previous close is red when positive, green when negative, and neutral at zero. Daily candle colors compare close with open, as the chart label states.
 
-Turnover and volume use compact Chinese market units, while quote and document timestamps use Shanghai time. Quote, candle, and news reads settle independently: a failed section reports its own error and retry action, and a refresh retains the last available content.
+Turnover and volume use compact Chinese market units, while quote and document timestamps use Shanghai time. Quote, candle, and news reads settle independently: a failed section reports its own error and retry action, and a refresh retains the last available content. The daily and news tabs support arrow, Home, and End keys; Escape closes the panel and returns focus to its previous location.
 
 -----
 

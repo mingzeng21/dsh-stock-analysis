@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /** The directory and graph render committed pages while proposals wait for review. */
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { createSnapshotStore } from '@deepseek-ai/dsh-client-store'
 import { bindSnapshotSelector, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import type { ResearchSnapshot } from '@deepseek-ai/dsh-api-research-controller/types'
@@ -43,6 +43,31 @@ it('shows published pages, reviews a proposal, and opens an unlinked page from t
   expect(screen.getByText('这些页面尚未建立关联。选择页面可查看内容并编辑关联。')).toBeTruthy()
   fireEvent.click(screen.getByRole('button', { name: '主题芯片产业链' }))
   expect(screen.getByRole('button', { name: '编辑页面' })).toBeTruthy()
+})
+
+it('exposes linked graph nodes as keyboard-operable pages', () => {
+  const first = library.pages[0]
+  if (first === undefined) throw new Error('the graph fixture needs a page')
+  const state = createSnapshotStore({ ...library, proposals: [], pages: [
+    { ...first, links: ['page-2' as never] },
+    { ...first, id: 'page-2' as never, title: '上游材料', links: [] },
+  ] })
+  const phase = createSnapshotStore<'ready'>('ready')
+  const unused = () => { throw new Error('unused global panel property') }
+  const props = {
+    t: makeTranslate(zh), useLibrary: bindSnapshotSelector(state), usePhase: bindSnapshotSelector(phase),
+    load: vi.fn(async () => undefined), saveSource: vi.fn(), savePage: vi.fn(), restorePage: vi.fn(),
+    startStudy: vi.fn(), runSource: vi.fn(), openStudy: vi.fn(),
+    acceptProposal: vi.fn(), rejectProposal: vi.fn(), sourceFile: vi.fn(), saveTemplate: vi.fn(),
+    usePanelInfo: unused, useSessions: unused, useSessionStatus: unused,
+    useSessionRetainInfo: unused, useWorkspaces: unused, useResource: unused,
+  } as ResearchPanelProps
+  render(<ResearchPanel {...props} />)
+  fireEvent.click(screen.getByRole('button', { name: '关系图谱' }))
+  const graph = screen.getByRole('group', { name: /图谱显示前 30 个页面/ })
+  const node = within(graph).getByRole('button', { name: '上游材料' })
+  fireEvent.keyDown(node, { key: 'Enter' })
+  expect(screen.getByRole('heading', { name: '上游材料' })).toBeTruthy()
 })
 
 it('starts a complete topic study from one topic field', () => {

@@ -104,6 +104,8 @@ function QuoteView({ selection, stock, nameOf, t, watchlist, add, onClose }: Sha
   const [chartRevision, retryChart] = useState(0)
   const [newsRevision, retryNews] = useState(0)
   const [tab, setTab] = useState<Tab>('day')
+  const dayTab = useRef<HTMLButtonElement>(null)
+  const newsTab = useRef<HTMLButtonElement>(null)
   const [data, setData] = useState<QuoteData | undefined>()
   const [phase, setPhase] = useState<'loading' | 'ready' | 'failed'>('loading')
   const [candles, setCandles] = useState<SectionData<readonly Candle[]>>({ code, phase: 'loading', value: undefined })
@@ -178,13 +180,23 @@ function QuoteView({ selection, stock, nameOf, t, watchlist, add, onClose }: Sha
     </section>}
     {phase === 'loading' && <div className={css.quoteLoading} role="status">{t('loading')}</div>}
     {phase === 'failed' && <div className={css.quoteError} role="alert">{visibleData === undefined ? t('failed') : t('quoteRefreshFailed')} <button type="button" onClick={() => { retry(value => value + 1) }}>{t('retry')}</button></div>}
-    <nav className={css.tabs} role="tablist" aria-label={t('title')}>
-      <button type="button" role="tab" aria-selected={tab === 'day'} className={tab === 'day' ? css.activeTab : undefined}
+    <nav className={css.tabs} role="tablist" aria-label={t('title')}
+      onKeyDown={(event) => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight' && event.key !== 'Home' && event.key !== 'End') return
+        event.preventDefault()
+        const next: Tab = event.key === 'Home' ? 'day' : event.key === 'End' ? 'news' : tab === 'day' ? 'news' : 'day'
+        setTab(next)
+        if (next === 'day') dayTab.current?.focus()
+        else newsTab.current?.focus()
+      }}>
+      <button ref={dayTab} id="quote-tab-day" type="button" role="tab" aria-controls="quote-tab-panel"
+        aria-selected={tab === 'day'} tabIndex={tab === 'day' ? 0 : -1} className={tab === 'day' ? css.activeTab : undefined}
         onClick={() => { setTab('day') }}>{t('daily')}</button>
-      <button type="button" role="tab" aria-selected={tab === 'news'} className={tab === 'news' ? css.activeTab : undefined}
+      <button ref={newsTab} id="quote-tab-news" type="button" role="tab" aria-controls="quote-tab-panel"
+        aria-selected={tab === 'news'} tabIndex={tab === 'news' ? 0 : -1} className={tab === 'news' ? css.activeTab : undefined}
         onClick={() => { setTab('news') }}>{t('news')}</button>
     </nav>
-    <div className={css.body} role="tabpanel">
+    <div id="quote-tab-panel" className={css.body} role="tabpanel" aria-labelledby={`quote-tab-${tab}`} tabIndex={0}>
       {visibleData !== undefined && tab === 'day' && <section className={css.chartSection} aria-label={t('daily')}>
         <div className={css.chartHeader}><strong>{t('daily')}</strong><small>{t('candleBasis')}</small></div>
         {visibleCandles.phase === 'failed' && <p className={css.sectionNotice} role="alert">{t('chartFailed')} <button type="button" onClick={() => { retryChart(value => value + 1) }}>{t('retry')}</button></p>}

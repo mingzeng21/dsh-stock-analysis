@@ -29,7 +29,7 @@ An empty library opens with actions to add a source, start a topic study, or cre
 
 Topic research starts from one topic field. The panel opens a `stock-analysis` Session and asks the Agent for a complete L1–L5 report: end demand, supply-chain stack, hard-to-replace bottlenecks, cross-checked evidence, then directional conclusions with risks, falsifiers, and monitoring points. Follow-up messages and corrections remain in that Session; the request tells the Agent to issue a revised complete report. A completed L1–L5 report in that Session shows **Add to knowledge base** beneath the answer. Clicking it retains the exact report as an immutable source once per Session Turn and queues a second Agent request to propose source, topic, and supported entity or concept pages with links. The Agent's page edits remain proposals until the user publishes them. Starting source compilation also asks the Agent to read the saved source and stage wiki changes.
 
-The graph displays up to 30 published pages and their explicit links. Selecting a node opens the page. When pages have no explicit links, it presents a page list instead of isolated nodes. It does not infer unsupported relationships from prose. When the graph has no pages, it offers a direct path to create one.
+The graph displays up to 30 published pages and their explicit links. Its nodes are keyboard-focusable buttons; Enter or Space opens the selected page. When pages have no explicit links, it presents a page list instead of isolated nodes. It does not infer unsupported relationships from prose. When the graph has no pages, it offers a direct path to create one.
 
 ## Understand the implementation
 

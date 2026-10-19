@@ -3,6 +3,7 @@
   - button "Conversation"
   - button "Agents"
   - button "Watchlist"
+  - button "Research Lab"
 - complementary "Conversation history":
   - heading "Conversation history" [level=2]
   - button "New conversation"
@@ -25,8 +26,10 @@
 - button "Completed in {{duration}}" [disabled]
 - paragraph:
   - button "View quote for 贵州茅台 (600519.SH)": 贵州茅台
+  - button "Add 贵州茅台 to watchlist"
   - text: （
   - button "View quote for 贵州茅台 (600519.SH)": 600519.SH
+  - button "Add 贵州茅台 to watchlist"
   - text: ）主营白酒业务。
   - link "资料":
     - /url: https://example.com/600519.SH
@@ -48,6 +51,7 @@
   - region "Stock quote":
     - strong: 贵州茅台
     - text: 600519.SH SSE
+    - button "Add 贵州茅台 to watchlist": Add to watchlist
     - button "Close quote": ×
     - region "Quote":
       - text: Last
@@ -61,13 +65,14 @@
       - definition: "1259.00"
       - term: Prev
       - definition: "1257.12"
-      - text: Turnover 3,135,910,000 Volume 2,501,689
+      - text: Turnover 31.36 ×100m Volume 2.50 ×10k lots
     - tablist "Stock quote":
       - tab "Recent daily prices" [selected]
       - tab "Related news"
-    - tabpanel:
+    - tabpanel "Recent daily prices":
       - region "Recent daily prices":
         - strong: Recent daily prices
-        - img "Recent daily prices": 1265.00 1240.00 9/16/2026 9/17/2026
+        - text: Color compares close with open
+        - img "Recent daily prices": 1265.00 1240.00 2026-09-16 2026-09-17
     - button "Refresh"
-    - text: "Data time: 1/15/2026, {{clock}}"
+    - text: "Quote updated: 2026-01-15 {{clock}}"
