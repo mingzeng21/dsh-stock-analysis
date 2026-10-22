@@ -27,7 +27,7 @@ dsh Web 客户端的侧边栏让用户识别当前构建、启动新会话、将
 <a id="use-this-package"></a>
 ## 使用本包
 
-侧边栏是导航外壳。在这个股票投研分支中，全局栏目限定为 Conversation、Agents、自选股和个人研究所，并隐藏新会话、Workspace 浏览器和 Settings 席位；会话历史由 Conversation 页面承载。功能插件仍填充它的席位——ui-workspace 填充 `sidebar.workspaces`，ui-settings 在 `sidebar.settings` 注册触发行与设置面板。
+侧边栏是导航外壳。在这个股票投研分支中，全局栏目限定为 Conversation、Agents、自选股和个人研究所，并隐藏新会话、Workspace 浏览器和 Settings 席位；会话历史由 Conversation 页面承载。股票组合把这些入口绘制为带 DSH 字母标记的深色导航轨道，当前入口用文字颜色与细线标记。功能插件仍填充它的席位——ui-workspace 填充 `sidebar.workspaces`，ui-settings 在 `sidebar.settings` 注册触发行与设置面板。
 
 ### 品牌与 New Session
 

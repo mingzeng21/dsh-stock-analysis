@@ -18,7 +18,7 @@ export type ChartRange = 30 | 90 | 180 | 'all'
 const DEFAULT_DOCUMENT_KIND: DocumentKind = 'report'
 
 /** Initial width of the instrument list on a desktop panel. */
-export const DEFAULT_RAIL_WIDTH = 264
+export const DEFAULT_RAIL_WIDTH = 236
 
 interface WatchlistPanelState {
   /** Selected instrument's thscode, or null before anything is selected. */

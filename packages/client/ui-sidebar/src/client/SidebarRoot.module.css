@@ -600,6 +600,43 @@
   width: auto;
 }
 
+/* The stock workspace uses the existing navigation actions as a quiet icon rail. */
+.root[data-stock-research] {
+  background: var(--dsw-specific-sidebar-fill);
+  font-family: var(--dsw-font-family);
+}
+
+.root[data-stock-research].collapsed { padding-top: 20px; }
+.root[data-stock-research].collapsed .logoRow { margin-bottom: 24px; }
+.root[data-stock-research] .panelList { gap: 8px; }
+.root[data-stock-research] .panelRow { border-radius: 4px; color: var(--dsw-alias-label-tertiary); }
+.root[data-stock-research] .panelRow:hover { background: var(--dsw-alias-interactive-bg-hover); color: var(--dsw-alias-label-primary); }
+.root[data-stock-research] .panelRow.panelActive { position: relative; background: transparent; color: var(--dsw-alias-label-primary); }
+.root[data-stock-research] .panelRow.panelActive::before {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: -10px;
+  width: 1px;
+  background: var(--dsw-alias-label-primary-bluish);
+  content: '';
+}
+.root[data-stock-research].collapsed .panelRow { width: 40px; height: 40px; }
+.root[data-stock-research].collapsed .panelList { margin-left: -2px; }
+.root[data-stock-research].collapsed .panelGlyph { color: inherit; }
+.stockBrand {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0.5px solid var(--dsw-alias-label-primary-bluish);
+  border-radius: 50%;
+  corner-shape: round;
+  color: var(--dsw-alias-label-primary);
+  font: 500 11px/1 var(--ds-font-family-code);
+  letter-spacing: -.08em;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wide,
   .fading > *,

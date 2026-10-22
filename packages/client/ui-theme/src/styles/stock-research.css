@@ -1,0 +1,29 @@
+/* The stock research workspace keeps its own quiet dark palette in either app theme. */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500&display=swap');
+
+[data-stock-research] {
+  --dsw-alias-bg-base: #171719;
+  --dsw-alias-bg-layer-1: #171719;
+  --dsw-alias-bg-layer-2: #212023;
+  --dsw-alias-bg-layer-3: #28282b;
+  --dsw-alias-label-primary: #f5f5f5;
+  --dsw-alias-label-secondary: #b7b8bc;
+  --dsw-alias-label-tertiary: #a3a4a8;
+  --dsw-alias-label-dimmed: #98999e;
+  --dsw-alias-label-primary-bluish: #a9bfd4;
+  --dsw-alias-border-l1: #29292c;
+  --dsw-alias-border-l2: #303033;
+  --dsw-alias-border-l3: #414145;
+  --dsw-alias-interactive-bg-hover: #252529;
+  --dsw-alias-interactive-bg-hover-solid: #252529;
+  --dsw-alias-state-error-primary: #e77988;
+  --dsw-alias-state-success-primary: #65ae91;
+  --dsw-alias-scrollbar-bg-l2: #414145;
+  --dsw-alias-scrollbar-hover-l2: #5c5c61;
+  --dsw-specific-input-major: #212023;
+  --dsw-specific-sidebar-fill: #131217;
+  --dsw-focus-ring-color: #a9bfd4;
+  --dsw-font-family: 'Public Sans', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --ds-font-family-code: 'IBM Plex Mono', 'SF Mono', 'PingFang SC', monospace;
+  color-scheme: dark;
+}

@@ -414,10 +414,7 @@ export function WatchlistPanel({
 
   useLayoutEffect(() => {
     scrollPosition.current = detailScrollTop
-    const scroller = window.innerWidth <= 720
-      ? panelRef.current
-      : quoteRef.current
-    if (scroller !== null) scroller.scrollTop = detailScrollTop
+    if (quoteRef.current !== null) quoteRef.current.scrollTop = detailScrollTop
   }, [selected])
 
   useEffect(() => () => { actions.setDetailScrollTop(scrollPosition.current) }, [actions])
@@ -508,12 +505,14 @@ export function WatchlistPanel({
     <section
       ref={panelRef}
       className={css.panel}
+      data-stock-research=""
       style={panelStyle}
       onScroll={(event) => {
         if (event.target === event.currentTarget) scrollPosition.current = event.currentTarget.scrollTop
       }}
     >
       <nav ref={railRef} id="watchlist-rail" className={css.rail} aria-label={t('list.aria')}>
+        <div className={css.railEyebrow}>{t('list.scope')}</div>
         <header className={css.railHead}>
           <h2 className={css.railTitle}>{t('list.title')}</h2>
           <span className={css.railCount} aria-hidden="true">{entries.length}</span>
@@ -575,13 +574,7 @@ export function WatchlistPanel({
                   type="button"
                   className={clsx(css.row, entry.thscode === selected && css.rowActive)}
                   aria-current={entry.thscode === selected || undefined}
-                  onClick={() => {
-                    actions.select(entry.thscode)
-                    if (window.innerWidth <= 720) window.requestAnimationFrame(() => {
-                      const top = railRef.current?.offsetHeight ?? 0
-                      if (panelRef.current !== null) panelRef.current.scrollTop = top
-                    })
-                  }}
+                  onClick={() => { actions.select(entry.thscode) }}
                 >
                   <span className={css.rowName}>{entry.name}</span>
                   <span className={css.rowCode}>{entry.thscode}</span>
@@ -645,239 +638,247 @@ export function WatchlistPanel({
             className={css.quote}
             onScroll={(event) => { scrollPosition.current = event.currentTarget.scrollTop }}
           >
-            <header className={css.quoteHead}>
-              <div className={css.quoteIdentity}>
-                <div className={css.quoteTitle}>
-                  <h2 className={css.quoteName}>{selectedEntry.name}</h2>
-                  <span className={css.quoteCode}>{selectedEntry.thscode}</span>
-                </div>
-                {selectedQuote !== undefined && (
-                  <div className={css.quotePrice}>
-                    <span className={css.quoteLast}>{selectedQuote.last.toFixed(2)}</span>
-                    <span className={clsx(css.quoteChange, directionOf(selectedQuote))}>{changeText(selectedQuote, t)}</span>
+            <div className={css.market}>
+              <div className={css.breadcrumb}>{t('list.title')} / {t('detail.snapshot')}</div>
+              <header className={css.quoteHead}>
+                <div className={css.quoteIdentity}>
+                  <div className={css.quoteTitle}>
+                    <h2 className={css.quoteName}>{selectedEntry.name}</h2>
+                    <span className={css.quoteCode}>{selectedEntry.thscode}</span>
                   </div>
-                )}
-                {quoteTime !== undefined && (
-                  <p className={css.asOf}>
-                    {t('quotes.asOf', {
-                      time: quoteTime,
-                    })}
-                  </p>
-                )}
-                {selectedQuote !== undefined && quotes.phase !== 'ready' && quotes.phase !== 'idle' && (
-                  <div className={css.quoteStatus} role="status">
-                    <span>{quotes.phase === 'failed' ? t('quotes.retainedFailure') : t('quotes.refreshingRetained')}</span>
-                    {quotes.phase === 'failed' && <button type="button" className={css.retry}
-                      onClick={() => { refreshQuotes() }}>{t('quotes.retry')}</button>}
-                  </div>
-                )}
-              </div>
-              <button type="button" className={css.analysisJump} onClick={focusAnalysis}>
-                {t('analysis.jump')}
-              </button>
-            </header>
-            <section className={css.summary} aria-label={t('summary.aria')}>
-              <SummaryCard
-                label={t('summary.latestClose')}
-                value={overview.latest?.close.toFixed(2) ?? '—'}
-                note={overview.latest === undefined ? t('summary.unavailable') : tradingDate(overview.latest.time)}
-              />
-              <SummaryCard
-                label={t('summary.periodReturn')}
-                value={overview.returnPct === undefined ? '—' : percentText(overview.returnPct, t)}
-                direction={directionOfPercent(overview.returnPct)}
-                note={overview.first === undefined || overview.latest === undefined
-                  ? t('summary.unavailable')
-                  : t('summary.dateRange', { start: tradingDate(overview.first.time), end: tradingDate(overview.latest.time) })}
-              />
-              <SummaryCard
-                label={t(`summary.drawdown.${interval}`)}
-                value={overview.drawdown60Pct === undefined ? '—' : percentText(overview.drawdown60Pct, t)}
-                note={overview.drawdown60Pct === undefined ? t('summary.insufficient60') : t('summary.adjustedClose')}
-              />
-              <SummaryCard
-                label={t(`summary.averageTurnover.${interval}`)}
-                value={overview.averageTurnover20 === undefined ? '—' : amountText(overview.averageTurnover20, t)}
-                note={overview.averageTurnover20 === undefined ? t('summary.insufficient20') : t('summary.originalAmount')}
-              />
-            </section>
-            {selectedQuote === undefined ? (
-              <p className={css.failure}>
-                {quotes.phase === 'failed'
-                  ? t('failure.withCode', { code: quotes.failure })
-                  : quotes.phase === 'ready' ? t('quotes.missing') : t('quotes.loading')}
-                {(quotes.phase === 'failed' || quotes.phase === 'ready') && (
-                  <button type="button" className={css.retry} onClick={() => { refreshQuotes() }}>
-                    {t('quotes.retry')}
-                  </button>
-                )}
-              </p>
-            ) : (
-              <section className={css.snapshot} aria-label={t('detail.snapshot')}>
-                <div className={css.snapshotHead}>
-                  <h3 className={css.sectionTitle}>{t('detail.snapshot')}</h3>
+                  {selectedQuote !== undefined && (
+                    <div className={css.quotePrice}>
+                      <span className={css.quoteLast}>{selectedQuote.last.toFixed(2)}</span>
+                      <span className={clsx(css.quoteChange, directionOf(selectedQuote))}>{changeText(selectedQuote, t)}</span>
+                    </div>
+                  )}
+                  {quoteTime !== undefined && (
+                    <p className={css.asOf}>
+                      {t('quotes.asOf', {
+                        time: quoteTime,
+                      })}
+                    </p>
+                  )}
+                  {selectedQuote !== undefined && quotes.phase !== 'ready' && quotes.phase !== 'idle' && (
+                    <div className={css.quoteStatus} role="status">
+                      <span>{quotes.phase === 'failed' ? t('quotes.retainedFailure') : t('quotes.refreshingRetained')}</span>
+                      {quotes.phase === 'failed' && <button type="button" className={css.retry}
+                        onClick={() => { refreshQuotes() }}>{t('quotes.retry')}</button>}
+                    </div>
+                  )}
                 </div>
-                <div className={css.metrics}>
-                  <Metric label={t('detail.open')} value={selectedQuote.open.toFixed(2)} />
-                  <Metric label={t('detail.high')} value={selectedQuote.high.toFixed(2)} />
-                  <Metric label={t('detail.low')} value={selectedQuote.low.toFixed(2)} />
-                  <Metric label={t('detail.prevClose')} value={selectedQuote.prevClose.toFixed(2)} />
-                  <Metric label={t('detail.volume')} value={volumeText(selectedQuote.volume, t)} />
-                  <Metric label={t('detail.turnover')} value={amountText(selectedQuote.turnover, t)} />
-                </div>
+                <button type="button" className={css.analysisJump} onClick={focusAnalysis}>
+                  {t('analysis.jump')}
+                </button>
+              </header>
+              <section className={css.summary} aria-label={t('summary.aria')}>
+                <SummaryCard
+                  label={t('summary.latestClose')}
+                  value={overview.latest?.close.toFixed(2) ?? '—'}
+                  note={overview.latest === undefined ? t('summary.unavailable') : tradingDate(overview.latest.time)}
+                />
+                <SummaryCard
+                  label={t('summary.periodReturn')}
+                  value={overview.returnPct === undefined ? '—' : percentText(overview.returnPct, t)}
+                  direction={directionOfPercent(overview.returnPct)}
+                  note={overview.first === undefined || overview.latest === undefined
+                    ? t('summary.unavailable')
+                    : t('summary.dateRange', { start: tradingDate(overview.first.time), end: tradingDate(overview.latest.time) })}
+                />
+                <SummaryCard
+                  label={t(`summary.drawdown.${interval}`)}
+                  value={overview.drawdown60Pct === undefined ? '—' : percentText(overview.drawdown60Pct, t)}
+                  note={overview.drawdown60Pct === undefined ? t('summary.insufficient60') : t('summary.adjustedClose')}
+                />
+                <SummaryCard
+                  label={t(`summary.averageTurnover.${interval}`)}
+                  value={overview.averageTurnover20 === undefined ? '—' : amountText(overview.averageTurnover20, t)}
+                  note={overview.averageTurnover20 === undefined ? t('summary.insufficient20') : t('summary.originalAmount')}
+                />
               </section>
-            )}
-            <section className={css.chartSection} aria-label={t('chart.aria')}>
-              <div className={css.chartHead}>
-                <div>
-                  <h3 className={css.sectionTitle}>{t('chart.title')}</h3>
-                  <p className={css.sectionNote}>{t('chart.legend')}</p>
-                  <p className={css.sectionNote}>{t('chart.adjust.forward')}</p>
-                </div>
-                <div className={css.chartControls}>
-                  <div className={css.chartBar} role="group" aria-label={t('chart.periods')}>
-                    {CANDLE_INTERVALS.map(candidate => (
-                      <Pill key={candidate} active={candidate === interval} onClick={() => { actions.setInterval(candidate) }}>
-                        {t(`chart.period.${candidate}`)}
-                      </Pill>
-                    ))}
-                  </div>
-                  <div className={css.chartBar} role="group" aria-label={t('chart.ranges')}>
-                    {([30, 90, 180, 'all'] as const).map(candidate => (
-                      <Pill key={candidate} active={candidate === chartRange} onClick={() => { actions.setChartRange(candidate) }}>
-                        {t(`chart.range.${candidate}`)}
-                      </Pill>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              {currentBars.length > 0 && candles.truncated && <p className={css.chartNote}>{t('chart.truncated')}</p>}
-              {candles.phase === 'failed' && currentBars.length > 0 && (
+              {selectedQuote === undefined ? (
                 <p className={css.failure}>
-                  {t('failure.withCode', { code: candles.failure })}
-                  <button
-                    type="button"
-                    className={css.retry}
-                    onClick={() => { loadCandles(selectedEntry.thscode, interval, Date.now()) }}
-                  >
-                    {t('quotes.retry')}
-                  </button>
+                  {quotes.phase === 'failed'
+                    ? t('failure.withCode', { code: quotes.failure })
+                    : quotes.phase === 'ready' ? t('quotes.missing') : t('quotes.loading')}
+                  {(quotes.phase === 'failed' || quotes.phase === 'ready') && (
+                    <button type="button" className={css.retry} onClick={() => { refreshQuotes() }}>
+                      {t('quotes.retry')}
+                    </button>
+                  )}
                 </p>
+              ) : (
+                <section className={css.snapshot} aria-label={t('detail.snapshot')}>
+                  <div className={css.snapshotHead}>
+                    <h3 className={css.sectionTitle}>{t('detail.snapshot')}</h3>
+                  </div>
+                  <div className={css.metrics}>
+                    <Metric label={t('detail.open')} value={selectedQuote.open.toFixed(2)} />
+                    <Metric label={t('detail.high')} value={selectedQuote.high.toFixed(2)} />
+                    <Metric label={t('detail.low')} value={selectedQuote.low.toFixed(2)} />
+                    <Metric label={t('detail.prevClose')} value={selectedQuote.prevClose.toFixed(2)} />
+                    <Metric label={t('detail.volume')} value={volumeText(selectedQuote.volume, t)} />
+                    <Metric label={t('detail.turnover')} value={amountText(selectedQuote.turnover, t)} />
+                  </div>
+                </section>
               )}
-              <div className={css.chartArea}>
-                {candles.phase === 'failed' && currentBars.length === 0 ? (
+              <section className={css.chartSection} aria-label={t('chart.aria')}>
+                <div className={css.chartHead}>
+                  <div>
+                    <h3 className={css.sectionTitle}>{t('chart.title')}</h3>
+                    <p className={css.sectionNote}>{t('chart.legend')}</p>
+                    <p className={css.sectionNote}>{t('chart.adjust.forward')}</p>
+                  </div>
+                  <div className={css.chartControls}>
+                    <div className={css.chartBar} role="group" aria-label={t('chart.periods')}>
+                      {CANDLE_INTERVALS.map(candidate => (
+                        <Pill key={candidate} active={candidate === interval} aria-pressed={candidate === interval}
+                          onClick={() => { actions.setInterval(candidate) }}>
+                          {t(`chart.period.${candidate}`)}
+                        </Pill>
+                      ))}
+                    </div>
+                    <div className={css.chartBar} role="group" aria-label={t('chart.ranges')}>
+                      {([30, 90, 180, 'all'] as const).map(candidate => (
+                        <Pill key={candidate} active={candidate === chartRange} aria-pressed={candidate === chartRange}
+                          onClick={() => { actions.setChartRange(candidate) }}>
+                          {t(`chart.range.${candidate}`)}
+                        </Pill>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                {currentBars.length > 0 && candles.truncated && <p className={css.chartNote}>{t('chart.truncated')}</p>}
+                {candles.phase === 'failed' && currentBars.length > 0 && (
                   <p className={css.failure}>
                     {t('failure.withCode', { code: candles.failure })}
-                    <button type="button" className={css.retry} onClick={() => { loadCandles(selectedEntry.thscode, interval, Date.now()) }}>
+                    <button
+                      type="button"
+                      className={css.retry}
+                      onClick={() => { loadCandles(selectedEntry.thscode, interval, Date.now()) }}
+                    >
                       {t('quotes.retry')}
                     </button>
                   </p>
-                ) : currentBars.length === 0 ? (
-                  <p className={css.chartEmpty}>{candles.phase === 'loading' ? t('chart.loading') : t('chart.empty')}</p>
-                ) : (
-                  <CandleChart bars={currentBars} range={chartRange} themeRevision={themeRevision} />
                 )}
-              </div>
-            </section>
-
-            {overview.recent.length > 0 && (
-              <section className={css.recent} aria-label={t('recent.title')}>
-                <h3 className={css.sectionTitle}>{t('recent.title')}</h3>
-                <div className={css.recentTableScroll}>
-                  <table className={css.recentTable}>
-                    <thead><tr>
-                      <th>{t('recent.date')}</th><th>{t('detail.open')}</th><th>{t('detail.high')}</th>
-                      <th>{t('detail.low')}</th><th>{t('recent.close')}</th><th>{t('recent.change')}</th>
-                      <th>{t('detail.turnover')}</th>
-                    </tr></thead>
-                    <tbody>
-                      {overview.recent.map(({ bar, changePct }) => (
-                        <tr key={bar.time}>
-                          <td>{tradingDate(bar.time)}</td><td>{bar.open.toFixed(2)}</td><td>{bar.high.toFixed(2)}</td>
-                          <td>{bar.low.toFixed(2)}</td><td>{bar.close.toFixed(2)}</td>
-                          <td className={directionOfPercent(changePct)}>
-                            {changePct === undefined ? '—' : percentText(changePct, t)}
-                          </td>
-                          <td>{amountText(bar.turnover, t)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className={css.chartArea}>
+                  {candles.phase === 'failed' && currentBars.length === 0 ? (
+                    <p className={css.failure}>
+                      {t('failure.withCode', { code: candles.failure })}
+                      <button type="button" className={css.retry} onClick={() => { loadCandles(selectedEntry.thscode, interval, Date.now()) }}>
+                        {t('quotes.retry')}
+                      </button>
+                    </p>
+                  ) : currentBars.length === 0 ? (
+                    <p className={css.chartEmpty}>{candles.phase === 'loading' ? t('chart.loading') : t('chart.empty')}</p>
+                  ) : (
+                    <CandleChart bars={currentBars} range={chartRange} themeRevision={themeRevision} />
+                  )}
                 </div>
               </section>
-            )}
-            <p className={css.disclaimer}>{t('source.disclaimer')}</p>
 
-            <section
-              ref={analysisRef}
-              className={clsx(css.analysis, analysisSession !== null && css.analysisActive)}
-              aria-label={t('analysis.aria')}
-            >
-              <header className={css.analysisBar}>
-                <h3 className={css.analysisTitle}>{t('analysis.title')}</h3>
-                {analysisSession !== null && (
-                  <button
-                    type="button"
-                    className={css.retry}
-                    onClick={() => {
-                      actions.setDetailScrollTop(scrollPosition.current)
-                      openAnalysisInConversation(analysisSession)
-                    }}
-                  >
-                    {t('analysis.openInConversation')}
-                  </button>
+              {overview.recent.length > 0 && (
+                <section className={css.recent} aria-label={t('recent.title')}>
+                  <h3 className={css.sectionTitle}>{t('recent.title')}</h3>
+                  <div className={css.recentTableScroll}>
+                    <table className={css.recentTable}>
+                      <thead><tr>
+                        <th>{t('recent.date')}</th><th>{t('detail.open')}</th><th>{t('detail.high')}</th>
+                        <th>{t('detail.low')}</th><th>{t('recent.close')}</th><th>{t('recent.change')}</th>
+                        <th>{t('detail.turnover')}</th>
+                      </tr></thead>
+                      <tbody>
+                        {overview.recent.map(({ bar, changePct }) => (
+                          <tr key={bar.time}>
+                            <td>{tradingDate(bar.time)}</td><td>{bar.open.toFixed(2)}</td><td>{bar.high.toFixed(2)}</td>
+                            <td>{bar.low.toFixed(2)}</td><td>{bar.close.toFixed(2)}</td>
+                            <td className={directionOfPercent(changePct)}>
+                              {changePct === undefined ? '—' : percentText(changePct, t)}
+                            </td>
+                            <td>{amountText(bar.turnover, t)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              )}
+              <p className={css.disclaimer}>{t('source.disclaimer')}</p>
+            </div>
+
+            <aside className={css.researchRail} aria-label={t('analysis.aria')}>
+              <section
+                ref={analysisRef}
+                className={clsx(css.analysis, analysisSession !== null && css.analysisActive)}
+                aria-label={t('analysis.aria')}
+              >
+                <header className={css.analysisBar}>
+                  <h3 className={css.analysisTitle}>{t('analysis.title')}</h3>
+                  {analysisSession !== null && (
+                    <button
+                      type="button"
+                      className={css.retry}
+                      onClick={() => {
+                        actions.setDetailScrollTop(scrollPosition.current)
+                        openAnalysisInConversation(analysisSession)
+                      }}
+                    >
+                      {t('analysis.openInConversation')}
+                    </button>
+                  )}
+                </header>
+                {analysisSession !== null && analysisReference !== undefined && (
+                  <SessionProvider session={analysisReference}>
+                    {renderSlot('watchlist.analysis', {})}
+                  </SessionProvider>
                 )}
-              </header>
-              {analysisSession !== null && analysisReference !== undefined && (
-                <SessionProvider session={analysisReference}>
-                  {renderSlot('watchlist.analysis', {})}
-                </SessionProvider>
-              )}
-              {analysisSession === null && <p className={css.analysisHint}>{t('analysis.intro')}</p>}
-              <form className={css.composer} onSubmit={(event) => { ask(event, selectedEntry) }}>
-                <input
-                  ref={questionRef}
-                  className={css.addInput}
-                  value={question}
-                  aria-label={t('analysis.ask')}
-                  placeholder={t('analysis.ask')}
-                  onChange={(event) => { actions.setAnalysisDraft(event.target.value) }}
-                />
-                <button
-                  type="submit"
-                  className={css.send}
-                  disabled={submitting || analysis.phase === 'starting' || analysis.phase === 'sending' || question.trim() === ''}
-                >
-                  {analysis.phase === 'sending'
-                    ? t('analysis.sending')
-                    : submitting || analysis.phase === 'starting' ? t('analysis.starting') : t('analysis.send')}
-                </button>
-              </form>
-              {analysis.phase === 'failed' && (
-                <p className={css.failure}>{t('failure.withCode', { code: analysis.failure })}</p>
-              )}
-            </section>
-
-            <section className={css.documents} aria-label={t('documents.aria')}>
-              <div className={css.documentBar} role="group" aria-label={t('documents.aria')}>
-                {DOCUMENT_KINDS.map(kind => (
-                  <Pill
-                    key={kind}
-                    active={kind === documentKind}
-                    onClick={() => { actions.setDocumentKind(kind) }}
+                {analysisSession === null && <p className={css.analysisHint}>{t('analysis.intro')}</p>}
+                <form className={css.composer} onSubmit={(event) => { ask(event, selectedEntry) }}>
+                  <input
+                    ref={questionRef}
+                    className={css.addInput}
+                    value={question}
+                    aria-label={t('analysis.ask')}
+                    placeholder={t('analysis.ask')}
+                    onChange={(event) => { actions.setAnalysisDraft(event.target.value) }}
+                  />
+                  <button
+                    type="submit"
+                    className={css.send}
+                    disabled={submitting || analysis.phase === 'starting' || analysis.phase === 'sending' || question.trim() === ''}
                   >
-                    {t(`documents.${kind}`)}
-                  </Pill>
-                ))}
-              </div>
-              <DocumentList
-                state={documents}
-                name={selectedEntry.name}
-                kind={documentKind}
-                t={t}
-                onRetry={() => { loadDocuments(selectedEntry.name, documentKind) }}
-              />
-            </section>
+                    {analysis.phase === 'sending'
+                      ? t('analysis.sending')
+                      : submitting || analysis.phase === 'starting' ? t('analysis.starting') : t('analysis.send')}
+                  </button>
+                </form>
+                {analysis.phase === 'failed' && (
+                  <p className={css.failure}>{t('failure.withCode', { code: analysis.failure })}</p>
+                )}
+              </section>
+
+              <section className={css.documents} aria-label={t('documents.aria')}>
+                <div className={css.documentBar} role="group" aria-label={t('documents.aria')}>
+                  {DOCUMENT_KINDS.map(kind => (
+                    <Pill
+                      key={kind}
+                      active={kind === documentKind}
+                      aria-pressed={kind === documentKind}
+                      onClick={() => { actions.setDocumentKind(kind) }}
+                    >
+                      {t(`documents.${kind}`)}
+                    </Pill>
+                  ))}
+                </div>
+                <DocumentList
+                  state={documents}
+                  name={selectedEntry.name}
+                  kind={documentKind}
+                  t={t}
+                  onRetry={() => { loadDocuments(selectedEntry.name, documentKind) }}
+                />
+              </section>
+            </aside>
 
           </article>
         )}

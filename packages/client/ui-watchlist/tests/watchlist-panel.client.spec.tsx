@@ -299,7 +299,7 @@ describe('WatchlistPanel list width', () => {
     const { view, props } = mount()
     const divider = screen.getByRole('separator', { name: zh['list.resize'] })
     fireEvent.keyDown(divider, { key: 'ArrowLeft' })
-    expect(view.getSnapshot().railWidth).toBe(248)
+    expect(view.getSnapshot().railWidth).toBe(220)
     fireEvent.keyDown(divider, { key: 'Home' })
     expect(view.getSnapshot().railWidth).toBe(180)
     cleanup()

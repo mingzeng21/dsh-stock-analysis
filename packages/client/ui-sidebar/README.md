@@ -27,7 +27,7 @@ The dsh web client sidebar lets users recognize the active build, start a new se
 <a id="use-this-package"></a>
 ## Use this package
 
-The sidebar is the navigation shell. In this stock research fork, it limits global rows to Conversation, Agents, Watchlist, and Personal Research Lab and hides the New Session, Workspace browser, and Settings seats; Conversation owns Session history. Feature plugins still fill its seats — ui-workspace fills `sidebar.workspaces`, ui-settings registers the trigger row and settings panel at `sidebar.settings`.
+The sidebar is the navigation shell. In this stock research fork, it limits global rows to Conversation, Agents, Watchlist, and Personal Research Lab and hides the New Session, Workspace browser, and Settings seats; Conversation owns Session history. The stock composition styles these rows as a quiet dark navigation rail with a DSH monogram, an ink change, and a thin accent on the selected row. Feature plugins still fill its seats — ui-workspace fills `sidebar.workspaces`, ui-settings registers the trigger row and settings panel at `sidebar.settings`.
 
 ### Brand and New Session
 

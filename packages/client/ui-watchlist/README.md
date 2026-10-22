@@ -39,9 +39,9 @@ The row id and the main key are the same string by construction, because selecti
 
 The panel reads the list and its quote batch when it mounts, which is what returning to the panel does: the entry unmounts whenever another panel or the Conversation is selected. The rail's refresh control re-reads the batch, and the retry control on a failed batch does the same. There is no timer and no server push, because neither the watchlist nor the stock Remote publishes a subscription.
 
-The quote update stamp shows the Shanghai date and time. On desktop, drag the divider between the instrument list and detail to resize the list; the chosen width survives switching panels. The focused divider also supports Left and Right arrow keys, Home, and End. At narrow browser widths, the instrument list stacks above the detail and the panel scrolls vertically; selecting an instrument brings its detail into view.
+The quote update stamp shows the Shanghai date and time. On desktop, drag the divider between the instrument list and detail to resize the list; the chosen width survives switching panels. The focused divider also supports Left and Right arrow keys, Home, and End. The stock workspace is desktop-only: the instrument rail, price workspace, and research column remain side by side, and a window narrower than the workspace scrolls horizontally.
 
-The rail shows the list count and highlights the selected instrument. The detail places the selected name, live price, change, and quote time together; historical summary values and six quote metrics use divided rows, while documents use a scan-friendly list within one scrollable view. Period return is red when positive, green when negative, and neutral at zero; drawdown remains a neutral risk metric. The analysis composer remains a distinct section. All surfaces use the client theme in light and dark mode.
+The rail shows the list count and highlights the selected instrument. The detail places the selected name, live price, change, and quote time above the chart; six quote metrics, historical summary values, and recent bars follow it. The research column keeps the analysis composer and document channels beside the market view. Period return is red when positive, green when negative, and neutral at zero; drawdown remains a neutral risk metric. The stock workspace uses one scoped dark palette in both app theme modes.
 
 Every read is published with a phase, and a failed one carries the Remote failure code. A newer read supersedes an older one: a read that is no longer current publishes nothing, so a slow first read can never replace a fast second one.
 
@@ -59,7 +59,7 @@ Three periods are offered — `1d`, `1w`, `1mo` — and each asks the Host for i
 
 The detail derives its latest close and period return from the returned series. The maximum drawdown needs 60 bars and the average turnover needs 20; without a full window each value shows as unavailable. The last eight bars list OHLC, change from the preceding close, and turnover. The quote snapshot separately shows the latest price, open, high, low, previous close, volume, turnover, and quote readiness time, since snapshot and historical times may differ.
 
-At narrow browser widths, the chart retains a readable width and scrolls horizontally within its area.
+The desktop chart keeps a readable width inside the central market column.
 
 Colors come from the same `--dsw-*` tokens the markup around the chart uses. A canvas cannot resolve a CSS variable, so the wrapper reads them as computed values and repaints when the theme revision moves; it never re-creates the chart for a theme change.
 
@@ -69,11 +69,11 @@ Three tabs — research, announcements, and news — list what the gateway publi
 
 A row shows its title, publication date, and excerpt. The title links to the original document when the vendor supplied one; a channel that carries no links renders the same row as text rather than as a broken link. When the Host cut the excerpt at its configured bound, the row says so.
 
-Document rows share the detail's single vertical scroll; the analysis composer is above the documents.
+Document rows share the detail's vertical scroll; the analysis composer sits above them in the research column.
 
 ### The analysis session
 
-One session serves every instrument. The quote header links to the analysis composer below the chart. The first submitted question creates a session, composes it from the shipped `stock-analysis` preset, and sends the question once; browsing the list creates no session. The panel retains that Session for its transcript without changing the main Conversation selection. The preset is selected while the session is still blank, because the Host refuses a composition swap once history exists under another one.
+One session serves every instrument. The quote header links to the analysis composer in the research column. The first submitted question creates a session, composes it from the shipped `stock-analysis` preset, and sends the question once; browsing the list creates no session. The panel retains that Session for its transcript without changing the main Conversation selection. The preset is selected while the session is still blank, because the Host refuses a composition swap once history exists under another one.
 
 The selected instrument travels in the prompt itself — the panel prefixes the question with the instrument's name and thscode from its own dictionary — so the agent answers about what the reader is looking at without a per-instrument session. The composer sends through the session's own submission echo, so the question appears immediately and retires when the durable user message arrives.
 
